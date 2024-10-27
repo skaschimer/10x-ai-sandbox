@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from datetime import datetime, timedelta
 from typing import List, Union, Optional
+import logging
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -16,6 +17,10 @@ from apps.webui.models.documents import (
 
 from utils.utils import get_current_user, get_admin_user
 from constants import ERROR_MESSAGES
+
+from config import CHROMA_CLIENT
+
+log = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -154,5 +159,20 @@ async def update_doc_by_name(
 
 @router.delete("/doc/delete", response_model=bool)
 async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
+    doc = Documents.get_doc_by_name(name)
+    collection_name = doc.collection_name
+
+    log.info(f"Deleting document {name}")
     result = Documents.delete_doc_by_name(name)
+
+    collection = CHROMA_CLIENT.get_collection(collection_name)
+
+    ids = collection.get()["ids"]
+    if ids:
+        log.info("found ids")
+        collection.delete(ids)
+    del collection
+
+    log.info(f"Deleting collection {collection_name}")
+    CHROMA_CLIENT.delete_collection(collection_name)
     return result

@@ -8,12 +8,17 @@ from fastapi import (
     Form,
 )
 from fastapi.middleware.cors import CORSMiddleware
-import requests
-import os, shutil, logging, re
+
+# import requests
+import os
+import shutil
+import logging
+
+# import re
 from datetime import datetime
 
 from pathlib import Path
-from typing import List, Union, Sequence, Iterator, Any
+from typing import List, Union, Sequence, Iterator  # , Any
 
 from chromadb.utils.batch_utils import create_batches
 from langchain_core.documents import Document
@@ -26,7 +31,7 @@ from langchain_community.document_loaders import (
     BSHTMLLoader,
     Docx2txtLoader,
     UnstructuredEPubLoader,
-    UnstructuredWordDocumentLoader,
+    # UnstructuredWordDocumentLoader,
     UnstructuredMarkdownLoader,
     UnstructuredXMLLoader,
     UnstructuredRSTLoader,
@@ -53,7 +58,7 @@ import sentence_transformers
 from apps.webui.models.documents import (
     Documents,
     DocumentForm,
-    DocumentResponse,
+    # DocumentResponse,
 )
 
 from apps.rag.utils import (
@@ -127,6 +132,7 @@ from config import (
 )
 
 from constants import ERROR_MESSAGES
+import asyncio
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
@@ -618,7 +624,7 @@ class QueryCollectionsForm(BaseModel):
 
 
 @app.post("/query/collection")
-def query_collection_handler(
+async def query_collection_handler(
     form_data: QueryCollectionsForm,
     user=Depends(get_current_user),
 ):
@@ -635,7 +641,7 @@ def query_collection_handler(
                 ),
             )
         else:
-            return query_collection(
+            return await query_collection(
                 collection_names=form_data.collection_names,
                 query=form_data.query,
                 embedding_function=app.state.EMBEDDING_FUNCTION,
@@ -897,7 +903,7 @@ def store_data_in_vector_db(data, collection_name, overwrite: bool = False) -> b
     docs = text_splitter.split_documents(data)
 
     if len(docs) > 0:
-        log.info(f"store_data_in_vector_db {docs}")
+        # log.info(f"store_data_in_vector_db {docs}")
         return store_docs_in_vector_db(docs, collection_name, overwrite), None
     else:
         raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
@@ -916,7 +922,7 @@ def store_text_in_vector_db(
 
 
 def store_docs_in_vector_db(docs, collection_name, overwrite: bool = False) -> bool:
-    log.info(f"store_docs_in_vector_db {docs} {collection_name}")
+    log.info(f"store_docs_in_vector_db for {collection_name}")
 
     texts = [doc.page_content for doc in docs]
     metadatas = [doc.metadata for doc in docs]
@@ -929,11 +935,14 @@ def store_docs_in_vector_db(docs, collection_name, overwrite: bool = False) -> b
                 metadata[key] = str(value)
 
     try:
-        if overwrite:
-            for collection in CHROMA_CLIENT.list_collections():
-                if collection_name == collection.name:
+
+        for collection in CHROMA_CLIENT.list_collections():
+            if collection_name == collection.name:
+                log.info(f"found existing collection for: {collection_name}")
+                if overwrite:
                     log.info(f"deleting existing collection {collection_name}")
                     CHROMA_CLIENT.delete_collection(name=collection_name)
+                return True
 
         collection = CHROMA_CLIENT.create_collection(name=collection_name)
 
@@ -947,7 +956,17 @@ def store_docs_in_vector_db(docs, collection_name, overwrite: bool = False) -> b
         )
 
         embedding_texts = list(map(lambda x: x.replace("\n", " "), texts))
-        embeddings = embedding_func(embedding_texts)
+        embeddings = asyncio.run(embedding_func(embedding_texts))
+
+        d = (
+            1536 if app.state.config.RAG_EMBEDDING_ENGINE == "openai" else 384
+        )  # dimensionality of embeddings
+        memory_usage = len(embedding_texts) * d * 4  # memory in bytes
+        print(f"Number of embeddings: {len(embeddings)} for num texts {len(texts)} ")
+        print(f"First text: \n{texts[0]} \nand last text \n{texts[-1]}")
+        print(
+            f"Estimated memory usage: {memory_usage / (1024 ** 2):.2f} MB"
+        )  # mem in MB
 
         for batch in create_batches(
             api=CHROMA_CLIENT,
@@ -1083,7 +1102,7 @@ def store_doc(
             f.close()
 
         f = open(file_path, "rb")
-        if collection_name == None:
+        if collection_name is None:
             collection_name = calculate_sha256(f)[:63]
         f.close()
 
@@ -1132,7 +1151,7 @@ def store_text(
 ):
 
     collection_name = form_data.collection_name
-    if collection_name == None:
+    if collection_name is None:
         collection_name = calculate_sha256_string(form_data.content)
 
     result = store_text_in_vector_db(
@@ -1175,7 +1194,7 @@ def scan_docs_dir(user=Depends(get_admin_user)):
                         sanitized_filename = sanitize_filename(filename)
                         doc = Documents.get_doc_by_name(sanitized_filename)
 
-                        if doc == None:
+                        if doc is None:
                             doc = Documents.insert_new_doc(
                                 user.id,
                                 DocumentForm(

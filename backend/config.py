@@ -775,7 +775,7 @@ if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
 ####################################
 # RAG
 ####################################
-
+VECTOR_STORE = os.environ.get("VECTOR_STORE", "chroma")
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", chromadb.DEFAULT_TENANT)
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", chromadb.DEFAULT_DATABASE)
@@ -862,25 +862,27 @@ RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = (
     os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "").lower() == "true"
 )
 
+if VECTOR_STORE == "chroma":
+    if CHROMA_HTTP_HOST != "":
+        CHROMA_CLIENT = chromadb.HttpClient(
+            host=CHROMA_HTTP_HOST,
+            port=CHROMA_HTTP_PORT,
+            headers=CHROMA_HTTP_HEADERS,
+            ssl=CHROMA_HTTP_SSL,
+            tenant=CHROMA_TENANT,
+            database=CHROMA_DATABASE,
+            settings=Settings(allow_reset=True, anonymized_telemetry=False),
+        )
+    else:
+        CHROMA_CLIENT = chromadb.PersistentClient(
+            path=CHROMA_DATA_PATH,
+            settings=Settings(allow_reset=True, anonymized_telemetry=False),
+            tenant=CHROMA_TENANT,
+            database=CHROMA_DATABASE,
+        )
 
-if CHROMA_HTTP_HOST != "":
-    CHROMA_CLIENT = chromadb.HttpClient(
-        host=CHROMA_HTTP_HOST,
-        port=CHROMA_HTTP_PORT,
-        headers=CHROMA_HTTP_HEADERS,
-        ssl=CHROMA_HTTP_SSL,
-        tenant=CHROMA_TENANT,
-        database=CHROMA_DATABASE,
-        settings=Settings(allow_reset=True, anonymized_telemetry=False),
-    )
-else:
-    CHROMA_CLIENT = chromadb.PersistentClient(
-        path=CHROMA_DATA_PATH,
-        settings=Settings(allow_reset=True, anonymized_telemetry=False),
-        tenant=CHROMA_TENANT,
-        database=CHROMA_DATABASE,
-    )
-
+if VECTOR_STORE == "postgres":
+    # TODO: add support for postgres
 
 # device type embedding models - "cpu" (default), "cuda" (nvidia gpu required) or "mps" (apple silicon) - choosing this right can lead to better performance
 USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")

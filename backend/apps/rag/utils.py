@@ -1,6 +1,8 @@
+import asyncio
 import os
 import logging
 import requests
+import aiohttp
 
 from typing import List, Union
 
@@ -27,7 +29,7 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
-def query_doc(
+async def query_doc(
     collection_name: str,
     query: str,
     embedding_function,
@@ -35,7 +37,7 @@ def query_doc(
 ):
     try:
         collection = CHROMA_CLIENT.get_collection(name=collection_name)
-        query_embeddings = embedding_function(query)
+        query_embeddings = await embedding_function(query)
 
         result = collection.query(
             query_embeddings=[query_embeddings],
@@ -141,7 +143,7 @@ def merge_and_sort_query_results(query_results, k, reverse=False):
     return result
 
 
-def query_collection(
+async def query_collection(
     collection_names: List[str],
     query: str,
     embedding_function,
@@ -150,7 +152,7 @@ def query_collection(
     results = []
     for collection_name in collection_names:
         try:
-            result = query_doc(
+            result = await query_doc(
                 collection_name=collection_name,
                 query=query,
                 k=k,
@@ -193,6 +195,48 @@ def rag_template(template: str, context: str, query: str):
     return template
 
 
+async def generate_openai_embeddings_async(
+    model: str,
+    text: Union[str, list[str]],
+    key: str,
+    url: str = "https://api.openai.com/v1",
+):
+    async with aiohttp.ClientSession() as session:
+        if isinstance(text, list):
+            embeddings = await generate_openai_batch_embeddings_async(
+                model, text, key, url, session
+            )
+        else:
+            embeddings = await generate_openai_batch_embeddings_async(
+                model, [text], key, url, session
+            )
+    return embeddings[0] if isinstance(text, str) else embeddings
+
+
+async def generate_openai_batch_embeddings_async(
+    model: str, texts: list[str], key: str, url: str, session: aiohttp.ClientSession
+) -> Optional[list[list[float]]]:
+    try:
+        log.info(f"Generating OpenAI embeddings for {texts[0][0:25]}...")
+        async with session.post(
+            f"{url}/embeddings",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {key}",
+            },
+            json={"input": texts, "model": model},
+        ) as response:
+            response.raise_for_status()
+            data = await response.json()
+            if "data" in data:
+                return [elem["embedding"] for elem in data["data"]]
+            else:
+                raise Exception("Something went wrong :/")
+    except Exception as e:
+        print(e)
+        return None
+
+
 def get_embedding_function(
     embedding_engine,
     embedding_model,
@@ -214,29 +258,31 @@ def get_embedding_function(
                 )
             )
         elif embedding_engine == "openai":
-            func = lambda query: generate_openai_embeddings(
+            func = lambda query: generate_openai_embeddings_async(
                 model=embedding_model,
                 text=query,
                 key=openai_key,
                 url=openai_url,
             )
 
-        def generate_multiple(query, f):
+        async def generate_multiple(query, f):
             if isinstance(query, list):
                 if embedding_engine == "openai":
-                    embeddings = []
+                    tasks = []
                     for i in range(0, len(query), batch_size):
-                        embeddings.extend(f(query[i : i + batch_size]))
-                    return embeddings
+                        tasks.append(f(query[i : i + batch_size]))
+                    embeddings = await asyncio.gather(*tasks)
+                    return [item for sublist in embeddings for item in sublist]
                 else:
-                    return [f(q) for q in query]
+                    tasks = [f(q) for q in query]
+                    return await asyncio.gather(*tasks)
             else:
-                return f(query)
+                return await f(query)
 
         return lambda query: generate_multiple(query, func)
 
 
-def get_rag_context(
+async def get_rag_context(
     docs,
     messages,
     embedding_function,
@@ -279,7 +325,7 @@ def get_rag_context(
                         r=r,
                     )
                 else:
-                    context = query_collection(
+                    context = await query_collection(
                         collection_names=collection_names,
                         query=query,
                         embedding_function=embedding_function,
@@ -377,6 +423,7 @@ def generate_openai_batch_embeddings(
     model: str, texts: list[str], key: str, url: str = "https://api.openai.com/v1"
 ) -> Optional[list[list[float]]]:
     try:
+        log.info(f"Generating OpenAI embeddings for {texts[0][0:25]}...")
         r = requests.post(
             f"{url}/embeddings",
             headers={

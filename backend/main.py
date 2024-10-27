@@ -361,7 +361,7 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
             # If docs field is present, generate RAG completions
             if "docs" in data:
                 data = {**data}
-                rag_context, citations = get_rag_context(
+                rag_context, citations = await get_rag_context(
                     docs=data["docs"],
                     messages=data["messages"],
                     embedding_function=rag_app.state.EMBEDDING_FUNCTION,
