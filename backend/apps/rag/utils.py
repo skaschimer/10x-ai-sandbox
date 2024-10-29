@@ -23,10 +23,31 @@ from langchain.retrievers import (
 from typing import Optional
 
 from utils.misc import get_last_user_message, add_or_update_system_message
-from config import SRC_LOG_LEVELS, CHROMA_CLIENT
+from config import SRC_LOG_LEVELS, CHROMA_CLIENT, VECTOR_CLIENT
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
+
+
+# async def query_doc(
+#     collection_name: str,
+#     query: str,
+#     embedding_function,
+#     k: int,
+# ):
+#     try:
+#         collection = CHROMA_CLIENT.get_collection(name=collection_name)
+#         query_embeddings = await embedding_function(query)
+
+#         result = collection.query(
+#             query_embeddings=[query_embeddings],
+#             n_results=k,
+#         )
+
+#         log.info(f"query_doc:result {result}")
+#         return result
+#     except Exception as e:
+#         raise e
 
 
 async def query_doc(
@@ -36,15 +57,21 @@ async def query_doc(
     k: int,
 ):
     try:
-        collection = CHROMA_CLIENT.get_collection(name=collection_name)
+        # log.debug(f"Firing query_doc for collection_name {collection_name}")
+        collection = VECTOR_CLIENT.get_collection(
+            name=collection_name
+        )  # Get the VectorCollection
         query_embeddings = await embedding_function(query)
 
-        result = collection.query(
-            query_embeddings=[query_embeddings],
+        result = await collection.query(
+            query_embedding=query_embeddings,
             n_results=k,
         )
 
-        log.info(f"query_doc:result {result}")
+        # for doc in result:
+        #     log.debug(f"query_doc result")
+        #     log.debug(f"id {doc['id']}")
+        #     log.debug(f"document {doc['document']}")
         return result
     except Exception as e:
         raise e
@@ -109,9 +136,9 @@ def merge_and_sort_query_results(query_results, k, reverse=False):
     combined_metadatas = []
 
     for data in query_results:
-        combined_distances.extend(data["distances"][0])
-        combined_documents.extend(data["documents"][0])
-        combined_metadatas.extend(data["metadatas"][0])
+        combined_distances.append(data["distance"])
+        combined_documents.append(data["document"])
+        combined_metadatas.append(data["metadata"])
 
     # Create a list of tuples (distance, document, metadata)
     combined = list(zip(combined_distances, combined_documents, combined_metadatas))
@@ -158,7 +185,7 @@ async def query_collection(
                 k=k,
                 embedding_function=embedding_function,
             )
-            results.append(result)
+            results.extend(result)
         except:
             pass
     return merge_and_sort_query_results(results, k=k)
@@ -210,6 +237,9 @@ async def generate_openai_embeddings_async(
             embeddings = await generate_openai_batch_embeddings_async(
                 model, [text], key, url, session
             )
+        # log.error(
+        #     f"embeddings: {embeddings[0] if isinstance(text, str) else embeddings}"
+        # )
     return embeddings[0] if isinstance(text, str) else embeddings
 
 
@@ -217,21 +247,41 @@ async def generate_openai_batch_embeddings_async(
     model: str, texts: list[str], key: str, url: str, session: aiohttp.ClientSession
 ) -> Optional[list[list[float]]]:
     try:
-        log.info(f"Generating OpenAI embeddings for {texts[0][0:25]}...")
-        async with session.post(
-            f"{url}/embeddings",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {key}",
-            },
-            json={"input": texts, "model": model},
-        ) as response:
-            response.raise_for_status()
-            data = await response.json()
-            if "data" in data:
-                return [elem["embedding"] for elem in data["data"]]
-            else:
-                raise Exception("Something went wrong :/")
+        if "azure.com" in url:
+            log.info(f"Generating async OpenAI embeddings for {texts[0][0:25]}...")
+            async with session.post(
+                f"{url}/embeddings?api-version=2023-05-15",
+                headers={
+                    "Content-Type": "application/json",
+                    "api-key": f"{key}",
+                },
+                json={"input": texts, "model": model},
+            ) as response:
+                response.raise_for_status()
+                data = await response.json()
+                if "data" in data:
+                    return [elem["embedding"] for elem in data["data"]]
+                else:
+                    raise Exception("Something went wrong :/")
+        else:
+            log.info(
+                f"Generating async Azure OpenAI embeddings for {texts[0][0:25]}..."
+            )
+            async with session.post(
+                f"{url}/embeddings",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {key}",
+                },
+                json={"input": texts, "model": model},
+            ) as response:
+                response.raise_for_status()
+                data = await response.json()
+                if "data" in data:
+                    return [elem["embedding"] for elem in data["data"]]
+                else:
+                    raise Exception("Something went wrong :/")
+
     except Exception as e:
         print(e)
         return None
@@ -245,9 +295,15 @@ def get_embedding_function(
     openai_url,
     batch_size,
 ):
+    print(f"Getting embedding function for {embedding_engine} & {embedding_model}")
+    embedding_engine = str(embedding_engine).strip()
     if embedding_engine == "":
+        print(f"No engine for {embedding_engine} & {embedding_model}")
         return lambda query: embedding_function.encode(query).tolist()
     elif embedding_engine in ["ollama", "openai"]:
+        print(
+            f"found openai getting embedding function for {embedding_engine} & {embedding_model}"
+        )
         if embedding_engine == "ollama":
             func = lambda query: generate_ollama_embeddings(
                 GenerateEmbeddingsForm(
@@ -258,6 +314,10 @@ def get_embedding_function(
                 )
             )
         elif embedding_engine == "openai":
+            print(
+                f"found openai again etting embedding function for {embedding_engine} & {embedding_model}"
+            )
+            print("OpenAI embeddings are being generated.")
             func = lambda query: generate_openai_embeddings_async(
                 model=embedding_model,
                 text=query,
@@ -281,6 +341,9 @@ def get_embedding_function(
 
         return lambda query: generate_multiple(query, func)
 
+    else:
+        raise Exception(f"Unknown embedding engine: {embedding_engine}")
+
 
 async def get_rag_context(
     docs,
@@ -291,13 +354,17 @@ async def get_rag_context(
     r,
     hybrid_search,
 ):
-    log.debug(f"docs: {docs} {messages} {embedding_function} {reranking_function}")
+    log.info(f"Starting get_rag_context with {len(docs)} docs")
+
     query = get_last_user_message(messages)
+    log.info(f"Extracted query: {query}")
 
     extracted_collections = []
     relevant_contexts = []
 
-    for doc in docs:
+    log.info(f"Processing {len(docs)} documents")
+    for idx, doc in enumerate(docs):
+        log.info(f"Processing document {idx+1}/{len(docs)}")
         context = None
 
         collection_names = (
@@ -305,17 +372,26 @@ async def get_rag_context(
             if doc["type"] == "collection"
             else [doc["collection_name"]]
         )
+        log.info(f"Collection names for current doc: {collection_names}")
 
         collection_names = set(collection_names).difference(extracted_collections)
+        log.debug(
+            f"Filtered collection names (removing already extracted): {collection_names}"
+        )
+
         if not collection_names:
-            log.debug(f"skipping {doc} as it has already been extracted")
+            log.info(f"Skipping doc {idx+1} - collections already processed")
             continue
 
         try:
             if doc["type"] == "text":
+                log.info("Processing text type document")
                 context = doc["content"]
+                log.debug(f"Text content: {context[:100]}...")
             else:
+                log.info("Processing collection type document")
                 if hybrid_search:
+                    log.info("Using hybrid search")
                     context = query_collection_with_hybrid_search(
                         collection_names=collection_names,
                         query=query,
@@ -325,6 +401,7 @@ async def get_rag_context(
                         r=r,
                     )
                 else:
+                    log.info("Using regular search")
                     context = await query_collection(
                         collection_names=collection_names,
                         query=query,
@@ -332,36 +409,55 @@ async def get_rag_context(
                         k=k,
                     )
         except Exception as e:
+            log.error(f"Error processing document {idx+1}: {str(e)}")
             log.exception(e)
             context = None
 
         if context:
+            log.info(f"Adding context from doc {idx+1} to relevant contexts")
             relevant_contexts.append({**context, "source": doc})
+        else:
+            log.warning(f"No context found for doc {idx+1}")
 
         extracted_collections.extend(collection_names)
+        log.debug(f"Updated extracted collections: {extracted_collections}")
 
+    log.info(
+        f"Processing {len(relevant_contexts)} relevant contexts to build final string"
+    )
     context_string = ""
-
     citations = []
-    for context in relevant_contexts:
+
+    for idx, context in enumerate(relevant_contexts):
+        log.info(f"Processing context {idx+1}/{len(relevant_contexts)}")
+        # log.debug(f"Current context: {context}")
         try:
             if "documents" in context:
-                context_string += "\n\n".join(
-                    [text for text in context["documents"][0] if text is not None]
-                )
+                # log.debug(f"Context documents: {context['documents']}")
+                texts = [text for text in context["documents"][0] if text is not None]
+                # log.info(f"Found texts: {texts}")
+                context_string += "\n\n".join(texts)
 
                 if "metadatas" in context:
-                    citations.append(
-                        {
-                            "source": context["source"],
-                            "document": context["documents"][0],
-                            "metadata": context["metadatas"][0],
-                        }
-                    )
+                    log.info("Adding citation from metadata")
+                    log.debug(f"Metadata: {context['metadatas']}")
+                    citation = {
+                        "source": context["source"],
+                        "document": context["documents"][0],
+                        "metadata": context["metadatas"][0],
+                    }
+                    citations.append(citation)
+            else:
+                log.info("No documents in context")
         except Exception as e:
+            log.error(f"Error processing context {idx+1}: {str(e)}")
             log.exception(e)
 
     context_string = context_string.strip()
+    log.info(f"Final context string length: {len(context_string)}")
+    log.info(f"Number of citations gathered: {len(citations)}")
+    # log.debug(f"Final context string: {context_string[:200]}...")
+    # log.debug(f"Citations: {citations}")
 
     return context_string, citations
 

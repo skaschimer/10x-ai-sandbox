@@ -5,6 +5,7 @@ import logging
 
 from fastapi import APIRouter
 from pydantic import BaseModel
+from redisvl.query.filter import Tag
 import json
 
 from apps.webui.models.documents import (
@@ -18,7 +19,7 @@ from apps.webui.models.documents import (
 from utils.utils import get_current_user, get_admin_user
 from constants import ERROR_MESSAGES
 
-from config import CHROMA_CLIENT
+from config import CHROMA_CLIENT, VECTOR_CLIENT, VECTOR_STORE
 
 log = logging.getLogger(__name__)
 
@@ -165,14 +166,26 @@ async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
     log.info(f"Deleting document {name}")
     result = Documents.delete_doc_by_name(name)
 
-    collection = CHROMA_CLIENT.get_collection(collection_name)
+    collection = VECTOR_CLIENT.get_collection(collection_name)
 
-    ids = collection.get()["ids"]
+    # Create a tag filter for your collection_name
+    tag_filter = Tag("collection") == collection_name
+
+    # Convert to a query string
+    query_str = str(tag_filter)
+
+    # Call the search method to find matching documents
+    results = await collection.collection.search(query_str)
+
+    # Extract IDs from results
+    ids = [doc.id for doc in results.docs]  # Assuming the documents have
+
     if ids:
         log.info("found ids")
-        collection.delete(ids)
+        await collection.delete(ids)
     del collection
 
-    log.info(f"Deleting collection {collection_name}")
-    CHROMA_CLIENT.delete_collection(collection_name)
+    if VECTOR_STORE == "chroma":
+        log.info(f"Deleting collection {collection_name}")
+        VECTOR_CLIENT.delete_collection(collection_name)
     return result

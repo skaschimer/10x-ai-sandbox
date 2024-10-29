@@ -8,11 +8,13 @@ import time
 import os
 import sys
 import logging
+import traceback
 import aiohttp
 import requests
 import mimetypes
 import shutil
 import inspect
+
 
 # import asyncio
 from urllib.parse import urlencode
@@ -100,7 +102,11 @@ from config import (
     SEARCH_QUERY_GENERATION_PROMPT_TEMPLATE,
     SEARCH_QUERY_PROMPT_LENGTH_THRESHOLD,
     TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE,
+    VECTOR_STORE,
+    VECTOR_CLIENT,
+    REDIS_VL_SCHEMA,
     AppConfig,
+    initialize_vector_client,
 )
 from constants import ERROR_MESSAGES
 
@@ -139,7 +145,25 @@ https://github.com/open-webui/open-webui
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Startup code here
+    # Await inside the async function
+    redis_client = await initialize_vector_client()
+
+    if VECTOR_STORE == "redis":
+        from redisvl.index import AsyncSearchIndex
+
+        async_search_index = await AsyncSearchIndex.from_dict(
+            REDIS_VL_SCHEMA
+        ).set_client(redis_client)
+        await async_search_index.create(overwrite=False)
+
+        await VECTOR_CLIENT.initialize(async_search_index=async_search_index)
+
     yield
+
+    # Shutdown code here
+    if VECTOR_STORE == "redis":
+        await redis_client.aclose()
 
 
 app = FastAPI(
@@ -361,15 +385,28 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
             # If docs field is present, generate RAG completions
             if "docs" in data:
                 data = {**data}
-                rag_context, citations = await get_rag_context(
-                    docs=data["docs"],
-                    messages=data["messages"],
-                    embedding_function=rag_app.state.EMBEDDING_FUNCTION,
-                    k=rag_app.state.config.TOP_K,
-                    reranking_function=rag_app.state.sentence_transformer_rf,
-                    r=rag_app.state.config.RELEVANCE_THRESHOLD,
-                    hybrid_search=rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH,
+                log.error(
+                    f"docs: {data}\n"
+                    # + f"len messages: {len(data['messages'])}\n"
+                    # + f"{rag_app.state.EMBEDDING_FUNCTION}\n"
+                    # + f"{rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH}"
                 )
+                try:
+                    log.error("About to call get_rag_context...")
+                    rag_context, citations = await get_rag_context(
+                        docs=data["docs"],
+                        messages=data["messages"],
+                        embedding_function=rag_app.state.EMBEDDING_FUNCTION,
+                        k=rag_app.state.config.TOP_K,
+                        reranking_function=rag_app.state.sentence_transformer_rf,
+                        r=rag_app.state.config.RELEVANCE_THRESHOLD,
+                        hybrid_search=rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH,
+                    )
+                    log.error("get_rag_context completed successfully")
+                except Exception as e:
+                    log.error(f"Error in get_rag_context: {str(e)}")
+                    log.error(f"Full exception: {traceback.format_exc()}")
+                    raise
 
                 if rag_context:
                     context += ("\n" if context != "" else "") + rag_context
@@ -590,12 +627,15 @@ async def check_url(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
-async def update_embedding_function(request: Request, call_next):
-    response = await call_next(request)
-    if "/embedding/update" in request.url.path:
-        webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
-    return response
+# @app.middleware("http")
+# async def update_embedding_function(request: Request, call_next):
+#     try:
+#         response = await call_next(request)
+#         if "/embedding/update" in request.url.path:
+#             webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
+#         return response
+#     except:
+#         pass
 
 
 app.mount("/ws", socket_app)

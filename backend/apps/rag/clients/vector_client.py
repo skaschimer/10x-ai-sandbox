@@ -181,7 +181,7 @@ class VectorCollection:
                 results.append(query_result.to_dict())
         elif self.vector_client.backend == "redis":
             # log.debug(f"\n\nquery_embedding: {query_embedding}\n\n")
-            log.debug(f"\n\nNum_results to return: {n_results}\n\n")
+            # log.debug(f"\n\nNum_results to return: {n_results}\n\n")
             query = VectorQuery(
                 vector=query_embedding,
                 vector_field_name="vector",

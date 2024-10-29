@@ -20,7 +20,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Union, Sequence, Iterator  # , Any
 
-from chromadb.utils.batch_utils import create_batches
 from langchain_core.documents import Document
 
 from langchain_community.document_loaders import (
@@ -50,7 +49,6 @@ import socket
 from pydantic import BaseModel
 from typing import Optional
 import mimetypes
-import uuid
 import json
 
 import sentence_transformers
@@ -129,10 +127,10 @@ from config import (
     RAG_WEB_SEARCH_RESULT_COUNT,
     RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
     RAG_EMBEDDING_OPENAI_BATCH_SIZE,
+    VECTOR_CLIENT,
 )
 
 from constants import ERROR_MESSAGES
-import asyncio
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
@@ -159,8 +157,10 @@ app.state.config.RAG_RERANKING_MODEL = RAG_RERANKING_MODEL
 app.state.config.RAG_TEMPLATE = RAG_TEMPLATE
 
 
-app.state.config.OPENAI_API_BASE_URL = RAG_OPENAI_API_BASE_URL
-app.state.config.OPENAI_API_KEY = RAG_OPENAI_API_KEY
+# app.state.config.OPENAI_API_BASE_URL = RAG_OPENAI_API_BASE_URL
+# app.state.config.OPENAI_API_KEY = RAG_OPENAI_API_KEY
+app.state.config.RAG_OPENAI_API_BASE_URL = RAG_OPENAI_API_BASE_URL
+app.state.config.RAG_OPENAI_API_KEY = RAG_OPENAI_API_KEY
 
 app.state.config.PDF_EXTRACT_IMAGES = PDF_EXTRACT_IMAGES
 
@@ -228,8 +228,8 @@ app.state.EMBEDDING_FUNCTION = get_embedding_function(
     app.state.config.RAG_EMBEDDING_ENGINE,
     app.state.config.RAG_EMBEDDING_MODEL,
     app.state.sentence_transformer_ef,
-    app.state.config.OPENAI_API_KEY,
-    app.state.config.OPENAI_API_BASE_URL,
+    app.state.config.RAG_OPENAI_API_KEY,
+    app.state.config.RAG_OPENAI_API_BASE_URL,
     app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
 )
 
@@ -278,8 +278,8 @@ async def get_embedding_config(user=Depends(get_admin_user)):
         "embedding_engine": app.state.config.RAG_EMBEDDING_ENGINE,
         "embedding_model": app.state.config.RAG_EMBEDDING_MODEL,
         "openai_config": {
-            "url": app.state.config.OPENAI_API_BASE_URL,
-            "key": app.state.config.OPENAI_API_KEY,
+            "url": app.state.config.RAG_OPENAI_API_BASE_URL,
+            "key": app.state.config.RAG_OPENAI_API_KEY,
             "batch_size": app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
         },
     }
@@ -316,10 +316,10 @@ async def update_embedding_config(
         app.state.config.RAG_EMBEDDING_ENGINE = form_data.embedding_engine
         app.state.config.RAG_EMBEDDING_MODEL = form_data.embedding_model
 
-        if app.state.config.RAG_EMBEDDING_ENGINE in ["ollama", "openai"]:
+        if app.state.config.RAG_EMBEDDING_ENGINE in ["ollama"]:
             if form_data.openai_config is not None:
-                app.state.config.OPENAI_API_BASE_URL = form_data.openai_config.url
-                app.state.config.OPENAI_API_KEY = form_data.openai_config.key
+                app.state.config.RAG_OPENAI_API_BASE_URL = form_data.openai_config.url
+                app.state.config.RAG_OPENAI_API_KEY = form_data.openai_config.key
                 app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE = (
                     form_data.openai_config.batch_size
                     if form_data.openai_config.batch_size
@@ -332,8 +332,8 @@ async def update_embedding_config(
             app.state.config.RAG_EMBEDDING_ENGINE,
             app.state.config.RAG_EMBEDDING_MODEL,
             app.state.sentence_transformer_ef,
-            app.state.config.OPENAI_API_KEY,
-            app.state.config.OPENAI_API_BASE_URL,
+            app.state.config.RAG_OPENAI_API_KEY,
+            app.state.config.RAG_OPENAI_API_BASE_URL,
             app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
         )
 
@@ -342,8 +342,8 @@ async def update_embedding_config(
             "embedding_engine": app.state.config.RAG_EMBEDDING_ENGINE,
             "embedding_model": app.state.config.RAG_EMBEDDING_MODEL,
             "openai_config": {
-                "url": app.state.config.OPENAI_API_BASE_URL,
-                "key": app.state.config.OPENAI_API_KEY,
+                "url": app.state.config.RAG_OPENAI_API_BASE_URL,
+                "key": app.state.config.RAG_OPENAI_API_KEY,
                 "batch_size": app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
             },
         }
@@ -628,6 +628,7 @@ async def query_collection_handler(
     form_data: QueryCollectionsForm,
     user=Depends(get_current_user),
 ):
+    log.debug(f"query_collection_handler: {form_data}")
     try:
         if app.state.config.ENABLE_RAG_HYBRID_SEARCH:
             return query_collection_with_hybrid_search(
@@ -657,7 +658,7 @@ async def query_collection_handler(
 
 
 @app.post("/youtube")
-def store_youtube_video(form_data: UrlForm, user=Depends(get_current_user)):
+async def store_youtube_video(form_data: UrlForm, user=Depends(get_current_user)):
     try:
         loader = YoutubeLoader.from_youtube_url(
             form_data.url,
@@ -671,7 +672,7 @@ def store_youtube_video(form_data: UrlForm, user=Depends(get_current_user)):
         if collection_name == "":
             collection_name = calculate_sha256_string(form_data.url)[:63]
 
-        store_data_in_vector_db(data, collection_name, overwrite=True)
+        await store_data_in_vector_db(data, collection_name, overwrite=True)
         return {
             "status": True,
             "collection_name": collection_name,
@@ -686,7 +687,7 @@ def store_youtube_video(form_data: UrlForm, user=Depends(get_current_user)):
 
 
 @app.post("/web")
-def store_web(form_data: UrlForm, user=Depends(get_current_user)):
+async def store_web(form_data: UrlForm, user=Depends(get_current_user)):
     # "https://www.gutenberg.org/files/1727/1727-h/1727-h.htm"
     try:
         loader = get_web_loader(
@@ -699,7 +700,7 @@ def store_web(form_data: UrlForm, user=Depends(get_current_user)):
         if collection_name == "":
             collection_name = calculate_sha256_string(form_data.url)[:63]
 
-        store_data_in_vector_db(data, collection_name, overwrite=True)
+        await store_data_in_vector_db(data, collection_name, overwrite=True)
         return {
             "status": True,
             "collection_name": collection_name,
@@ -852,7 +853,7 @@ def search_web(engine: str, query: str) -> list[SearchResult]:
 
 
 @app.post("/web/search")
-def store_web_search(form_data: SearchForm, user=Depends(get_current_user)):
+async def store_web_search(form_data: SearchForm, user=Depends(get_current_user)):
     try:
         logging.info(
             f"trying to web search with {app.state.config.RAG_WEB_SEARCH_ENGINE, form_data.query}"
@@ -878,7 +879,7 @@ def store_web_search(form_data: SearchForm, user=Depends(get_current_user)):
         if collection_name == "":
             collection_name = calculate_sha256_string(form_data.query)[:63]
 
-        store_data_in_vector_db(data, collection_name, overwrite=True)
+        await store_data_in_vector_db(data, collection_name, overwrite=True)
         return {
             "status": True,
             "collection_name": collection_name,
@@ -892,7 +893,9 @@ def store_web_search(form_data: SearchForm, user=Depends(get_current_user)):
         )
 
 
-def store_data_in_vector_db(data, collection_name, overwrite: bool = False) -> bool:
+async def store_data_in_vector_db(
+    data, collection_name, overwrite: bool = False
+) -> bool:
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
@@ -904,12 +907,12 @@ def store_data_in_vector_db(data, collection_name, overwrite: bool = False) -> b
 
     if len(docs) > 0:
         # log.info(f"store_data_in_vector_db {docs}")
-        return store_docs_in_vector_db(docs, collection_name, overwrite), None
+        return await store_docs_in_vector_db(docs, collection_name, overwrite), None
     else:
         raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
 
 
-def store_text_in_vector_db(
+async def store_text_in_vector_db(
     text, metadata, collection_name, overwrite: bool = False
 ) -> bool:
     text_splitter = RecursiveCharacterTextSplitter(
@@ -918,72 +921,86 @@ def store_text_in_vector_db(
         add_start_index=True,
     )
     docs = text_splitter.create_documents([text], metadatas=[metadata])
-    return store_docs_in_vector_db(docs, collection_name, overwrite)
+    return await store_docs_in_vector_db(docs, collection_name, overwrite)
 
 
-def store_docs_in_vector_db(docs, collection_name, overwrite: bool = False) -> bool:
-    log.info(f"store_docs_in_vector_db for {collection_name}")
+async def store_docs_in_vector_db(
+    docs, collection_name, overwrite: bool = False
+) -> bool:
+    log.info(f"Storing documents in vector DB for collection {collection_name}")
 
     texts = [doc.page_content for doc in docs]
-    metadatas = [doc.metadata for doc in docs]
-
-    # ChromaDB does not like datetime formats
-    # for meta-data so convert them to string.
-    for metadata in metadatas:
-        for key, value in metadata.items():
-            if isinstance(value, datetime):
-                metadata[key] = str(value)
+    metadatas = [convert_metadata_to_strings(doc.metadata) for doc in docs]
 
     try:
+        collection = await prepare_collection(collection_name, overwrite)
 
-        for collection in CHROMA_CLIENT.list_collections():
-            if collection_name == collection.name:
-                log.info(f"found existing collection for: {collection_name}")
-                if overwrite:
-                    log.info(f"deleting existing collection {collection_name}")
-                    CHROMA_CLIENT.delete_collection(name=collection_name)
-                return True
+        if not collection:
+            raise Exception(f"Failed to create or get collection {collection_name}.")
 
-        collection = CHROMA_CLIENT.create_collection(name=collection_name)
+        embeddings = await compute_embeddings(texts)
 
-        embedding_func = get_embedding_function(
-            app.state.config.RAG_EMBEDDING_ENGINE,
-            app.state.config.RAG_EMBEDDING_MODEL,
-            app.state.sentence_transformer_ef,
-            app.state.config.OPENAI_API_KEY,
-            app.state.config.OPENAI_API_BASE_URL,
-            app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
-        )
+        log_and_print_summary(texts, embeddings, collection_name)
 
-        embedding_texts = list(map(lambda x: x.replace("\n", " "), texts))
-        embeddings = asyncio.run(embedding_func(embedding_texts))
-
-        d = (
-            1536 if app.state.config.RAG_EMBEDDING_ENGINE == "openai" else 384
-        )  # dimensionality of embeddings
-        memory_usage = len(embedding_texts) * d * 4  # memory in bytes
-        print(f"Number of embeddings: {len(embeddings)} for num texts {len(texts)} ")
-        print(f"First text: \n{texts[0]} \nand last text \n{texts[-1]}")
-        print(
-            f"Estimated memory usage: {memory_usage / (1024 ** 2):.2f} MB"
-        )  # mem in MB
-
-        for batch in create_batches(
-            api=CHROMA_CLIENT,
-            ids=[str(uuid.uuid4()) for _ in texts],
-            metadatas=metadatas,
-            embeddings=embeddings,
-            documents=texts,
-        ):
-            collection.add(*batch)
+        await collection.add(texts, embeddings, metadatas=metadatas)
 
         return True
     except Exception as e:
-        log.exception(e)
+        log.exception(f"Error storing documents: {e}")
+
         if e.__class__.__name__ == "UniqueConstraintError":
             return True
 
         return False
+
+
+def convert_metadata_to_strings(metadata):
+    """Converts datetime objects in metadata to strings."""
+    for key, value in metadata.items():
+        if isinstance(value, datetime):
+            metadata[key] = str(value)
+    return metadata
+
+
+async def prepare_collection(collection_name, overwrite):
+    """Prepare the vector collection, handling possible overwriting."""
+    collection = VECTOR_CLIENT.get_collection(collection_name)
+
+    if overwrite:
+        log.info(f"Deleting existing collection {collection_name}")
+        VECTOR_CLIENT.delete_collection(name=collection_name)
+        collection = VECTOR_CLIENT.create_collection(name=collection_name)
+
+    return collection
+
+
+async def compute_embeddings(texts):
+    """Compute embeddings for the given texts."""
+    # Assume get_embedding_function and related configs are available
+    log.error(f"Computing embeddings for model: {app.state.config.RAG_EMBEDDING_MODEL}")
+    embedding_func = get_embedding_function(
+        app.state.config.RAG_EMBEDDING_ENGINE,
+        app.state.config.RAG_EMBEDDING_MODEL,
+        app.state.sentence_transformer_ef,
+        app.state.config.RAG_OPENAI_API_KEY,
+        app.state.config.RAG_OPENAI_API_BASE_URL,
+        app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE,
+    )
+
+    # Replace newlines
+    embedding_texts = [text.replace("\n", " ") for text in texts]
+    return await embedding_func(embedding_texts)
+
+
+def log_and_print_summary(texts, embeddings, collection_name):
+    """Log and print the summary of the embeddings and memory usage."""
+    d = 1536 if app.state.config.RAG_EMBEDDING_ENGINE == "openai" else 384
+    memory_usage = len(texts) * d * 4  # memory in bytes
+
+    log.info(f"Number of embeddings: {len(embeddings)} for {len(texts)} texts.")
+    log.debug(f"First text: {texts[0]} \nAnd last text: {texts[-1]}")
+    log.info(f"Estimated memory usage: {memory_usage / (1024 ** 2):.2f} MB")
+    log.warning(f"Adding {len(texts)} documents to collection {collection_name}")
 
 
 def get_loader(filename: str, file_content_type: str, file_path: str):
@@ -1082,7 +1099,7 @@ def get_loader(filename: str, file_content_type: str, file_path: str):
 
 
 @app.post("/doc")
-def store_doc(
+async def store_doc(
     collection_name: Optional[str] = Form(None),
     file: UploadFile = File(...),
     user=Depends(get_current_user),
@@ -1110,7 +1127,7 @@ def store_doc(
         data = loader.load()
 
         try:
-            result = store_data_in_vector_db(data, collection_name)
+            result = await store_data_in_vector_db(data, collection_name)
 
             if result:
                 return {
@@ -1170,7 +1187,7 @@ def store_text(
 
 
 @app.get("/scan")
-def scan_docs_dir(user=Depends(get_admin_user)):
+async def scan_docs_dir(user=Depends(get_admin_user)):
     for path in Path(DOCS_DIR).rglob("./**/*"):
         try:
             if path.is_file() and not path.name.startswith("."):
@@ -1188,7 +1205,7 @@ def scan_docs_dir(user=Depends(get_admin_user)):
                 data = loader.load()
 
                 try:
-                    result = store_data_in_vector_db(data, collection_name)
+                    result = await store_data_in_vector_db(data, collection_name)
 
                     if result:
                         sanitized_filename = sanitize_filename(filename)
