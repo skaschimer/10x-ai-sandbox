@@ -39,7 +39,15 @@
    nvm use 20.15.1
    ```
 
-5. **Install deps, build and run**:
+5. **Run redis**:
+
+   - Check for redis on the default `lsof -i:6379`, if it's there, make sure it's got the default creds, or kill it and run:
+
+   ```bash
+   docker run -d --name redis -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
+   ```
+
+6. **Install deps, build and run**:
 
    - Install, build and run with hot reloading:
 
@@ -54,7 +62,7 @@
 
    - You should see the pipelines server running at 9099, the static files should be compiled and the webui server should be running at http://0.0.0.0:8080.
 
-6. **Set up pipelines to access models via API**:
+7. **Set up pipelines to access models via API**:
 
 - The first user to sign up to a new installation should get the admin role. Once you're in, navigate to the Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to http://localhost:9099 and the API key to 0p3n-w3bu! and hit refresh to see if it connects.
 - After completing these steps, the model specified in the pipeline should be available in the drop down at the upper left when you create a new conversation.

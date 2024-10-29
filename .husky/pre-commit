@@ -1,3 +1,4 @@
+gitleaks detect --source . -v
 npm install
 npm run format
 npm run i18n:parse
