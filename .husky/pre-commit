@@ -1,5 +1,4 @@
-echo "Scanning entire commit history, this may take 30-60s..."
-echo "▓▒▒▒▒▒▒▒▒▒ ⏳%"
+echo "Scanning commit history, ~30-60s... 💅🥱⏳"
 gitleaks detect --source . -v
 npm install
 npm run format

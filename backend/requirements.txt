@@ -28,6 +28,10 @@ langchain==0.2.0
 langchain-community==0.2.0
 langchain-chroma==0.1.1
 
+redis==5.2.0
+redisvl==0.3.5
+pgvector==0.2.5
+
 fake-useragent==1.5.1
 chromadb==0.5.0
 sentence-transformers==2.7.0
@@ -52,6 +56,8 @@ rank-bm25==0.2.2
 faster-whisper==1.0.2
 
 PyJWT[crypto]==2.8.0
+
+pytest-asyncio==0.24.0
 
 black==24.4.2
 langfuse==2.33.0
