@@ -12,9 +12,10 @@
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/favicon-ios.png" />
 		<meta name="apple-mobile-web-app-title" content="GSA AI Sandbox" />
 		<meta name="format-detection" content="telephone=no" />
-		<meta name="apple-touch-fullscreen" content="yes" /> <!-- Ensures Fullscreen mode on iOS -->
-		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"/>
-		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
+		<meta name="apple-touch-fullscreen" content="yes" />
+		<!-- Ensures Fullscreen mode on iOS -->
+		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
 		<!-- Android Specific Tags -->
 		<meta name="theme-color" content="#000000" />
@@ -76,24 +77,24 @@
 			function isIosSafari() {
 				const ua = window.navigator.userAgent;
 				return !!ua.match(/iP(ad|hone|od)/i) && !!ua.match(/WebKit/i) && !ua.match(/CriOS/i);
-			  }
-			  
-			  function getViewportHeight() {
+			}
+
+			function getViewportHeight() {
 				return window.innerHeight;
-			  }
-			  
-			  let initialViewportHeight = getViewportHeight();
-			  
-			  window.addEventListener('resize', () => {
+			}
+
+			let initialViewportHeight = getViewportHeight();
+
+			window.addEventListener('resize', () => {
 				if (isIosSafari()) {
-				  const currentViewportHeight = getViewportHeight();
-				  if (currentViewportHeight > initialViewportHeight) {
-					document.documentElement.classList.add('ios-safari-toolbar-hidden');
-				  } else {
-					document.documentElement.classList.remove('ios-safari-toolbar-hidden');
-				  }
+					const currentViewportHeight = getViewportHeight();
+					if (currentViewportHeight > initialViewportHeight) {
+						document.documentElement.classList.add('ios-safari-toolbar-hidden');
+					} else {
+						document.documentElement.classList.remove('ios-safari-toolbar-hidden');
+					}
 				}
-			  });
+			});
 		</script>
 
 		<title>GSA AI Sandbox</title>
@@ -186,20 +187,21 @@
 		overflow-y: hidden !important;
 	}
 	/* Ensure html and body use safe area insets with a black background */
-    html, body {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        background-color: #000;
-    }
+	html,
+	body {
+		padding-top: env(safe-area-inset-top);
+		padding-bottom: env(safe-area-inset-bottom);
+		background-color: #000;
+	}
 	.ios-safari-toolbar-hidden body {
 		background-color: lightcoral;
 		padding-bottom: 100px;
-	  }
-    /* Ensure the splash screen respects safe area insets with a black background */
-    #splash-screen {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-    }
+	}
+	/* Ensure the splash screen respects safe area insets with a black background */
+	#splash-screen {
+		padding-top: env(safe-area-inset-top);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
 
 	#splash-screen {
 		background: #fff;
