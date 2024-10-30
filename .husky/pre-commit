@@ -1,4 +1,5 @@
 echo "Scanning commit history, ~30-60s... 💅🥱⏳"
+git rm -r --cached build
 gitleaks detect --log-opts="-n 1"
 npm install
 npm run format
