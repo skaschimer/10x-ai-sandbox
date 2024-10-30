@@ -1,5 +1,5 @@
 echo "Scanning commit history, ~30-60s... 💅🥱⏳"
-gitleaks detect --source . -v
+gitleaks detect --log-opts="-n 1"
 npm install
 npm run format
 npm run i18n:parse

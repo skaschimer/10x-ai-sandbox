@@ -9,6 +9,7 @@
 - gray out vision for custom models that don't have vision
 - Ability to share docs/models by pasting an email of another user ("This email is belongs to a sandbox user. They will now have access to the model" / "This email does not belong to a sandbox user"). Probably want comma separation...
 - Add http links to Doc upload options, seems mostly done
+- stop checking for ollama models?
 - Fix tagging ux, add tags should be clickable, should save when you hit save
 - Check and batch-tag multiple docs
 - documents tab needs a spinner when processing docs
