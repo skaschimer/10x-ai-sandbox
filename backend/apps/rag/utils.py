@@ -29,27 +29,6 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
-# async def query_doc(
-#     collection_name: str,
-#     query: str,
-#     embedding_function,
-#     k: int,
-# ):
-#     try:
-#         collection = CHROMA_CLIENT.get_collection(name=collection_name)
-#         query_embeddings = await embedding_function(query)
-
-#         result = collection.query(
-#             query_embeddings=[query_embeddings],
-#             n_results=k,
-#         )
-
-#         log.info(f"query_doc:result {result}")
-#         return result
-#     except Exception as e:
-#         raise e
-
-
 async def query_doc(
     collection_name: str,
     query: str,
@@ -68,10 +47,6 @@ async def query_doc(
             n_results=k,
         )
 
-        # for doc in result:
-        #     log.debug(f"query_doc result")
-        #     log.debug(f"id {doc['id']}")
-        #     log.debug(f"document {doc['document']}")
         return result
     except Exception as e:
         raise e
@@ -454,10 +429,6 @@ async def get_rag_context(
             log.exception(e)
 
     context_string = context_string.strip()
-    log.info(f"Final context string length: {len(context_string)}")
-    log.info(f"Number of citations gathered: {len(citations)}")
-    # log.debug(f"Final context string: {context_string[:200]}...")
-    # log.debug(f"Citations: {citations}")
 
     return context_string, citations
 
