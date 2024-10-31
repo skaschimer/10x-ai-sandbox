@@ -65,6 +65,7 @@
    pip install -r ./backend/requirements.txt && \
    rm -rf node_modules || true && \
    npm install && \
+   npx husky init && \
    npm run build && \
    ./backend/start.sh
    ```
