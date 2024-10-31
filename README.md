@@ -77,5 +77,5 @@
 
 8. **Set up pipelines to access models via API**:
 
-- Once you're in, you should see the four default models available in the chat. If not, check that the pipelines server is running on 9099 and in the UI click on your user in the lower left > Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to http://localhost:9099 and the API key to 0p3n-w3bu! and hit refresh to see if it connects to the pipeline server.
+- Once you're in, you should see the four default models available in the chat. If not, check that the pipelines server is running on 9099 and in the UI click on your user in the lower left > Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to [<http://localhost:9099](http://localhost:9099>) and the API key to 0p3n-w3bu! and hit refresh to see if it connects to the pipeline server.
 - After completing these steps, the models specified in the pipeline settings should be available in the drop down at the upper left when you create a new conversation.

@@ -897,6 +897,13 @@ async def store_data_in_vector_db(
     data, collection_name, overwrite: bool = False
 ) -> bool:
 
+    # check for collection
+    collection = VECTOR_CLIENT.get_collection(collection_name)
+    result = await collection.get_one()
+    if result is not None and not overwrite:
+        log.info(f"collection already exists for name: {collection_name}")
+        return True
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
         chunk_overlap=app.state.config.CHUNK_OVERLAP,
@@ -915,6 +922,13 @@ async def store_data_in_vector_db(
 async def store_text_in_vector_db(
     text, metadata, collection_name, overwrite: bool = False
 ) -> bool:
+
+    # check for collection
+    collection = VECTOR_CLIENT.get_collection(collection_name)
+    if collection is not None and not overwrite:
+        log.info(f"collection already exists for name: {collection_name}")
+        return True
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
         chunk_overlap=app.state.config.CHUNK_OVERLAP,

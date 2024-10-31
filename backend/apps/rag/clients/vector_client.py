@@ -4,7 +4,7 @@ import numpy as np
 import hashlib
 import json
 from chromadb.utils.batch_utils import create_batches
-from redisvl.query import VectorQuery
+from redisvl.query import VectorQuery, FilterQuery
 from redisvl.index import AsyncSearchIndex
 from redisvl.query.filter import Tag
 import logging
@@ -71,7 +71,10 @@ class VectorClient:
     def get_collection(self, name: str) -> "VectorCollection":
         """Retrieve an existing vector collection."""
         # TODO: check if collection exists, meaning entries with collection tag
-        return VectorCollection(name=name, vector_client=self)
+        if self.backend == "chroma":
+            self.chroma_client.get_collection(name=name)
+        elif self.backend == "redis":
+            return VectorCollection(name=name, vector_client=self)
 
     def delete_collection(self, name: str):
         """Delete a vector collection. For Redis, handled via collection tag."""
@@ -215,6 +218,22 @@ class VectorCollection:
             return (
                 [await self.collection.fetch(doc_id) for doc_id in ids] if ids else []
             )
+
+    async def get_one(self) -> List[Dict[str, Any]]:
+        """Retrieve documents by their IDs."""
+        if self.vector_client.backend == "chroma":
+            return NotImplementedError
+        elif self.vector_client.backend == "redis":
+            collection_tag = Tag("collection") == self.name
+            filter_query = FilterQuery(
+                filter_expression=collection_tag,
+                return_fields=["doc_id"],
+                num_results=1,
+            )
+            collection_entries = await self.collection._query(filter_query)
+            if len(collection_entries) > 0:
+                return collection_entries
+            return None
 
     async def delete(self, ids: List[str]):
         """Delete documents by their IDs."""
