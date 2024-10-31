@@ -929,6 +929,8 @@ async def store_docs_in_vector_db(
 ) -> bool:
     log.info(f"Storing documents in vector DB for collection {collection_name}")
 
+    # collection = VECTOR_CLIENT.get_collection(collection_name)
+
     texts = [doc.page_content for doc in docs]
     metadatas = [convert_metadata_to_strings(doc.metadata) for doc in docs]
 

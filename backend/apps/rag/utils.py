@@ -422,6 +422,8 @@ async def get_rag_context(
                         "metadata": context["metadatas"][0],
                     }
                     citations.append(citation)
+                log.debug(f"Updated context string: {context_string[:100]}...")
+                log.debug(f"Updated citations: {citations}")
             else:
                 log.info("No documents in context")
         except Exception as e:

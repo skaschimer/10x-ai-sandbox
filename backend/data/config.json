@@ -63,7 +63,7 @@
 	"rag": {
 		"embedding_engine": "openai",
 		"embedding_model": "text-embedding-3-small",
-		"embedding_openai_batch_size": 10,
+		"embedding_openai_batch_size": 1,
 		"pdf_extract_images": false,
 		"chunk_size": 1500,
 		"chunk_overlap": 100,

@@ -70,6 +70,7 @@ class VectorClient:
 
     def get_collection(self, name: str) -> "VectorCollection":
         """Retrieve an existing vector collection."""
+        # TODO: check if collection exists, meaning entries with collection tag
         return VectorCollection(name=name, vector_client=self)
 
     def delete_collection(self, name: str):
