@@ -66,6 +66,7 @@
    rm -rf node_modules || true && \
    npm install && \
    npx husky init && \
+   cp pre-commit .husky/pre-commit && \
    npm run build && \
    ./backend/start.sh
    ```
