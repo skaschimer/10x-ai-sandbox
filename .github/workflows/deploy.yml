@@ -86,6 +86,14 @@ jobs:
             --var RAG_OPENAI_API_BASE_URL="$RAG_OPENAI_API_BASE_URL"
             --var RAG_OPENAI_API_KEY="$RAG_OPENAI_API_KEY"
             --var RAG_EMBEDDING_ENGINE="$RAG_EMBEDDING_ENGINE"
+      # New Step: Clean up build artifacts
+      - name: Remove build artifacts and commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT_TOKEN secret for authentication
+        run: |
+          git rm -rf build/
+          git commit -m "Remove build artifacts after deployment" || echo "No changes to commit"
+          git push --force
 
   bail:
     runs-on: ubuntu-latest
