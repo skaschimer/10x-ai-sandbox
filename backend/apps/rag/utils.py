@@ -223,21 +223,50 @@ async def generate_openai_batch_embeddings_async(
 ) -> Optional[list[list[float]]]:
     try:
         if "azure.com" in url:
-            log.info(f"Generating async OpenAI embeddings for {texts[0][0:25]}...")
-            async with session.post(
-                f"{url}/embeddings?api-version=2023-05-15",
-                headers={
-                    "Content-Type": "application/json",
-                    "api-key": f"{key}",
-                },
-                json={"input": texts, "model": model},
-            ) as response:
-                response.raise_for_status()
-                data = await response.json()
-                if "data" in data:
-                    return [elem["embedding"] for elem in data["data"]]
-                else:
-                    raise Exception("Something went wrong :/")
+            initial_delay = 0.2
+            max_retries = 10
+            attempt = 0
+            retry_delay = initial_delay  # Start with the initial delay
+
+            while attempt <= max_retries:
+                log.info(
+                    f"Generating async OpenAI embeddings for {texts[0][0:25]}..."
+                    + f"(Attempt {attempt + 1}/{max_retries + 1})"
+                )
+                async with session.post(
+                    f"{url}/embeddings?api-version=2023-05-15",
+                    headers={
+                        "Content-Type": "application/json",
+                        "api-key": f"{key}",
+                    },
+                    json={"input": texts, "model": model},
+                ) as response:
+                    if response.status == 429:
+                        if attempt < max_retries:
+                            log.warning(
+                                f"Received 429 Too Many Requests. Retrying after {retry_delay:.2f} seconds..."
+                            )
+                            await asyncio.sleep(retry_delay)
+                            attempt += 1
+                            retry_delay *= 2
+                            continue
+                        else:
+                            log.error(
+                                "Max retries exceeded after receiving 429 Too Many Requests."
+                            )
+                            raise Exception(
+                                "429 Too Many Requests: Maximum retries exceeded."
+                            )
+                    elif response.status != 200:
+                        response.raise_for_status()
+
+                    data = await response.json()
+                    if "data" in data:
+                        return [elem["embedding"] for elem in data["data"]]
+                    else:
+                        raise Exception("Something went wrong :/")
+
+            raise Exception("The request failed after several retries.")
         else:
             log.info(
                 f"Generating async Azure OpenAI embeddings for {texts[0][0:25]}..."
