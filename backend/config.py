@@ -795,9 +795,12 @@ RAG_EMBEDDING_ENGINE = PersistentConfig(
 # Redis connection settings
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
-REDIS_PASSWORD = os.environ.get(
-    "REDIS_PASSWORD", "you forgot to set the redis password"
-)
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+REDIS_URL = f"redis://localhost:{REDIS_PORT}"
+REDIS_ENABLED = True
+REDIS_SSL = False
+REDIS_SSL_CERT_REQS = None
+REDIS_CONFIG = dict(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
 REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
 REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
 REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
@@ -1173,10 +1176,7 @@ AUDIO_TTS_VOICE = PersistentConfig(
 # Datastores
 ####################################
 
-REDIS_PORT = 6379
-REDIS_URL = f"redis://localhost:{REDIS_PORT}"
-REDIS_ENABLED = True
-REDIS_CONFIG = dict(host="localhost", port=REDIS_PORT, password="")
+
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
 
 if os.environ.get("VCAP_SERVICES"):
@@ -1198,8 +1198,12 @@ if os.environ.get("VCAP_SERVICES"):
         REDIS_CONFIG["password"] = redis_credentials["password"]
         REDIS_CONFIG["ssl"] = True
         REDIS_CONFIG["ssl_cert_reqs"] = None
+        REDIS_SSL = True
+        REDIS_SSL_CERT_REQS = None
+        REDIS_HOST = redis_credentials["host"]
+        REDIS_PORT = int(redis_credentials["port"])
+        REDIS_PASSWORD = redis_credentials["password"]
         REDIS_URL = redis_credentials["uri"].replace("redis://", "rediss://")
-        # REDIS_CONFIG['REDIS_URL'] = REDIS_URL
         REDIS_ENABLED = True
     else:
         REDIS_URL = None
@@ -1213,14 +1217,7 @@ REDIS_VL_SCHEMA = None
 
 
 async def initialize_vector_client():
-    REDIS_CLIENT = Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        # password=REDIS_PASSWORD,
-        db=REDIS_DB,
-        decode_responses=False,
-    )
-
+    REDIS_CLIENT = Redis(**REDIS_CONFIG)
     return REDIS_CLIENT
 
 
