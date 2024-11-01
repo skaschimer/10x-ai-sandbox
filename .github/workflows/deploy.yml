@@ -11,7 +11,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.head_commit.message != 'Merge pull request*' }} # Ensure it's not a merge commit
+    if: ${{ github.event.head_commit.message != 'Merge pull request*' }}
 
     steps:
       - uses: actions/checkout@v3
@@ -56,6 +56,9 @@ jobs:
           WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
           DEV_ADMIN_EMAILS: ${{ secrets.DEV_ADMIN_EMAILS }}
           DEV_USER_EMAILS: ${{ secrets.DEV_USER_EMAILS }}
+          RAG_OPENAI_API_BASE_URL: ${{ secrets.RAG_OPENAI_API_BASE_URL }}
+          RAG_OPENAI_API_KEY: ${{ secrets.RAG_OPENAI_API_KEY }}
+          RAG_EMBEDDING_ENGINE: ${{ secrets.RAG_EMBEDDING_ENGINE }}
         with:
           cf_username: ${{ secrets.CLOUDGOV_USERNAME }}
           cf_password: ${{ secrets.CLOUDGOV_PASSWORD }}
@@ -80,6 +83,9 @@ jobs:
             --var WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY"
             --var DEV_ADMIN_EMAILS="$DEV_ADMIN_EMAILS"
             --var DEV_USER_EMAILS="$DEV_USER_EMAILS"
+            --var RAG_OPENAI_API_BASE_URL="$RAG_OPENAI_API_BASE_URL"
+            --var RAG_OPENAI_API_KEY="$RAG_OPENAI_API_KEY"
+            --var RAG_EMBEDDING_ENGINE="$RAG_EMBEDDING_ENGINE"
 
   bail:
     runs-on: ubuntu-latest
