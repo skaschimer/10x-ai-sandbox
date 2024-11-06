@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import shutil
 import logging
+import uuid
 
 # import re
 from datetime import datetime
@@ -128,6 +129,7 @@ from config import (
     RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
     RAG_EMBEDDING_OPENAI_BATCH_SIZE,
     VECTOR_CLIENT,
+    VectorItem,
 )
 
 from constants import ERROR_MESSAGES
@@ -601,6 +603,7 @@ def query_doc_handler(
                 ),
             )
         else:
+            log.info(f"Running query doc handler")
             return query_doc(
                 collection_name=form_data.collection_name,
                 query=form_data.query,
@@ -631,7 +634,7 @@ async def query_collection_handler(
     log.debug(f"query_collection_handler: {form_data}")
     try:
         if app.state.config.ENABLE_RAG_HYBRID_SEARCH:
-            return query_collection_with_hybrid_search(
+            return await query_collection_with_hybrid_search(
                 collection_names=form_data.collection_names,
                 query=form_data.query,
                 embedding_function=app.state.EMBEDDING_FUNCTION,
@@ -898,11 +901,10 @@ async def store_data_in_vector_db(
 ) -> bool:
 
     # check for collection
-    collection = VECTOR_CLIENT.get_collection(collection_name)
-    result = await collection.get_one()
-    if result is not None and not overwrite:
-        log.info(f"collection already exists for name: {collection_name}")
-        return True
+    collection_exists = VECTOR_CLIENT.has_collection(collection_name)
+    # if collection_exists and not overwrite:
+    #     log.info(f"collection already exists for name: {collection_name}")
+    #     return True
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
@@ -925,9 +927,9 @@ async def store_text_in_vector_db(
 
     # check for collection
     collection = VECTOR_CLIENT.get_collection(collection_name)
-    if collection is not None and not overwrite:
-        log.info(f"collection already exists for name: {collection_name}")
-        return True
+    # if collection is not None and not overwrite:
+    #     log.info(f"collection already exists for name: {collection_name}")
+    #     return True
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
@@ -949,16 +951,29 @@ async def store_docs_in_vector_db(
     metadatas = [convert_metadata_to_strings(doc.metadata) for doc in docs]
 
     try:
-        collection = await prepare_collection(collection_name, overwrite)
-
-        if not collection:
-            raise Exception(f"Failed to create or get collection {collection_name}.")
+        collection = await prepare_collection(
+            collection_name, True
+        )  # TODO: unnecessary?
 
         embeddings = await compute_embeddings(texts)
 
         log_and_print_summary(texts, embeddings, collection_name)
 
-        await collection.add(texts, embeddings, metadatas=metadatas)
+        items_to_upsert: List[VectorItem] = []
+        for text, embedding, metadata in zip(texts, embeddings, metadatas):
+            vector_item = VectorItem(
+                id=metadata.get("id", str(uuid.uuid4())),
+                text=text,
+                vector=embedding,
+                metadata=metadata,
+            )
+            items_to_upsert.append(vector_item)
+
+        log.info(
+            f"Upserting {embeddings[0][0:5]} items to collection {collection_name}"
+        )
+
+        await VECTOR_CLIENT.upsert(collection_name, items_to_upsert)
 
         return True
     except Exception as e:
@@ -980,14 +995,12 @@ def convert_metadata_to_strings(metadata):
 
 async def prepare_collection(collection_name, overwrite):
     """Prepare the vector collection, handling possible overwriting."""
-    collection = VECTOR_CLIENT.get_collection(collection_name)
 
     if overwrite:
         log.info(f"Deleting existing collection {collection_name}")
-        VECTOR_CLIENT.delete_collection(name=collection_name)
-        collection = VECTOR_CLIENT.create_collection(name=collection_name)
+        VECTOR_CLIENT.delete_collection(collection_name=collection_name)
 
-    return collection
+    return True
 
 
 async def compute_embeddings(texts):

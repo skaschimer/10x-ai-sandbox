@@ -21,7 +21,8 @@ import markdown
 import requests
 import shutil
 
-from apps.rag.clients.vector_client import VectorClient
+from apps.rag.clients.vector_client import VectorClient, PGVectorClient, VectorItem
+
 
 # from secrets import token_bytes
 from constants import ERROR_MESSAGES
@@ -806,7 +807,7 @@ REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
 REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
 REDIS_VECTOR_DIM = 1536 if RAG_EMBEDDING_ENGINE == "openai" else 384
 
-VECTOR_STORE = os.environ.get("VECTOR_STORE", "redis")
+VECTOR_STORE = os.environ.get("VECTOR_STORE", "postgres")
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", chromadb.DEFAULT_TENANT)
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", chromadb.DEFAULT_DATABASE)
@@ -1263,3 +1264,7 @@ elif VECTOR_STORE == "redis":
         ],
     }
     VECTOR_CLIENT = VectorClient(backend="redis")
+
+elif VECTOR_STORE == "postgres":
+    DATABASE = "postgres"
+    VECTOR_CLIENT = PGVectorClient(dbname=DATABASE)

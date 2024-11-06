@@ -404,7 +404,9 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
                         r=rag_app.state.config.RELEVANCE_THRESHOLD,
                         hybrid_search=rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH,
                     )
-                    log.info("get_rag_context completed successfully")
+                    log.info(
+                        f"get_rag_context completed successfully with context string {rag_context[0:100]}"
+                    )
                     log.info("get_rag_context proceeding")
                 except Exception as e:
                     log.error(f"Error in get_rag_context: {str(e)}")
@@ -417,7 +419,7 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
 
                 del data["docs"]
 
-                log.debug(f"rag_context: {rag_context}, citations: {citations}")
+                log.info(f"rag_context: {rag_context}, citations: {citations}")
 
             if context != "":
                 system_prompt = rag_template(

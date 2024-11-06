@@ -43,7 +43,8 @@
 		"enable_community_sharing": true
 	},
 	"ollama": {
-		"base_urls": ["http://localhost:11434"]
+		"base_urls": ["http://localhost:11434"],
+		"enable": false
 	},
 	"openai": {
 		"api_base_urls": ["http://localhost:9099"],

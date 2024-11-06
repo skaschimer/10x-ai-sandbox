@@ -37,18 +37,29 @@ async def query_doc(
 ):
     try:
         # log.debug(f"Firing query_doc for collection_name {collection_name}")
-        collection = VECTOR_CLIENT.get_collection(
-            name=collection_name
-        )  # Get the VectorCollection
+        # collection = VECTOR_CLIENT.get_collection(
+        #     name=collection_name
+        # )  # Get the VectorCollection
+
         query_embeddings = await embedding_function(query)
 
-        result = await collection.query(
-            query_embedding=query_embeddings,
-            n_results=k,
-        )
+        log.info(f"Query Embeddings length: {len(query_embeddings)}")
 
-        return result
+        has_collection = VECTOR_CLIENT.has_collection(collection_name)
+        log.info(f"Has collection: {has_collection}")
+        if not has_collection:
+            log.error("Collection does not exist.")
+            return None
+        else:
+            log.info("Collection exists!")
+
+        return VECTOR_CLIENT.search(
+            collection_name=collection_name,
+            vectors=[query_embeddings],
+            limit=k,
+        )
     except Exception as e:
+        log.error(f"query_doc: An exception occurred: {str(e)}")
         raise e
 
 
@@ -104,17 +115,19 @@ def query_doc_with_hybrid_search(
         raise e
 
 
-def merge_and_sort_query_results(query_results, k, reverse=False):
+async def merge_and_sort_query_results(query_results, k, reverse=False):
     # Initialize lists to store combined data
     combined_distances = []
     combined_documents = []
     combined_metadatas = []
 
-    for data in query_results:
-        combined_distances.append(data["distance"])
-        combined_documents.append(data["document"])
-        combined_metadatas.append(data["metadata"])
+    log.error(f"query_results {query_results}")
+    for query_result in query_results:
+        combined_distances.extend(query_result["distances"])
+        combined_documents.extend(query_result["documents"])
+        combined_metadatas.extend(query_result["metadatas"])
 
+    log.error(f"combined_distances {combined_distances}")
     # Create a list of tuples (distance, document, metadata)
     combined = list(zip(combined_distances, combined_documents, combined_metadatas))
 
@@ -154,6 +167,7 @@ async def query_collection(
     results = []
     for collection_name in collection_names:
         try:
+            log.info(f"Firing query_collection for collection_name {collection_name}")
             result = await query_doc(
                 collection_name=collection_name,
                 query=query,
@@ -163,10 +177,10 @@ async def query_collection(
             results.extend(result)
         except:
             pass
-    return merge_and_sort_query_results(results, k=k)
+    return await merge_and_sort_query_results(results, k=k)
 
 
-def query_collection_with_hybrid_search(
+async def query_collection_with_hybrid_search(
     collection_names: List[str],
     query: str,
     embedding_function,
@@ -188,7 +202,7 @@ def query_collection_with_hybrid_search(
             results.append(result)
         except:
             pass
-    return merge_and_sort_query_results(results, k=k, reverse=True)
+    return await merge_and_sort_query_results(results, k=k, reverse=True)
 
 
 def rag_template(template: str, context: str, query: str):
@@ -396,7 +410,7 @@ async def get_rag_context(
                 log.info("Processing collection type document")
                 if hybrid_search:
                     log.info("Using hybrid search")
-                    context = query_collection_with_hybrid_search(
+                    context = await query_collection_with_hybrid_search(
                         collection_names=collection_names,
                         query=query,
                         embedding_function=embedding_function,
@@ -439,19 +453,19 @@ async def get_rag_context(
             if "documents" in context:
                 # log.debug(f"Context documents: {context['documents']}")
                 texts = [text for text in context["documents"][0] if text is not None]
-                # log.info(f"Found texts: {texts}")
+                # log.debug(f"Found texts: {texts}")
                 context_string += "\n\n".join(texts)
 
                 if "metadatas" in context:
                     log.info("Adding citation from metadata")
-                    log.debug(f"Metadata: {context['metadatas']}")
+                    log.info(f"Metadata: {context['metadatas']}")
                     citation = {
                         "source": context["source"],
                         "document": context["documents"][0],
                         "metadata": context["metadatas"][0],
                     }
                     citations.append(citation)
-                log.debug(f"Updated context string: {context_string[:100]}...")
+                log.info(f"Updated context string: {context_string[:100]}...")
                 log.debug(f"Updated citations: {citations}")
             else:
                 log.info("No documents in context")

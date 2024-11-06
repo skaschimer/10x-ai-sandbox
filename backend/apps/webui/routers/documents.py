@@ -187,5 +187,5 @@ async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
 
     if VECTOR_STORE == "chroma":
         log.info(f"Deleting collection {collection_name}")
-        VECTOR_CLIENT.delete_collection(collection_name)
+        VECTOR_CLIENT.delete_collection(collection_name=collection_name)
     return result
