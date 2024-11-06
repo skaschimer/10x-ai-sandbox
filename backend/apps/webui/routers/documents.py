@@ -161,11 +161,12 @@ async def update_doc_by_name(
 @router.delete("/doc/delete", response_model=bool)
 async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
     doc = Documents.get_doc_by_name(name)
-    collection_name = doc.collection_name
+    # collection_name = doc.collection_name
 
     log.info(f"Deleting document {name}")
     result = Documents.delete_doc_by_name(name)
 
-    success = VECTOR_CLIENT.delete(collection_name)
+    # NOTE: storing the vectors less than creating them, let's skip while in beta
+    # success = VECTOR_CLIENT.delete(collection_name)
 
-    return result and success
+    return result

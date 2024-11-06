@@ -92,6 +92,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT_TOKEN secret for authentication
         run: |
           git rm -rf build/
+          git add .
           git commit -m "Remove build artifacts after deployment" || echo "No changes to commit"
           git push --force
 
