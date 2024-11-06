@@ -58,6 +58,7 @@ async def test_add_and_query(vector_client, embedding_function):
         "To be or not to be, that is the question.",
     ]
     embeddings = await embedding_function(paragraphs)
+    # TODO: save embeddings and mock them
     # embeddings = [
     #     np.array(embedding, dtype=np.float32).tobytes() for embedding in embeddings
     # ]
