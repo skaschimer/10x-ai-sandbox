@@ -276,6 +276,7 @@
 
 <hr class=" dark:border-gray-850 my-2.5" />
 
+<!-- TODO: we should allow bulk select even when there's no tags -->
 {#if tags.length > 0}
 	<div class="px-2.5 pt-1 flex gap-1 flex-wrap">
 		<div class="ml-0.5 pr-3 my-auto flex items-center">

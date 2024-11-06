@@ -4,10 +4,13 @@ import logging
 import importlib.metadata
 import pkgutil
 import chromadb
-from chromadb import Settings
-from base64 import b64encode
+
+# from chromadb import Settings
+# from redis.asyncio import Redis
+
+# from base64 import b64encode
 from bs4 import BeautifulSoup
-from typing import TypeVar, Generic, Union
+from typing import TypeVar, Generic  # , Union
 from pydantic import BaseModel
 from typing import Optional
 
@@ -19,7 +22,10 @@ import markdown
 import requests
 import shutil
 
-from secrets import token_bytes
+from apps.rag.clients.vector_client import PGVectorClient, VectorItem
+
+
+# from secrets import token_bytes
 from constants import ERROR_MESSAGES
 
 ####################################
@@ -96,7 +102,8 @@ ENV = os.environ.get("ENV", "dev")
 
 try:
     PACKAGE_DATA = json.loads((BASE_DIR / "package.json").read_text())
-except:
+except Exception as e:
+    log.error(f"Error loading package.json: {e}")
     try:
         PACKAGE_DATA = {"version": importlib.metadata.version("open-webui")}
     except importlib.metadata.PackageNotFoundError:
@@ -129,7 +136,8 @@ try:
     with open(str(changelog_path.absolute()), "r", encoding="utf8") as file:
         changelog_content = file.read()
 
-except:
+except Exception as e:
+    log.error(f"Error loading CHANGELOG.md: {e}")
     changelog_content = (pkgutil.get_data("open_webui", "CHANGELOG.md") or b"").decode()
 
 
@@ -188,12 +196,14 @@ if RESET_CONFIG_ON_START:
         os.remove(f"{DATA_DIR}/config.json")
         with open(f"{DATA_DIR}/config.json", "w") as f:
             f.write("{}")
-    except:
+    except Exception as e:
+        log.exception(e)
         pass
 
 try:
     CONFIG_DATA = json.loads((DATA_DIR / "config.json").read_text())
-except:
+except Exception as e:
+    log.exception(e)
     CONFIG_DATA = {}
 
 
@@ -498,7 +508,7 @@ if ENV == "prod":
     if OLLAMA_BASE_URL == "/ollama" and not K8S_FLAG:
         if USE_OLLAMA_DOCKER.lower() == "true":
             # if you use all-in-one docker container (Open WebUI + Ollama)
-            # with the docker build arg USE_OLLAMA=true (--build-arg="USE_OLLAMA=true") this only works with http://localhost:11434
+            # with the docker build arg USE_OLLAMA=true (--build-arg="USE_OLLAMA=true") this only works with http://localhost:11434 # noqa: E501
             OLLAMA_BASE_URL = "http://localhost:11434"
         else:
             OLLAMA_BASE_URL = "http://host.docker.internal:11434"
@@ -560,7 +570,8 @@ try:
     OPENAI_API_KEY = OPENAI_API_KEYS.value[
         OPENAI_API_BASE_URLS.value.index("https://api.openai.com/v1")
     ]
-except:
+except Exception as e:
+    log.error(e)
     pass
 
 OPENAI_API_BASE_URL = "https://api.openai.com/v1"
@@ -588,11 +599,11 @@ DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
     [
         {
             "title": ["Help me study", "vocabulary for a college entrance exam"],
-            "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
+            "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",  # noqa: E501
         },
         {
             "title": ["Give me ideas", "for what to do with my kids' art"],
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
+            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",  # noqa: E501
         },
         {
             "title": ["Tell me a fun fact", "about the Roman Empire"],
@@ -611,7 +622,7 @@ DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
         },
         {
             "title": ["Overcome procrastination", "give me tips"],
-            "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
+            "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",  # noqa: E501
         },
     ],
 )
@@ -719,7 +730,7 @@ Examples of titles:
 Evolution of Music Streaming
 Remote Work Productivity Tips
 Artificial Intelligence in Healthcare
-🎮 Video Game Development Insights""",
+🎮 Video Game Development Insights""",  # noqa: E501
     ),
 )
 
@@ -732,7 +743,7 @@ SEARCH_QUERY_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
         """You are tasked with generating web search queries. Give me an appropriate query to answer my question for google search. Answer with only the query. Today is {{CURRENT_DATE}}.
 
 Question:
-{{prompt:end:4000}}""",
+{{prompt:end:4000}}""",  # noqa: E501
     ),
 )
 
@@ -753,7 +764,7 @@ TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = PersistentConfig(
     os.environ.get(
         "TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE",
         """Tools: {{TOOLS}}
-If a function tool doesn't match the query, return an empty string. Else, pick a function tool, fill in the parameters from the function tool's schema, and return it in the format { "name": \"functionName\", "parameters": { "key": "value" } }. Only pick a function if the user asks.  Only return the object. Do not return any other text.""",
+If a function tool doesn't match the query, return an empty string. Else, pick a function tool, fill in the parameters from the function tool's schema, and return it in the format { "name": \"functionName\", "parameters": { "key": "value" } }. Only pick a function if the user asks.  Only return the object. Do not return any other text.""",  # noqa: E501
     ),
 )
 
@@ -776,6 +787,28 @@ if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
 # RAG
 ####################################
 
+# Currently sentence transformers or openai
+RAG_EMBEDDING_ENGINE = PersistentConfig(
+    "RAG_EMBEDDING_ENGINE",
+    "rag.embedding_engine",
+    os.environ.get("RAG_EMBEDDING_ENGINE", "openai"),
+)
+
+# Redis connection settings
+# REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+# REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
+# REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+# REDIS_URL = f"redis://localhost:{REDIS_PORT}"
+# REDIS_ENABLED = True
+# REDIS_SSL = False
+# REDIS_SSL_CERT_REQS = None
+# REDIS_CONFIG = dict(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
+# REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
+# REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
+# REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
+# REDIS_VECTOR_DIM = 1536 if RAG_EMBEDDING_ENGINE == "openai" else 384
+
+VECTOR_STORE = os.environ.get("VECTOR_STORE", "postgres")
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", chromadb.DEFAULT_TENANT)
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", chromadb.DEFAULT_DATABASE)
@@ -790,7 +823,7 @@ if CHROMA_HTTP_HEADERS:
 else:
     CHROMA_HTTP_HEADERS = None
 CHROMA_HTTP_SSL = os.environ.get("CHROMA_HTTP_SSL", "false").lower() == "true"
-# this uses the model defined in the Dockerfile ENV variable. If you dont use docker or docker based deployments such as k8s, the default embedding model will be used (sentence-transformers/all-MiniLM-L6-v2)
+# this uses the model defined in the Dockerfile ENV variable. If you dont use docker or docker based deployments such as k8s, the default embedding model will be used (sentence-transformers/all-MiniLM-L6-v2) # noqa: E501
 
 RAG_TOP_K = PersistentConfig(
     "RAG_TOP_K", "rag.top_k", int(os.environ.get("RAG_TOP_K", "5"))
@@ -811,12 +844,6 @@ ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = PersistentConfig(
     "ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION",
     "rag.enable_web_loader_ssl_verification",
     os.environ.get("ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION", "True").lower() == "true",
-)
-
-RAG_EMBEDDING_ENGINE = PersistentConfig(
-    "RAG_EMBEDDING_ENGINE",
-    "rag.embedding_engine",
-    os.environ.get("RAG_EMBEDDING_ENGINE", ""),
 )
 
 PDF_EXTRACT_IMAGES = PersistentConfig(
@@ -862,27 +889,7 @@ RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = (
     os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "").lower() == "true"
 )
 
-
-if CHROMA_HTTP_HOST != "":
-    CHROMA_CLIENT = chromadb.HttpClient(
-        host=CHROMA_HTTP_HOST,
-        port=CHROMA_HTTP_PORT,
-        headers=CHROMA_HTTP_HEADERS,
-        ssl=CHROMA_HTTP_SSL,
-        tenant=CHROMA_TENANT,
-        database=CHROMA_DATABASE,
-        settings=Settings(allow_reset=True, anonymized_telemetry=False),
-    )
-else:
-    CHROMA_CLIENT = chromadb.PersistentClient(
-        path=CHROMA_DATA_PATH,
-        settings=Settings(allow_reset=True, anonymized_telemetry=False),
-        tenant=CHROMA_TENANT,
-        database=CHROMA_DATABASE,
-    )
-
-
-# device type embedding models - "cpu" (default), "cuda" (nvidia gpu required) or "mps" (apple silicon) - choosing this right can lead to better performance
+# device type embedding models - "cpu" (default), "cuda" (nvidia gpu required) or "mps" (apple silicon) - choosing this right can lead to better performance # noqa: E501
 USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")
 
 if USE_CUDA.lower() == "true":
@@ -922,12 +929,12 @@ RAG_TEMPLATE = PersistentConfig(
 RAG_OPENAI_API_BASE_URL = PersistentConfig(
     "RAG_OPENAI_API_BASE_URL",
     "rag.openai_api_base_url",
-    os.getenv("RAG_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL),
+    os.getenv("RAG_OPENAI_API_BASE_URL", ""),
 )
 RAG_OPENAI_API_KEY = PersistentConfig(
     "RAG_OPENAI_API_KEY",
     "rag.openai_api_key",
-    os.getenv("RAG_OPENAI_API_KEY", OPENAI_API_KEY),
+    os.getenv("RAG_OPENAI_API_KEY", ""),
 )
 
 ENABLE_RAG_LOCAL_WEB_FETCH = (
@@ -1168,13 +1175,49 @@ AUDIO_TTS_VOICE = PersistentConfig(
 
 
 ####################################
-# Database
+# Datastores
 ####################################
-if os.environ.get("VCAP_SERVICES"):
-    vcap_services = json.loads(os.getenv("VCAP_SERVICES"))
-    if (vcap_services and "aws-rds" in vcap_services) and not os.getenv(
-        "DATABASE_URL", None
-    ):
-        os.environ["DATABASE_URL"] = vcap_services["aws-rds"][0]["credentials"]["uri"]
+
+VECTOR_CLIENT = None
+REDIS_CLIENT = None
+CHROMA_CLIENT = None
+REDIS_VL_SCHEMA = None
+HOST = "localhost"
+DATABASE = "postgres"
+USER = "postgres"
+PASSWORD = "mysecretpassword"
+PORT = 5432
 
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
+
+if os.environ.get("VCAP_SERVICES"):
+    DEBUG = False
+    vcap_services = json.loads(os.getenv("VCAP_SERVICES"))
+    vcap_app = json.loads(os.getenv("VCAP_APPLICATION"))
+    routes = vcap_app["application_uris"]
+
+    if vcap_services and "aws-rds" in vcap_services:
+        if not os.getenv("DATABASE_URL", None):
+            os.environ["DATABASE_URL"] = vcap_services["aws-rds"][0]["credentials"][
+                "uri"
+            ]
+            DATABASE_URL = vcap_services["aws-rds"][0]["credentials"]["uri"]
+        if not os.getenv("VECTOR_DATABASE_URL", None):
+            os.environ["VECTOR_DATABASE_URL"] = vcap_services["aws-rds"][1][
+                "credentials"
+            ]["uri"]
+            for rds_instance in vcap_services["aws-rds"]:
+                if rds_instance["name"] == "gsa-ai-sandbox-large-psql-single-zone":
+                    vector_database = rds_instance
+                    VECTOR_DATABASE_URL = vector_database["credentials"]["uri"]
+                    HOST = vector_database["credentials"]["host"]
+                    DATABASE = vector_database["credentials"]["db_name"]
+                    USER = vector_database["credentials"]["username"]
+                    PASSWORD = vector_database["credentials"]["password"]
+                    PORT = vector_database["credentials"]["port"]
+
+if VECTOR_STORE == "postgres":
+
+    VECTOR_CLIENT = PGVectorClient(
+        dbname=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT
+    )

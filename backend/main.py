@@ -8,11 +8,13 @@ import time
 import os
 import sys
 import logging
+import traceback
 import aiohttp
 import requests
 import mimetypes
 import shutil
 import inspect
+
 
 # import asyncio
 from urllib.parse import urlencode
@@ -100,7 +102,11 @@ from config import (
     SEARCH_QUERY_GENERATION_PROMPT_TEMPLATE,
     SEARCH_QUERY_PROMPT_LENGTH_THRESHOLD,
     TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE,
+    VECTOR_STORE,
+    VECTOR_CLIENT,
+    REDIS_VL_SCHEMA,
     AppConfig,
+    # initialize_vector_client,
 )
 from constants import ERROR_MESSAGES
 
@@ -139,7 +145,11 @@ https://github.com/open-webui/open-webui
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Startup code here
+
     yield
+
+    # Shutdown code here
 
 
 app = FastAPI(
@@ -286,7 +296,9 @@ async def get_function_call_response(messages, tool_id, template, task_model_id,
 
 class ChatCompletionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        return_citations = False
+
+        # TODO: make this a config var
+        return_citations = True
 
         if request.method == "POST" and (
             "/ollama/api/chat" in request.url.path
@@ -361,22 +373,39 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
             # If docs field is present, generate RAG completions
             if "docs" in data:
                 data = {**data}
-                rag_context, citations = get_rag_context(
-                    docs=data["docs"],
-                    messages=data["messages"],
-                    embedding_function=rag_app.state.EMBEDDING_FUNCTION,
-                    k=rag_app.state.config.TOP_K,
-                    reranking_function=rag_app.state.sentence_transformer_rf,
-                    r=rag_app.state.config.RELEVANCE_THRESHOLD,
-                    hybrid_search=rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH,
+                log.error(
+                    f"docs: {data}\n"
+                    # + f"len messages: {len(data['messages'])}\n"
+                    # + f"{rag_app.state.EMBEDDING_FUNCTION}\n"
+                    # + f"{rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH}"
                 )
+                try:
+                    log.error("About to call get_rag_context...")
+                    rag_context, citations = await get_rag_context(
+                        docs=data["docs"],
+                        messages=data["messages"],
+                        embedding_function=rag_app.state.EMBEDDING_FUNCTION,
+                        k=rag_app.state.config.TOP_K,
+                        reranking_function=rag_app.state.sentence_transformer_rf,
+                        r=rag_app.state.config.RELEVANCE_THRESHOLD,
+                        hybrid_search=rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH,
+                    )
+                    log.info(
+                        f"get_rag_context completed successfully with context string {rag_context[0:100]}"
+                    )
+                    log.info("get_rag_context proceeding")
+                except Exception as e:
+                    log.error(f"Error in get_rag_context: {str(e)}")
+                    log.error(f"Full exception: {traceback.format_exc()}")
+                    raise
 
+                log.info("get_rag_context proceeding...")
                 if rag_context:
                     context += ("\n" if context != "" else "") + rag_context
 
                 del data["docs"]
 
-                log.debug(f"rag_context: {rag_context}, citations: {citations}")
+                log.info(f"rag_context: {rag_context}, citations: {citations}")
 
             if context != "":
                 system_prompt = rag_template(
@@ -405,19 +434,33 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
 
-        if return_citations:
-            # Inject the citations into the response
-            if isinstance(response, StreamingResponse):
-                # If it's a streaming response, inject it as SSE event or NDJSON line
-                content_type = response.headers.get("Content-Type")
-                if "text/event-stream" in content_type:
-                    return StreamingResponse(
-                        self.openai_stream_wrapper(response.body_iterator, citations),
-                    )
-                if "application/x-ndjson" in content_type:
-                    return StreamingResponse(
-                        self.ollama_stream_wrapper(response.body_iterator, citations),
-                    )
+        if request.method == "POST" and (
+            "/ollama/api/chat" in request.url.path
+            or "/chat/completions" in request.url.path
+        ):
+
+            if return_citations:
+                # Inject the citations into the response
+                if isinstance(response, StreamingResponse):
+                    # If it's a streaming response, inject it as SSE event or NDJSON line
+                    try:
+                        content_type = response.headers.get("Content-Type")
+                    except Exception as e:
+                        log.warning(f"Couldn't find header Content-Type: {e}")
+                        content_type = response.headers.get("content-type")
+
+                    if "text/event-stream" in content_type:
+                        return StreamingResponse(
+                            self.openai_stream_wrapper(
+                                response.body_iterator, citations
+                            ),
+                        )
+                    if "application/x-ndjson" in content_type:
+                        return StreamingResponse(
+                            self.ollama_stream_wrapper(
+                                response.body_iterator, citations
+                            ),
+                        )
 
         return response
 
@@ -579,11 +622,6 @@ async def check_url(request: Request, call_next):
 
     start_time = int(time.time())
     response = await call_next(request)
-    # session = request.cookies.get("session")
-    # if session:
-    #     response.set_cookie(
-    #         key="session", value=request.cookies.get("session"), httponly=True
-    #     )
     process_time = int(time.time()) - start_time
     response.headers["X-Process-Time"] = str(process_time)
 
@@ -592,14 +630,39 @@ async def check_url(request: Request, call_next):
 
 @app.middleware("http")
 async def update_embedding_function(request: Request, call_next):
+    if "/ws/socket.io" in request.url.path:
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": f"Invalid WebSocket upgrade request: {e}"},
+            )
     response = await call_next(request)
     if "/embedding/update" in request.url.path:
         webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
     return response
 
 
-app.mount("/ws", socket_app)
+# @app.middleware("http")
+# async def inspect_websocket(request: Request, call_next):
+#     if (
+#         "/ws/socket.io" in request.url.path
+#         and request.query_params.get("transport") == "websocket"
+#     ):
+#         upgrade = (request.headers.get("Upgrade") or "").lower()
+#         connection = (request.headers.get("Connection") or "").lower().split(",")
+#         # Check that there's the correct headers for an upgrade, else reject the connection
+#         # This is to work around this upstream issue: https://github.com/miguelgrinberg/python-engineio/issues/367
+#         if upgrade != "websocket" or "upgrade" not in connection:
+#             return JSONResponse(
+#                 status_code=status.HTTP_400_BAD_REQUEST,
+#                 content={"detail": "Invalid WebSocket upgrade request"},
+#             )
+#     return await call_next(request)
 
+
+app.mount("/ws", socket_app)
 
 app.mount("/ollama", ollama_app)
 app.mount("/openai", openai_app)
