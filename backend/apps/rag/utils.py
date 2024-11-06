@@ -1,6 +1,7 @@
 import asyncio
 import os
 import logging
+import traceback
 import requests
 import aiohttp
 
@@ -36,10 +37,6 @@ async def query_doc(
     k: int,
 ):
     try:
-        # log.debug(f"Firing query_doc for collection_name {collection_name}")
-        # collection = VECTOR_CLIENT.get_collection(
-        #     name=collection_name
-        # )  # Get the VectorCollection
 
         query_embeddings = await embedding_function(query)
 
@@ -116,46 +113,57 @@ def query_doc_with_hybrid_search(
 
 
 async def merge_and_sort_query_results(query_results, k, reverse=False):
-    # Initialize lists to store combined data
-    combined_distances = []
-    combined_documents = []
-    combined_metadatas = []
+    try:
+        combined_distances = []
+        combined_documents = []
+        combined_metadatas = []
 
-    log.error(f"query_results {query_results}")
-    for query_result in query_results:
-        combined_distances.extend(query_result["distances"])
-        combined_documents.extend(query_result["documents"])
-        combined_metadatas.extend(query_result["metadatas"])
+        for query_result in query_results:
+            log.error(f"query_result {query_result}")
+            # these are all double nested arrays
+            # ids = query_result.ids[0]
+            documents = query_result.documents[0]
+            distances = query_result.distances[0]
+            metadatas = query_result.metadatas[0]
 
-    log.error(f"combined_distances {combined_distances}")
-    # Create a list of tuples (distance, document, metadata)
-    combined = list(zip(combined_distances, combined_documents, combined_metadatas))
+            combined_distances.extend(distances)
+            combined_documents.extend(documents)
+            combined_metadatas.extend(metadatas)
 
-    # Sort the list based on distances
-    combined.sort(key=lambda x: x[0], reverse=reverse)
+        log.error(f"combined_distances {combined_distances}")
+        # Create a list of tuples (distance, document, metadata)
+        combined = list(zip(combined_distances, combined_documents, combined_metadatas))
 
-    # We don't have anything :-(
-    if not combined:
-        sorted_distances = []
-        sorted_documents = []
-        sorted_metadatas = []
-    else:
-        # Unzip the sorted list
-        sorted_distances, sorted_documents, sorted_metadatas = zip(*combined)
+        # Sort the list based on distances
+        combined.sort(key=lambda x: x[0], reverse=reverse)
 
-        # Slicing the lists to include only k elements
-        sorted_distances = list(sorted_distances)[:k]
-        sorted_documents = list(sorted_documents)[:k]
-        sorted_metadatas = list(sorted_metadatas)[:k]
+        # We don't have anything :-(
+        if not combined:
+            sorted_distances = []
+            sorted_documents = []
+            sorted_metadatas = []
+        else:
+            # Unzip the sorted list
+            sorted_distances, sorted_documents, sorted_metadatas = zip(*combined)
 
-    # Create the output dictionary
-    result = {
-        "distances": [sorted_distances],
-        "documents": [sorted_documents],
-        "metadatas": [sorted_metadatas],
-    }
+            # Slicing the lists to include only k elements
+            sorted_distances = list(sorted_distances)[:k]
+            sorted_documents = list(sorted_documents)[:k]
+            sorted_metadatas = list(sorted_metadatas)[:k]
 
-    return result
+        # Create the output dictionary
+        result = {
+            "distances": [sorted_distances],
+            "documents": [sorted_documents],
+            "metadatas": [sorted_metadatas],
+        }
+
+        return result
+    except Exception as e:
+        log.error(f"merge_and_sort_query_results: An exception occurred: {str(e)}")
+        log.error(traceback.format_exc())
+        # pass
+        raise e
 
 
 async def query_collection(
@@ -174,7 +182,7 @@ async def query_collection(
                 k=k,
                 embedding_function=embedding_function,
             )
-            results.extend(result)
+            results.append(result)
         except:
             pass
     return await merge_and_sort_query_results(results, k=k)
@@ -243,7 +251,7 @@ async def generate_openai_batch_embeddings_async(
             retry_delay = initial_delay  # Start with the initial delay
 
             while attempt <= max_retries:
-                log.info(
+                log.debug(
                     f"Generating async OpenAI embeddings for {texts[0][0:25]}..."
                     + f"(Attempt {attempt + 1}/{max_retries + 1})"
                 )
@@ -282,7 +290,7 @@ async def generate_openai_batch_embeddings_async(
 
             raise Exception("The request failed after several retries.")
         else:
-            log.info(
+            log.debug(
                 f"Generating async Azure OpenAI embeddings for {texts[0][0:25]}..."
             )
             async with session.post(
@@ -313,15 +321,11 @@ def get_embedding_function(
     openai_url,
     batch_size,
 ):
-    print(f"Getting embedding function for {embedding_engine} & {embedding_model}")
+    log.debug(f"Getting embedding function for {embedding_engine} & {embedding_model}")
     embedding_engine = str(embedding_engine).strip()
     if embedding_engine == "":
-        print(f"No engine for {embedding_engine} & {embedding_model}")
         return lambda query: embedding_function.encode(query).tolist()
     elif embedding_engine in ["ollama", "openai"]:
-        print(
-            f"found openai getting embedding function for {embedding_engine} & {embedding_model}"
-        )
         if embedding_engine == "ollama":
             func = lambda query: generate_ollama_embeddings(
                 GenerateEmbeddingsForm(
@@ -332,10 +336,7 @@ def get_embedding_function(
                 )
             )
         elif embedding_engine == "openai":
-            print(
-                f"found openai again etting embedding function for {embedding_engine} & {embedding_model}"
-            )
-            print("OpenAI embeddings are being generated.")
+            log.info("OpenAI embeddings are being generated.")
             func = lambda query: generate_openai_embeddings_async(
                 model=embedding_model,
                 text=query,
@@ -451,9 +452,9 @@ async def get_rag_context(
         # log.debug(f"Current context: {context}")
         try:
             if "documents" in context:
-                # log.debug(f"Context documents: {context['documents']}")
+                log.info(f"Context documents: {context['documents'][0]}")
                 texts = [text for text in context["documents"][0] if text is not None]
-                # log.debug(f"Found texts: {texts}")
+                log.debug(f"Found texts: {texts[0]}")
                 context_string += "\n\n".join(texts)
 
                 if "metadatas" in context:
@@ -535,7 +536,7 @@ def generate_openai_batch_embeddings(
     model: str, texts: list[str], key: str, url: str = "https://api.openai.com/v1"
 ) -> Optional[list[list[float]]]:
     try:
-        log.info(f"Generating OpenAI embeddings for {texts[0][0:25]}...")
+        log.debug(f"Generating OpenAI embeddings for {texts[0][0:25]}...")
         r = requests.post(
             f"{url}/embeddings",
             headers={

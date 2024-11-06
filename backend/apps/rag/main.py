@@ -902,9 +902,9 @@ async def store_data_in_vector_db(
 
     # check for collection
     collection_exists = VECTOR_CLIENT.has_collection(collection_name)
-    # if collection_exists and not overwrite:
-    #     log.info(f"collection already exists for name: {collection_name}")
-    #     return True
+    if collection_exists and not overwrite:
+        log.info(f"collection already exists for name: {collection_name}")
+        return True
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
@@ -926,10 +926,10 @@ async def store_text_in_vector_db(
 ) -> bool:
 
     # check for collection
-    collection = VECTOR_CLIENT.get_collection(collection_name)
-    # if collection is not None and not overwrite:
-    #     log.info(f"collection already exists for name: {collection_name}")
-    #     return True
+    collection_exists = VECTOR_CLIENT.has_collection(collection_name)
+    if collection_exists is not None and not overwrite:
+        log.info(f"collection with entry already exists for name: {collection_name}")
+        return True
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=app.state.config.CHUNK_SIZE,
@@ -951,9 +951,7 @@ async def store_docs_in_vector_db(
     metadatas = [convert_metadata_to_strings(doc.metadata) for doc in docs]
 
     try:
-        collection = await prepare_collection(
-            collection_name, True
-        )  # TODO: unnecessary?
+        _ = await prepare_collection(collection_name, overwrite)  # TODO: unnecessary?
 
         embeddings = await compute_embeddings(texts)
 
@@ -969,11 +967,7 @@ async def store_docs_in_vector_db(
             )
             items_to_upsert.append(vector_item)
 
-        log.info(
-            f"Upserting {embeddings[0][0:5]} items to collection {collection_name}"
-        )
-
-        await VECTOR_CLIENT.upsert(collection_name, items_to_upsert)
+        VECTOR_CLIENT.upsert(collection_name, items_to_upsert)
 
         return True
     except Exception as e:
@@ -982,7 +976,7 @@ async def store_docs_in_vector_db(
         if e.__class__.__name__ == "UniqueConstraintError":
             return True
 
-        return False
+        raise Exception(f"An error occurred while storing a document") from e
 
 
 def convert_metadata_to_strings(metadata):
@@ -1006,7 +1000,7 @@ async def prepare_collection(collection_name, overwrite):
 async def compute_embeddings(texts):
     """Compute embeddings for the given texts."""
     # Assume get_embedding_function and related configs are available
-    log.error(f"Computing embeddings for model: {app.state.config.RAG_EMBEDDING_MODEL}")
+    log.info(f"Computing embeddings for model: {app.state.config.RAG_EMBEDDING_MODEL}")
     embedding_func = get_embedding_function(
         app.state.config.RAG_EMBEDDING_ENGINE,
         app.state.config.RAG_EMBEDDING_MODEL,

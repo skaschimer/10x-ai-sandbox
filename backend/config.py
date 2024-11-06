@@ -4,8 +4,9 @@ import logging
 import importlib.metadata
 import pkgutil
 import chromadb
-from chromadb import Settings
-from redis.asyncio import Redis
+
+# from chromadb import Settings
+# from redis.asyncio import Redis
 
 # from base64 import b64encode
 from bs4 import BeautifulSoup
@@ -21,7 +22,7 @@ import markdown
 import requests
 import shutil
 
-from apps.rag.clients.vector_client import VectorClient, PGVectorClient, VectorItem
+from apps.rag.clients.vector_client import PGVectorClient, VectorItem
 
 
 # from secrets import token_bytes
@@ -794,18 +795,18 @@ RAG_EMBEDDING_ENGINE = PersistentConfig(
 )
 
 # Redis connection settings
-REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
-REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
-REDIS_URL = f"redis://localhost:{REDIS_PORT}"
-REDIS_ENABLED = True
-REDIS_SSL = False
-REDIS_SSL_CERT_REQS = None
-REDIS_CONFIG = dict(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
-REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
-REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
-REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
-REDIS_VECTOR_DIM = 1536 if RAG_EMBEDDING_ENGINE == "openai" else 384
+# REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+# REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
+# REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+# REDIS_URL = f"redis://localhost:{REDIS_PORT}"
+# REDIS_ENABLED = True
+# REDIS_SSL = False
+# REDIS_SSL_CERT_REQS = None
+# REDIS_CONFIG = dict(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
+# REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
+# REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
+# REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
+# REDIS_VECTOR_DIM = 1536 if RAG_EMBEDDING_ENGINE == "openai" else 384
 
 VECTOR_STORE = os.environ.get("VECTOR_STORE", "postgres")
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
@@ -1177,6 +1178,15 @@ AUDIO_TTS_VOICE = PersistentConfig(
 # Datastores
 ####################################
 
+VECTOR_CLIENT = None
+REDIS_CLIENT = None
+CHROMA_CLIENT = None
+REDIS_VL_SCHEMA = None
+HOST = "localhost"
+DATABASE = "postgres"
+USER = "postgres"
+PASSWORD = "mysecretpassword"
+PORT = 5432
 
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
 
@@ -1186,85 +1196,28 @@ if os.environ.get("VCAP_SERVICES"):
     vcap_app = json.loads(os.getenv("VCAP_APPLICATION"))
     routes = vcap_app["application_uris"]
 
-    if (vcap_services and "aws-rds" in vcap_services) and not os.getenv(
-        "DATABASE_URL", None
-    ):
-        os.environ["DATABASE_URL"] = vcap_services["aws-rds"][0]["credentials"]["uri"]
-        DATABASE_URL = vcap_services["aws-rds"][0]["credentials"]["uri"]
+    if vcap_services and "aws-rds" in vcap_services:
+        if not os.getenv("DATABASE_URL", None):
+            os.environ["DATABASE_URL"] = vcap_services["aws-rds"][0]["credentials"][
+                "uri"
+            ]
+            DATABASE_URL = vcap_services["aws-rds"][0]["credentials"]["uri"]
+        if not os.getenv("VECTOR_DATABASE_URL", None):
+            os.environ["VECTOR_DATABASE_URL"] = vcap_services["aws-rds"][1][
+                "credentials"
+            ]["uri"]
+            for rds_instance in vcap_services["aws-rds"]:
+                if rds_instance["name"] == "gsa-ai-sandbox-large-psql-single-zone":
+                    vector_database = rds_instance
+                    VECTOR_DATABASE_URL = vector_database["credentials"]["uri"]
+                    HOST = vector_database["credentials"]["host"]
+                    DATABASE = vector_database["credentials"]["db_name"]
+                    USER = vector_database["credentials"]["username"]
+                    PASSWORD = vector_database["credentials"]["password"]
+                    PORT = vector_database["credentials"]["port"]
 
-    if vcap_services and "aws-elasticache-redis" in vcap_services:
-        redis_credentials = vcap_services["aws-elasticache-redis"][0]["credentials"]
-        REDIS_CONFIG["host"] = redis_credentials["host"]
-        REDIS_CONFIG["port"] = int(redis_credentials["port"])
-        REDIS_CONFIG["password"] = redis_credentials["password"]
-        REDIS_CONFIG["ssl"] = True
-        REDIS_CONFIG["ssl_cert_reqs"] = None
-        REDIS_SSL = True
-        REDIS_SSL_CERT_REQS = None
-        REDIS_HOST = redis_credentials["host"]
-        REDIS_PORT = int(redis_credentials["port"])
-        REDIS_PASSWORD = redis_credentials["password"]
-        REDIS_URL = redis_credentials["uri"].replace("redis://", "rediss://")
-        REDIS_ENABLED = True
-    else:
-        REDIS_URL = None
-        REDIS_ENABLED = False
+if VECTOR_STORE == "postgres":
 
-
-VECTOR_CLIENT = None  # Global vector client container
-REDIS_CLIENT = None  # Global Redis client container
-CHROMA_CLIENT = None  # Global Chroma client container
-REDIS_VL_SCHEMA = None
-
-
-async def initialize_vector_client():
-    REDIS_CLIENT = Redis(**REDIS_CONFIG)
-    return REDIS_CLIENT
-
-
-if VECTOR_STORE == "chroma":
-    # Initialize Chroma client
-    if CHROMA_HTTP_HOST != "":
-        CHROMA_CLIENT = chromadb.HttpClient(
-            host=CHROMA_HTTP_HOST,
-            port=CHROMA_HTTP_PORT,
-            headers=CHROMA_HTTP_HEADERS,
-            ssl=CHROMA_HTTP_SSL,
-            tenant=CHROMA_TENANT,
-            database=CHROMA_DATABASE,
-            settings=Settings(allow_reset=True, anonymized_telemetry=False),
-        )
-    else:
-        CHROMA_CLIENT = chromadb.PersistentClient(
-            path=CHROMA_DATA_PATH,
-            settings=Settings(allow_reset=True, anonymized_telemetry=False),
-            tenant=CHROMA_TENANT,
-            database=CHROMA_DATABASE,
-        )
-    VECTOR_CLIENT = VectorClient(backend="chroma", chroma_client=CHROMA_CLIENT)
-
-elif VECTOR_STORE == "redis":
-    REDIS_VL_SCHEMA = {
-        "index": {"name": "global_index", "prefix": "your_prefix"},
-        "fields": [
-            {"name": "text", "type": "text"},
-            {"name": "metadata", "type": "text"},
-            {"name": "doc_id", "type": "tag"},
-            {"name": "collection", "type": "tag"},
-            {
-                "name": "vector",
-                "type": "vector",
-                "attrs": {
-                    "dims": 1536,
-                    "distance_metric": "cosine",
-                    "algorithm": "flat",
-                    "datatype": "float32",
-                },
-            },
-        ],
-    }
-    VECTOR_CLIENT = VectorClient(backend="redis")
-
-elif VECTOR_STORE == "postgres":
-    DATABASE = "postgres"
-    VECTOR_CLIENT = PGVectorClient(dbname=DATABASE)
+    VECTOR_CLIENT = PGVectorClient(
+        dbname=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT
+    )

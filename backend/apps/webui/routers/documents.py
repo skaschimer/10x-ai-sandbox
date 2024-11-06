@@ -166,26 +166,6 @@ async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
     log.info(f"Deleting document {name}")
     result = Documents.delete_doc_by_name(name)
 
-    collection = VECTOR_CLIENT.get_collection(collection_name)
+    success = VECTOR_CLIENT.delete(collection_name)
 
-    # Create a tag filter for your collection_name
-    tag_filter = Tag("collection") == collection_name
-
-    # Convert to a query string
-    query_str = str(tag_filter)
-
-    # Call the search method to find matching documents
-    results = await collection.collection.search(query_str)
-
-    # Extract IDs from results
-    ids = [doc.id for doc in results.docs]  # Assuming the documents have
-
-    if ids:
-        log.info("found ids")
-        await collection.delete(ids)
-    del collection
-
-    if VECTOR_STORE == "chroma":
-        log.info(f"Deleting collection {collection_name}")
-        VECTOR_CLIENT.delete_collection(collection_name=collection_name)
-    return result
+    return result and success

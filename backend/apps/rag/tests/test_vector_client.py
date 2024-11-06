@@ -1,8 +1,6 @@
 import pytest
-import numpy as np
-from redis import Redis
-from redisvl.index import AsyncSearchIndex
-from backend.apps.rag.clients.vector_client import VectorClient, VectorCollection
+import uuid
+from backend.apps.rag.clients.vector_client import PGVectorClient, VectorItem
 from backend.apps.rag.utils import get_embedding_function
 from backend.config import (
     RAG_OPENAI_API_KEY,
@@ -10,33 +8,21 @@ from backend.config import (
     RAG_EMBEDDING_ENGINE,
     RAG_EMBEDDING_MODEL,
     RAG_EMBEDDING_OPENAI_BATCH_SIZE,
-    REDIS_HOST,
-    REDIS_PORT,
-    REDIS_DB,
-    REDIS_VL_SCHEMA,
     VECTOR_STORE,
 )
 
 
 @pytest.fixture(scope="module")
 async def initialize_client():
-    redis_client = Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        db=REDIS_DB,
-        decode_responses=False,
-    )
-
-    if VECTOR_STORE == "redis":
-        print(f"REDIS_VL_SCHEMA: {REDIS_VL_SCHEMA}")
-        async_search_index = await AsyncSearchIndex.from_dict(
-            REDIS_VL_SCHEMA
-        ).set_client(redis_client)
-        await async_search_index.create(overwrite=True)
-
-        client = VectorClient(backend="redis")
-        await client.initialize(async_search_index=async_search_index)
-        return client
+    HOST = "localhost"
+    DATABASE = "postgres"
+    USER = "postgres"
+    PASSWORD = "mysecretpassword"
+    PORT = 5432
+    if VECTOR_STORE == "postgres":
+        return PGVectorClient(
+            dbname=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT
+        )
     else:
         raise ValueError(f"Unsupported vector store: {VECTOR_STORE}")
 
@@ -61,25 +47,11 @@ def embedding_function():
     )
 
 
-# @pytest.mark.asyncio
-# async def test_vector_client_creation(vector_client):
-#     client = await vector_client
-#     assert isinstance(client, VectorClient)
-#     assert client.backend == "redis"
-
-
-# @pytest.mark.asyncio
-# async def test_create_collection(vector_client):
-#     client = await vector_client
-#     collection = client.create_collection("test_collection")
-#     assert isinstance(collection, VectorCollection)
-#     assert collection.name == "test_collection"
-
-
 @pytest.mark.asyncio
 async def test_add_and_query(vector_client, embedding_function):
-    client = await vector_client  # No need to await
-    collection = client.create_collection("test_collection")
+    collection_name = "test_collection"
+    client = await vector_client
+    _ = client.delete(collection_name)
     paragraphs = [
         "The quick brown fox jumps over the lazy dog.",
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -90,28 +62,35 @@ async def test_add_and_query(vector_client, embedding_function):
     #     np.array(embedding, dtype=np.float32).tobytes() for embedding in embeddings
     # ]
     # print(f"~~~~~~~~~~~Paras embedding: {embeddings}")
-    ids = [f"paragraph_{i}" for i in range(len(paragraphs))]
-    await collection.add(
-        texts=paragraphs,
-        embeddings=embeddings,
-        ids=ids,
-        metadatas=[{"source": f"paragraph_{i}"} for i in range(len(paragraphs))],
-    )
-    docs = await collection.get(ids)
-    if docs:
-        texts = [doc["text"] for doc in docs]
-        ids = [doc["doc_id"] for doc in docs]
-        print(f"~~~~~~~~~~~Docs texts: {texts}\n for ids: {ids}")
+    # ids = [f"paragraph_{i}" for i in range(len(paragraphs))]
+    metadatas = [{"id": i} for i in range(len(paragraphs))]
+    items_to_upsert = []
+    for text, embedding, metadata in zip(paragraphs, embeddings, metadatas):
+        vector_item = VectorItem(
+            id=str(uuid.uuid4()),
+            text=text,
+            vector=embedding,
+            metadata=metadata,
+        )
+        items_to_upsert.append(vector_item)
+    client.upsert(collection_name, items_to_upsert)
+
     query = "What does the fox do?"
     query_embedding = await embedding_function(query)
-    # query_embedding = np.array(query_embedding, dtype=np.float32).tobytes()
-    # print(f"~~~~~~~~~~~Query embedding: {query_embedding}")
-    results = await collection.query(query_embedding=query_embedding, n_results=2)
+    k = 3
+    results = client.search(
+        collection_name=collection_name,
+        vectors=[query_embedding],
+        limit=k - 1,
+    )
+
     print(f"~~~~~~~~~~~Query results: {results}")
-    assert len(results) > 0
-    assert "document" in results[0]
-    assert "distance" in results[0]
-    assert len(results[0]["document"]) > 0
+    ids = results.ids[0]
+    documents = results.documents[0]
+    distances = results.distances[0]
+    assert len(ids) > 0
+    assert "fox" in documents[0]
+    assert distances[0] < 0.5
 
 
 if __name__ == "__main__":

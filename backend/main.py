@@ -106,7 +106,7 @@ from config import (
     VECTOR_CLIENT,
     REDIS_VL_SCHEMA,
     AppConfig,
-    initialize_vector_client,
+    # initialize_vector_client,
 )
 from constants import ERROR_MESSAGES
 
@@ -146,24 +146,10 @@ https://github.com/open-webui/open-webui
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup code here
-    # Await inside the async function
-    redis_client = await initialize_vector_client()
-
-    if VECTOR_STORE == "redis":
-        from redisvl.index import AsyncSearchIndex
-
-        async_search_index = await AsyncSearchIndex.from_dict(
-            REDIS_VL_SCHEMA
-        ).set_client(redis_client)
-        await async_search_index.create(overwrite=False)
-
-        await VECTOR_CLIENT.initialize(async_search_index=async_search_index)
 
     yield
 
     # Shutdown code here
-    if VECTOR_STORE == "redis":
-        await redis_client.aclose()
 
 
 app = FastAPI(
@@ -459,7 +445,8 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
                     # If it's a streaming response, inject it as SSE event or NDJSON line
                     try:
                         content_type = response.headers.get("Content-Type")
-                    except:
+                    except Exception as e:
+                        log.warning(f"Couldn't find header Content-Type: {e}")
                         content_type = response.headers.get("content-type")
 
                     if "text/event-stream" in content_type:
@@ -646,10 +633,10 @@ async def update_embedding_function(request: Request, call_next):
     if "/ws/socket.io" in request.url.path:
         try:
             response = await call_next(request)
-        except:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "Invalid WebSocket upgrade request"},
+                content={"detail": f"Invalid WebSocket upgrade request: {e}"},
             )
     response = await call_next(request)
     if "/embedding/update" in request.url.path:
