@@ -1174,33 +1174,39 @@ PORT = 5432
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
 
 if os.environ.get("VCAP_SERVICES"):
+    log.warning(f"Running in Cloud Foundry environment")
     DEBUG = False
     vcap_services = json.loads(os.getenv("VCAP_SERVICES"))
     vcap_app = json.loads(os.getenv("VCAP_APPLICATION"))
     routes = vcap_app["application_uris"]
 
     if vcap_services and "aws-rds" in vcap_services:
+        log.warning(f"Found aws-rds service")
         if not os.getenv("DATABASE_URL", None):
             os.environ["DATABASE_URL"] = vcap_services["aws-rds"][0]["credentials"][
                 "uri"
             ]
             DATABASE_URL = vcap_services["aws-rds"][0]["credentials"]["uri"]
         if not os.getenv("VECTOR_DATABASE_URL", None):
+            log.warning(f"VECTOR_DATABASE_URL not found")
             os.environ["VECTOR_DATABASE_URL"] = vcap_services["aws-rds"][1][
                 "credentials"
             ]["uri"]
             for rds_instance in vcap_services["aws-rds"]:
                 if rds_instance["name"] == "gsa-ai-sandbox-large-psql-single-zone":
                     vector_database = rds_instance
-                    VECTOR_DATABASE_URL = vector_database["credentials"]["uri"]
-                    HOST = vector_database["credentials"]["host"]
-                    DATABASE = vector_database["credentials"]["db_name"]
-                    USER = vector_database["credentials"]["username"]
-                    PASSWORD = vector_database["credentials"]["password"]
-                    PORT = vector_database["credentials"]["port"]
+            VECTOR_DATABASE_URL = vcap_services["aws-rds"][1]["credentials"]["uri"]
+
+        log.warning(
+            f'Setting service details for {vcap_services["aws-rds"][1]["name"]}'
+        )
+        HOST = vcap_services["aws-rds"][1]["credentials"]["host"]
+        DATABASE = vcap_services["aws-rds"][1]["credentials"]["db_name"]
+        USER = vcap_services["aws-rds"][1]["credentials"]["username"]
+        PASSWORD = vcap_services["aws-rds"][1]["credentials"]["password"]
+        PORT = vcap_services["aws-rds"][1]["credentials"]["port"]
 
 if VECTOR_STORE == "postgres":
-
     VECTOR_CLIENT = PGVectorClient(
         dbname=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT
     )
