@@ -168,7 +168,6 @@ export const uploadDocToVectorDB = async (token: string, collection_name: string
 	const data = new FormData();
 	data.append('file', file);
 	data.append('collection_name', collection_name);
-	console.log('collection_name', collection_name);
 
 	let error = null;
 
