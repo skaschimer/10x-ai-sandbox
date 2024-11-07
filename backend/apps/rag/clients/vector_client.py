@@ -26,23 +26,16 @@ class SearchResult(GetResult):
     distances: Optional[List[List[float | int]]]
 
 
-HOST = "localhost"
-DATABASE = "postgres"
-USER = "postgres"
-PASSWORD = "mysecretpassword"
-PORT = 5432
-
-
 # NOTE: This client uses pgvector, docs: https://github.com/pgvector/pgvector/blob/master/README.md
 class PGVectorClient:
     def __init__(self, dbname: str, user: str, password: str, host: str, port: int):
         # self.conn = psycopg.connect(dbname=dbname, autocommit=True)
         self.conn = psycopg.connect(
             dbname=dbname,
-            user=USER,
-            password=PASSWORD,
-            host=HOST,
-            port=PORT,
+            user=user,
+            password=password,
+            host=host,
+            port=port,
             autocommit=True,
         )
         self.conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
