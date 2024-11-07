@@ -399,14 +399,14 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
 
                 del data["docs"]
 
-                log.info(f"rag_context: {rag_context}, citations: {citations}")
+                log.debug(f"rag_context: {rag_context}, citations: {citations}")
 
             if context != "":
                 system_prompt = rag_template(
                     rag_app.state.config.RAG_TEMPLATE, context, prompt
                 )
 
-                print(system_prompt)
+                log.info(system_prompt)
 
                 data["messages"] = add_or_update_system_message(
                     f"\n{system_prompt}", data["messages"]

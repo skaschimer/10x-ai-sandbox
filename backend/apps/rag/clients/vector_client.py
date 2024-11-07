@@ -49,7 +49,7 @@ class PGVectorClient:
         return result and result[0]
 
     def delete_collection(self, collection_name: str):
-        self.conn.execute(f"DROP TABLE IF EXISTS {collection_name}")
+        self.conn.execute(f'DROP TABLE IF EXISTS "{collection_name}"')
 
     def search(
         self, collection_name: str, vectors: list[list[float]], limit: int
@@ -59,7 +59,7 @@ class PGVectorClient:
             # self.conn.execute("SET LOCAL hnsw.ef_search = 64")
             query = f"""
                 SELECT id, content, (embedding <=> %s::vector) AS distance, metadata
-                FROM {collection_name}
+                FROM "{collection_name}"
                 ORDER BY distance
                 LIMIT %s;
             """
@@ -84,7 +84,7 @@ class PGVectorClient:
         try:
             where_clause = " AND ".join([f"{key} = %({key})s" for key in filter.keys()])
             result = self.conn.execute(
-                f"SELECT id, content, metadata FROM {collection_name} WHERE {where_clause} LIMIT %(limit)s;",
+                f'SELECT id, content, metadata FROM "{collection_name}" WHERE {where_clause} LIMIT %(limit)s;',
                 {**filter, "limit": limit},
             ).fetchall()
 
@@ -102,7 +102,7 @@ class PGVectorClient:
     def get(self, collection_name: str) -> Optional[GetResult]:
         try:
             result = self.conn.execute(
-                f"SELECT id, content, metadata FROM {collection_name};"
+                f'SELECT id, content, metadata FROM "{collection_name}";'
             ).fetchall()
 
             if result:
@@ -120,13 +120,13 @@ class PGVectorClient:
         try:
             if not self.has_collection(collection_name):
                 self.conn.execute(
-                    f"CREATE TABLE {collection_name} "
+                    f'CREATE TABLE "{collection_name}" '
                     f"(id bigserial PRIMARY KEY, content text, embedding vector(1536), metadata jsonb)"
                 )
 
             for item in items:
                 self.conn.execute(
-                    f"INSERT INTO {collection_name} (content, embedding, metadata) VALUES (%s, %s, %s)",
+                    f'INSERT INTO "{collection_name}" (content, embedding, metadata) VALUES (%s, %s, %s)',
                     (item["text"], item["vector"], json.dumps(item["metadata"])),
                 )
         except Exception as e:
@@ -136,14 +136,14 @@ class PGVectorClient:
         try:
             if not self.has_collection(collection_name):
                 self.conn.execute(
-                    f"CREATE TABLE {collection_name} "
+                    f'CREATE TABLE "{collection_name}" '
                     f"(id bigserial PRIMARY KEY, content text, embedding vector(1536), metadata jsonb)"
                 )
 
             for item in items:
                 self.conn.execute(
                     f"""
-                    INSERT INTO {collection_name} (content, embedding, metadata)
+                    INSERT INTO "{collection_name}" (content, embedding, metadata)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (id)
                     DO UPDATE SET content = EXCLUDED.content, embedding = EXCLUDED.embedding, metadata = EXCLUDED.metadata
@@ -164,7 +164,7 @@ class PGVectorClient:
         try:
             if ids:
                 self.conn.execute(
-                    f"DELETE FROM {collection_name} WHERE id IN %(ids)s;",
+                    f'DELETE FROM "{collection_name}" WHERE id IN %(ids)s;',
                     {"ids": tuple(ids)},
                 )
             elif filter:
@@ -172,10 +172,10 @@ class PGVectorClient:
                     [f"{key} = %({key})s" for key in filter.keys()]
                 )
                 self.conn.execute(
-                    f"DELETE FROM {collection_name} WHERE {where_clause};", filter
+                    f'DELETE FROM "{collection_name}" WHERE {where_clause};', filter
                 )
             elif not ids and not filter:  # Check if both are empty
-                self.conn.execute(f"DROP TABLE IF EXISTS {collection_name};")
+                self.conn.execute(f'DROP TABLE IF EXISTS "{collection_name}";')
             return True
 
         except Exception as e:

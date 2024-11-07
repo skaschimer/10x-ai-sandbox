@@ -1,3 +1,4 @@
+from asyncio import sleep
 from fastapi import (
     FastAPI,
     Depends,
@@ -1211,61 +1212,66 @@ def store_text(
 
 @app.get("/scan")
 async def scan_docs_dir(user=Depends(get_admin_user)):
-    for path in Path(DOCS_DIR).rglob("./**/*"):
-        try:
-            if path.is_file() and not path.name.startswith("."):
-                tags = extract_folders_after_data_docs(path)
-                filename = path.name
-                file_content_type = mimetypes.guess_type(path)
+    for dir in [DOCS_DIR, UPLOAD_DIR]:
+        for path in Path(dir).rglob("./**/*"):
+            try:
+                if path.is_file() and not path.name.startswith("."):
+                    tags = extract_folders_after_data_docs(path)
+                    filename = path.name
+                    file_content_type = mimetypes.guess_type(path)
 
-                f = open(path, "rb")
-                collection_name = calculate_sha256(f)[:63]
-                f.close()
+                    f = open(path, "rb")
+                    log.info(f"Scanning {path}")
+                    collection_name = calculate_sha256(f)[:63]
+                    f.close()
 
-                loader, known_type = get_loader(
-                    filename, file_content_type[0], str(path)
-                )
-                data = loader.load()
+                    loader, known_type = get_loader(
+                        filename, file_content_type[0], str(path)
+                    )
+                    data = loader.load()
 
-                try:
-                    result = await store_data_in_vector_db(data, collection_name)
+                    try:
+                        await sleep(60)
+                        result = await store_data_in_vector_db(data, collection_name)
 
-                    if result:
-                        sanitized_filename = sanitize_filename(filename)
-                        doc = Documents.get_doc_by_name(sanitized_filename)
+                        if result:
+                            sanitized_filename = sanitize_filename(filename)
+                            doc = Documents.get_doc_by_name(sanitized_filename)
 
-                        if doc is None:
-                            doc = Documents.insert_new_doc(
-                                user.id,
-                                DocumentForm(
-                                    **{
-                                        "name": sanitized_filename,
-                                        "title": filename,
-                                        "collection_name": collection_name,
-                                        "filename": filename,
-                                        "content": (
-                                            json.dumps(
-                                                {
-                                                    "tags": list(
-                                                        map(
-                                                            lambda name: {"name": name},
-                                                            tags,
+                            if doc is None:
+                                doc = Documents.insert_new_doc(
+                                    user.id,
+                                    DocumentForm(
+                                        **{
+                                            "name": sanitized_filename,
+                                            "title": filename,
+                                            "collection_name": collection_name,
+                                            "filename": filename,
+                                            "content": (
+                                                json.dumps(
+                                                    {
+                                                        "tags": list(
+                                                            map(
+                                                                lambda name: {
+                                                                    "name": name
+                                                                },
+                                                                tags,
+                                                            )
                                                         )
-                                                    )
-                                                }
-                                            )
-                                            if len(tags)
-                                            else "{}"
-                                        ),
-                                    }
-                                ),
-                            )
-                except Exception as e:
-                    log.exception(e)
-                    pass
+                                                    }
+                                                )
+                                                if len(tags)
+                                                else "{}"
+                                            ),
+                                        }
+                                    ),
+                                )
+                    except Exception as e:
+                        log.exception(e)
+                        pass
 
-        except Exception as e:
-            log.exception(e)
+            except Exception as e:
+                log.exception(e)
 
     return True
 
