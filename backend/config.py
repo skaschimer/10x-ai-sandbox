@@ -5,12 +5,8 @@ import importlib.metadata
 import pkgutil
 import chromadb
 
-# from chromadb import Settings
-# from redis.asyncio import Redis
-
-# from base64 import b64encode
 from bs4 import BeautifulSoup
-from typing import TypeVar, Generic  # , Union
+from typing import TypeVar, Generic
 from pydantic import BaseModel
 from typing import Optional
 
@@ -794,21 +790,8 @@ RAG_EMBEDDING_ENGINE = PersistentConfig(
     os.environ.get("RAG_EMBEDDING_ENGINE", "openai"),
 )
 
-# Redis connection settings
-# REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
-# REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
-# REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
-# REDIS_URL = f"redis://localhost:{REDIS_PORT}"
-# REDIS_ENABLED = True
-# REDIS_SSL = False
-# REDIS_SSL_CERT_REQS = None
-# REDIS_CONFIG = dict(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
-# REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
-# REDIS_INDEX_NAME = os.environ.get("REDIS_INDEX_NAME", "document-index")
-# REDIS_PREFIX = os.environ.get("REDIS_PREFIX", "doc")
-# REDIS_VECTOR_DIM = 1536 if RAG_EMBEDDING_ENGINE == "openai" else 384
-
 VECTOR_STORE = os.environ.get("VECTOR_STORE", "postgres")
+# TODO: rip out chroma
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", chromadb.DEFAULT_TENANT)
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", chromadb.DEFAULT_DATABASE)

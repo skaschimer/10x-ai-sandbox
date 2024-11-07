@@ -6,17 +6,6 @@ from apps.webui.models.users import Users
 from utils.utils import decode_token
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
-
-# ENABLE_WEBSOCKET_SUPPORT = False
-
-# sio = socketio.AsyncServer(
-#     cors_allowed_origins=[],
-#     async_mode="asgi",
-#     transports=(["polling", "websocket"] if ENABLE_WEBSOCKET_SUPPORT else ["polling"]),
-#     allow_upgrades=ENABLE_WEBSOCKET_SUPPORT,
-#     always_connect=True,
-# )
-
 app = socketio.ASGIApp(sio, socketio_path="/ws/socket.io")
 
 # Dictionary to maintain the user pool

@@ -106,7 +106,6 @@ from config import (
     VECTOR_CLIENT,
     REDIS_VL_SCHEMA,
     AppConfig,
-    # initialize_vector_client,
 )
 from constants import ERROR_MESSAGES
 
@@ -373,12 +372,7 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
             # If docs field is present, generate RAG completions
             if "docs" in data:
                 data = {**data}
-                log.error(
-                    f"docs: {data}\n"
-                    # + f"len messages: {len(data['messages'])}\n"
-                    # + f"{rag_app.state.EMBEDDING_FUNCTION}\n"
-                    # + f"{rag_app.state.config.ENABLE_RAG_HYBRID_SEARCH}"
-                )
+                log.error(f"docs: {data}\n")
                 try:
                     log.error("About to call get_rag_context...")
                     rag_context, citations = await get_rag_context(

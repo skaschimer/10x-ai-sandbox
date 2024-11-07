@@ -166,7 +166,7 @@ async def delete_doc_by_name(name: str, user=Depends(get_current_user)):
     log.info(f"Deleting document {name}")
     result = Documents.delete_doc_by_name(name)
 
-    # NOTE: storing the vectors less than creating them, let's skip while in beta
+    # NOTE: storing the vectors costs less than creating them, let's skip while in beta
     # success = VECTOR_CLIENT.delete(collection_name)
 
     return result
