@@ -953,7 +953,9 @@
 				let lastUsage = null;
 
 				for await (const update of textStream) {
-					const { value, done, citations, error, usage } = update;
+					const { value, done, citations, cost, error, usage } = update;
+					console.log('update', update);
+					console.log('cost', cost);
 					if (error) {
 						await handleOpenAIError(error, null, model, responseMessage);
 						break;
@@ -981,6 +983,11 @@
 
 					if (citations) {
 						responseMessage.citations = citations;
+						continue;
+					}
+
+					if (cost) {
+						responseMessage.cost = cost;
 						continue;
 					}
 

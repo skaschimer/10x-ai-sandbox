@@ -58,8 +58,9 @@ import sentence_transformers
 from apps.webui.models.documents import (
     Documents,
     DocumentForm,
-    # DocumentResponse,
+    DocumentResponse,
 )
+from apps.webui.routers.documents import get_documents
 
 from apps.rag.utils import (
     get_model_path,
@@ -1208,6 +1209,36 @@ def store_text(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=ERROR_MESSAGES.DEFAULT(),
         )
+
+
+@app.get("/scan_database_docs")
+async def scan_database_docs(user=Depends(get_admin_user)):
+    # Fetch all documents using the get_documents function
+    docs = await get_documents(user=user)
+
+    for doc in docs:
+        try:
+            # Extract collection name and content from each DocumentResponse
+            collection_name = doc.collection_name
+            content = doc.content  # This is the content attribute of DocumentResponse
+            # content = json.loads(content)
+
+            log.info(f"Scanning {collection_name}")
+            log.info(f"Doc: {doc}")
+            log.info(f"Content: {content}")
+
+            # Ensure the content is properly loaded for processing
+            if content and isinstance(content, str):
+                data = content  # You can convert to the format needed for further processing
+
+                # Here you could add your logic to split documents if needed
+                await sleep(60)
+                await store_data_in_vector_db(data, collection_name)
+
+        except Exception as e:
+            log.exception(e)
+
+    return {"status": "scan complete"}
 
 
 @app.get("/scan")

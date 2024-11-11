@@ -412,6 +412,8 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
                     f"\n{system_prompt}", data["messages"]
                 )
 
+            log.error(f"chat data is:\n{data}")
+
             modified_body_bytes = json.dumps(data).encode("utf-8")
 
             # Replace the request body with the modified one
@@ -446,7 +448,7 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
                     if "text/event-stream" in content_type:
                         return StreamingResponse(
                             self.openai_stream_wrapper(
-                                response.body_iterator, citations
+                                response.body_iterator, citations, cost="4"
                             ),
                         )
                     if "application/x-ndjson" in content_type:
@@ -461,8 +463,10 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
     async def _receive(self, body: bytes):
         return {"type": "http.request", "body": body, "more_body": False}
 
-    async def openai_stream_wrapper(self, original_generator, citations):
-        yield f"data: {json.dumps({'citations': citations})}\n\n"
+    async def openai_stream_wrapper(self, original_generator, citations, **kwargs):
+        initial_data = {"citations": citations, **kwargs}
+        log.warning(f"initial_data: {initial_data}")
+        yield f"data: {json.dumps(initial_data)}\n\n"
         async for data in original_generator:
             yield data
 
@@ -632,7 +636,15 @@ async def update_embedding_function(request: Request, call_next):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": f"Invalid WebSocket upgrade request: {e}"},
             )
-    response = await call_next(request)
+
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        log.error(f"Error processing request: {e}")
+        return RedirectResponse(
+            url=str(request.url), status_code=status.HTTP_307_TEMPORARY_REDIRECT
+        )
+
     if "/embedding/update" in request.url.path:
         webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
     return response

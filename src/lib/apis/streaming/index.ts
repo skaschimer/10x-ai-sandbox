@@ -7,6 +7,8 @@ type TextStreamUpdate = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	citations?: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	cost?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	error?: any;
 	usage?: ResponseUsage;
 };
@@ -66,6 +68,11 @@ async function* openAIStreamToIterator(
 
 			if (parsedData.citations) {
 				yield { done: false, value: '', citations: parsedData.citations };
+				continue;
+			}
+
+			if (parsedData.cost) {
+				yield { done: false, value: '', cost: parsedData.cost };
 				continue;
 			}
 
