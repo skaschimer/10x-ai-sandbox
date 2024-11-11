@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import base64
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -340,6 +341,12 @@ MICROSOFT_REDIRECT_URI = PersistentConfig(
     os.environ.get("MICROSOFT_REDIRECT_URI", ""),
 )
 
+OAUTH_IDP_ACR_VALUES = PersistentConfig(
+    "OAUTH_IDP_ACR_VALUES",
+    "oauth.oidc.idp_acr_values",
+    os.environ.get("OAUTH_IDP_ACR_VALUES", ""),
+)
+
 OAUTH_CLIENT_ID = PersistentConfig(
     "OAUTH_CLIENT_ID",
     "oauth.oidc.client_id",
@@ -459,6 +466,12 @@ def load_oauth_providers():
             "name": OAUTH_PROVIDER_NAME.value,
             "redirect_uri": OPENID_REDIRECT_URI.value,
         }
+
+        if OAUTH_IDP_ACR_VALUES.value:
+            OAUTH_PROVIDERS["oidc"]["oauth_idp_acr_values"] = OAUTH_IDP_ACR_VALUES.value
+            OAUTH_PROVIDERS["oidc"]["client_secret"] = base64.b64decode(
+                OAUTH_CLIENT_SECRET.value
+            )
 
 
 load_oauth_providers()
@@ -929,7 +942,7 @@ TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = PersistentConfig(
 # Vector Database
 ####################################
 
-VECTOR_DB = os.environ.get("VECTOR_DB", "chroma")
+VECTOR_DB = os.environ.get("VECTOR_DB", "pgvector")
 
 # Chroma
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
@@ -954,6 +967,9 @@ MILVUS_URI = os.environ.get("MILVUS_URI", f"{DATA_DIR}/vector_db/milvus.db")
 
 # Qdrant
 QDRANT_URI = os.environ.get("QDRANT_URI", None)
+
+# PGVector
+PGVECTOR_URI = os.environ.get("PGVECTOR_URI", None)
 
 ####################################
 # Information Retrieval (RAG)

@@ -2,10 +2,13 @@ import base64
 import logging
 import mimetypes
 import uuid
+import os
 
 import aiohttp
 from authlib.integrations.starlette_client import OAuth
+from authlib.common.security import generate_token
 from authlib.oidc.core import UserInfo
+from authlib.oauth2.rfc7523 import PrivateKeyJWT
 from fastapi import (
     HTTPException,
     status,
@@ -26,6 +29,7 @@ from open_webui.config import (
     OAUTH_USERNAME_CLAIM,
     OAUTH_ALLOWED_ROLES,
     OAUTH_ADMIN_ROLES,
+    OAUTH_IDP_ACR_VALUES,
     WEBHOOK_URL,
     JWT_EXPIRES_IN,
     AppConfig,
@@ -37,6 +41,8 @@ from open_webui.utils.utils import get_password_hash, create_token
 from open_webui.utils.webhook import post_webhook
 
 log = logging.getLogger(__name__)
+# set level to debug
+log.setLevel(logging.DEBUG)
 
 auth_manager_config = AppConfig()
 auth_manager_config.DEFAULT_USER_ROLE = DEFAULT_USER_ROLE
@@ -49,6 +55,7 @@ auth_manager_config.OAUTH_PICTURE_CLAIM = OAUTH_PICTURE_CLAIM
 auth_manager_config.OAUTH_USERNAME_CLAIM = OAUTH_USERNAME_CLAIM
 auth_manager_config.OAUTH_ALLOWED_ROLES = OAUTH_ALLOWED_ROLES
 auth_manager_config.OAUTH_ADMIN_ROLES = OAUTH_ADMIN_ROLES
+auth_manager_config.OAUTH_IDP_ACR_VALUES = OAUTH_IDP_ACR_VALUES
 auth_manager_config.WEBHOOK_URL = WEBHOOK_URL
 auth_manager_config.JWT_EXPIRES_IN = JWT_EXPIRES_IN
 
@@ -61,10 +68,10 @@ class OAuthManager:
                 name=provider_name,
                 client_id=provider_config["client_id"],
                 client_secret=provider_config["client_secret"],
+                oauth_idp_acr_values=provider_config["oauth_idp_acr_values"],
                 server_metadata_url=provider_config["server_metadata_url"],
-                client_kwargs={
-                    "scope": provider_config["scope"],
-                },
+                token_endpoint_auth_method=PrivateKeyJWT(),
+                client_kwargs={"scope": provider_config["scope"]},
                 redirect_uri=provider_config["redirect_uri"],
             )
 
@@ -127,7 +134,13 @@ class OAuthManager:
         client = self.get_client(provider)
         if client is None:
             raise HTTPException(404)
-        return await client.authorize_redirect(request, redirect_uri)
+
+        return await client.authorize_redirect(
+            request,
+            redirect_uri=redirect_uri,
+            acr_values=auth_manager_config.OAUTH_IDP_ACR_VALUES or None,
+            nonce=generate_token(22),
+        )
 
     async def handle_callback(self, provider, request, response):
         if provider not in OAUTH_PROVIDERS:
