@@ -8,7 +8,8 @@ import aiohttp
 from authlib.integrations.starlette_client import OAuth
 from authlib.common.security import generate_token
 from authlib.oidc.core import UserInfo
-from authlib.oauth2.rfc7523 import PrivateKeyJWT
+
+# from authlib.oauth2.rfc7523 import PrivateKeyJWT
 from fastapi import (
     HTTPException,
     status,
@@ -29,7 +30,8 @@ from open_webui.config import (
     OAUTH_USERNAME_CLAIM,
     OAUTH_ALLOWED_ROLES,
     OAUTH_ADMIN_ROLES,
-    OAUTH_IDP_ACR_VALUES,
+    OAUTH_ACR_CLAIM,
+    OAUTH_NONCE_CLAIM,
     WEBHOOK_URL,
     JWT_EXPIRES_IN,
     AppConfig,
@@ -55,7 +57,8 @@ auth_manager_config.OAUTH_PICTURE_CLAIM = OAUTH_PICTURE_CLAIM
 auth_manager_config.OAUTH_USERNAME_CLAIM = OAUTH_USERNAME_CLAIM
 auth_manager_config.OAUTH_ALLOWED_ROLES = OAUTH_ALLOWED_ROLES
 auth_manager_config.OAUTH_ADMIN_ROLES = OAUTH_ADMIN_ROLES
-auth_manager_config.OAUTH_IDP_ACR_VALUES = OAUTH_IDP_ACR_VALUES
+auth_manager_config.OAUTH_ACR_CLAIM = OAUTH_ACR_CLAIM
+auth_manager_config.OAUTH_NONCE_CLAIM = OAUTH_NONCE_CLAIM
 auth_manager_config.WEBHOOK_URL = WEBHOOK_URL
 auth_manager_config.JWT_EXPIRES_IN = JWT_EXPIRES_IN
 
@@ -64,14 +67,17 @@ class OAuthManager:
     def __init__(self):
         self.oauth = OAuth()
         for provider_name, provider_config in OAUTH_PROVIDERS.items():
+            client_kwargs = {"scope": provider_config["scope"]}
+            client_kwargs.update(
+                {"code_challenge_method": "S256"} if provider_config["pkce"] else {}
+            )
+
             self.oauth.register(
                 name=provider_name,
                 client_id=provider_config["client_id"],
                 client_secret=provider_config["client_secret"],
-                oauth_idp_acr_values=provider_config["oauth_idp_acr_values"],
                 server_metadata_url=provider_config["server_metadata_url"],
-                token_endpoint_auth_method=PrivateKeyJWT(),
-                client_kwargs={"scope": provider_config["scope"]},
+                client_kwargs=client_kwargs,
                 redirect_uri=provider_config["redirect_uri"],
             )
 
@@ -135,11 +141,18 @@ class OAuthManager:
         if client is None:
             raise HTTPException(404)
 
+        redirect_kwargs = {}
+        if auth_manager_config.OAUTH_ACR_CLAIM:
+            redirect_kwargs.update({"acr_values": auth_manager_config.OAUTH_ACR_CLAIM})
+        if auth_manager_config.OAUTH_NONCE_CLAIM:
+            redirect_kwargs.update(
+                {"nonce": generate_token(int(auth_manager_config.OAUTH_NONCE_CLAIM))}
+            )
+
         return await client.authorize_redirect(
             request,
             redirect_uri=redirect_uri,
-            acr_values=auth_manager_config.OAUTH_IDP_ACR_VALUES or None,
-            nonce=generate_token(22),
+            **redirect_kwargs,
         )
 
     async def handle_callback(self, provider, request, response):

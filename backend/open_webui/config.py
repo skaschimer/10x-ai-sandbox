@@ -341,12 +341,6 @@ MICROSOFT_REDIRECT_URI = PersistentConfig(
     os.environ.get("MICROSOFT_REDIRECT_URI", ""),
 )
 
-OAUTH_IDP_ACR_VALUES = PersistentConfig(
-    "OAUTH_IDP_ACR_VALUES",
-    "oauth.oidc.idp_acr_values",
-    os.environ.get("OAUTH_IDP_ACR_VALUES", ""),
-)
-
 OAUTH_CLIENT_ID = PersistentConfig(
     "OAUTH_CLIENT_ID",
     "oauth.oidc.client_id",
@@ -428,6 +422,23 @@ OAUTH_ADMIN_ROLES = PersistentConfig(
     [role.strip() for role in os.environ.get("OAUTH_ADMIN_ROLES", "admin").split(",")],
 )
 
+OAUTH_ACR_CLAIM = PersistentConfig(
+    "OAUTH_ACR_CLAIM",
+    "oauth.oidc.acr_claim",
+    os.environ.get("OAUTH_ACR_CLAIM", ""),
+)
+OAUTH_NONCE_CLAIM = PersistentConfig(
+    "OAUTH_NONCE_CLAIM",
+    "oauth.oidc.nonce_claim",
+    os.environ.get("OAUTH_NONCE_CLAIM", ""),
+)
+
+OAUTH_USE_PKCE = PersistentConfig(
+    "OAUTH_USE_PKCE",
+    "oauth.oidc.use_pkce",
+    os.environ.get("OAUTH_USE_PKCE", ""),
+)
+
 
 def load_oauth_providers():
     OAUTH_PROVIDERS.clear()
@@ -467,11 +478,9 @@ def load_oauth_providers():
             "redirect_uri": OPENID_REDIRECT_URI.value,
         }
 
-        if OAUTH_IDP_ACR_VALUES.value:
-            OAUTH_PROVIDERS["oidc"]["oauth_idp_acr_values"] = OAUTH_IDP_ACR_VALUES.value
-            OAUTH_PROVIDERS["oidc"]["client_secret"] = base64.b64decode(
-                OAUTH_CLIENT_SECRET.value
-            )
+        # TODO: does this work out of the box for google and microsoft, too?
+        if OAUTH_USE_PKCE.value:
+            OAUTH_PROVIDERS["oidc"]["pkce"] = OAUTH_USE_PKCE.value
 
 
 load_oauth_providers()
