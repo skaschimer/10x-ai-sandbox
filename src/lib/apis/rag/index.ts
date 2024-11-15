@@ -336,7 +336,7 @@ export const queryCollection = async (
 export const scanDocs = async (token: string) => {
 	let error = null;
 
-	const res = await fetch(`${RAG_API_BASE_URL}/scan_database_docs`, {
+	const res = await fetch(`${RAG_API_BASE_URL}/scan`, {
 		method: 'GET',
 		headers: {
 			Accept: 'application/json',
