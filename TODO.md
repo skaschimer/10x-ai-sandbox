@@ -6,6 +6,10 @@
 - Cite sources in rag (do this for other models, too):
 - Allow bulk select even when nothing is tagged: <https://github.com/GSA-TTS/temp-10x-ai-sandbox/blob/66acbd1b866e9c93edc4457048af323c2fc0a5d0/src/lib/components/workspace/Documents.svelte#L280-L281>
 - Models and docs need ownership and visibility in database, owner str, visibility [str]
+- OpenAI embeddings via plugin? https://github.com/open-webui/open-webui/discussions/2288
+- Bigger exponential back off in embeddings, up to 10-20 minutes? Need to handle async failures/missing chunks.
+- Cost controls like hashing doc entries using their text to avoid duplication
+- Track costs and show them to users
 - gray out vision for custom models that don't have vision
 - Ability to share docs/models by pasting an email of another user ("This email is belongs to a sandbox user. They will now have access to the model" / "This email does not belong to a sandbox user"). Probably want comma separation...
 - Add http links to Doc upload options, seems mostly done

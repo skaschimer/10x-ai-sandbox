@@ -182,7 +182,7 @@ app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = (
 app.state.MODELS = {}
 
 app.add_middleware(
-    SessionMiddleware, secret_key="your_secret_key", max_age=None
+    SessionMiddleware, secret_key=str(secrets.token_urlsafe(32)), max_age=None
 )  # TODO: fix max_age
 
 origins = ["*"]
@@ -299,6 +299,8 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
         # TODO: make this a config var
         return_citations = True
 
+        cost = 0
+
         if request.method == "POST" and (
             "/ollama/api/chat" in request.url.path
             or "/chat/completions" in request.url.path
@@ -399,18 +401,25 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
 
                 del data["docs"]
 
-                log.debug(f"rag_context: {rag_context}, citations: {citations}")
+                # log.debug(f"rag_context: {rag_context}, citations: {citations}")
 
             if context != "":
                 system_prompt = rag_template(
                     rag_app.state.config.RAG_TEMPLATE, context, prompt
                 )
 
-                log.info(system_prompt)
+                log.info(f"system_prompt: {system_prompt}")
 
                 data["messages"] = add_or_update_system_message(
                     f"\n{system_prompt}", data["messages"]
                 )
+
+            # log.error(f"chat data is:\n{data}")
+
+            tokens = 0
+            for message in data["messages"]:
+                tokens += len(message["content"].split())
+            cost = tokens * 0.0000025  # input token cost
 
             modified_body_bytes = json.dumps(data).encode("utf-8")
 
@@ -427,6 +436,8 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
             ]
 
         response = await call_next(request)
+
+        response.headers["X-Input-Cost"] = str(cost)
 
         if request.method == "POST" and (
             "/ollama/api/chat" in request.url.path
@@ -446,7 +457,7 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
                     if "text/event-stream" in content_type:
                         return StreamingResponse(
                             self.openai_stream_wrapper(
-                                response.body_iterator, citations
+                                response.body_iterator, citations, cost=cost
                             ),
                         )
                     if "application/x-ndjson" in content_type:
@@ -461,8 +472,9 @@ class ChatCompletionMiddleware(BaseHTTPMiddleware):
     async def _receive(self, body: bytes):
         return {"type": "http.request", "body": body, "more_body": False}
 
-    async def openai_stream_wrapper(self, original_generator, citations):
-        yield f"data: {json.dumps({'citations': citations})}\n\n"
+    async def openai_stream_wrapper(self, original_generator, citations, **kwargs):
+        initial_data = {"citations": citations, **kwargs}
+        yield f"data: {json.dumps(initial_data)}\n\n"
         async for data in original_generator:
             yield data
 
@@ -632,7 +644,15 @@ async def update_embedding_function(request: Request, call_next):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": f"Invalid WebSocket upgrade request: {e}"},
             )
-    response = await call_next(request)
+
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        log.error(f"Error processing request: {e}")
+        return RedirectResponse(
+            url=str(request.url), status_code=status.HTTP_307_TEMPORARY_REDIRECT
+        )
+
     if "/embedding/update" in request.url.path:
         webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
     return response

@@ -7,6 +7,8 @@ type TextStreamUpdate = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	citations?: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	cost?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	error?: any;
 	usage?: ResponseUsage;
 };
@@ -40,32 +42,39 @@ export async function createOpenAITextStream(
 async function* openAIStreamToIterator(
 	reader: ReadableStreamDefaultReader<ParsedEvent>
 ): AsyncGenerator<TextStreamUpdate> {
+	var cost = 0.0;
 	while (true) {
 		const { value, done } = await reader.read();
+
 		if (done) {
-			yield { done: true, value: '' };
+			yield { done: true, value: '', cost: cost };
 			break;
 		}
 		if (!value) {
 			continue;
 		}
 		const data = value.data;
-		if (data.startsWith('[DONE]')) {
-			yield { done: true, value: '' };
-			break;
-		}
 
 		try {
 			const parsedData = JSON.parse(data);
-			console.log(parsedData);
+			// console.log('parsedData', parsedData);
+
+			if (parsedData.cost) {
+				cost = parsedData.cost;
+			}
+
+			if (data.startsWith('[DONE]')) {
+				yield { done: true, value: '', cost: cost };
+				break;
+			}
 
 			if (parsedData.error) {
-				yield { done: true, value: '', error: parsedData.error };
+				yield { done: true, value: '', error: parsedData.error, cost: cost };
 				break;
 			}
 
 			if (parsedData.citations) {
-				yield { done: false, value: '', citations: parsedData.citations };
+				yield { done: false, value: '', citations: parsedData.citations, cost: cost };
 				continue;
 			}
 

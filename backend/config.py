@@ -853,7 +853,7 @@ RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE = (
 RAG_EMBEDDING_OPENAI_BATCH_SIZE = PersistentConfig(
     "RAG_EMBEDDING_OPENAI_BATCH_SIZE",
     "rag.embedding_openai_batch_size",
-    os.environ.get("RAG_EMBEDDING_OPENAI_BATCH_SIZE", 1),
+    os.environ.get("RAG_EMBEDDING_OPENAI_BATCH_SIZE", 100),
 )
 
 RAG_RERANKING_MODEL = PersistentConfig(
@@ -1165,11 +1165,6 @@ VECTOR_CLIENT = None
 REDIS_CLIENT = None
 CHROMA_CLIENT = None
 REDIS_VL_SCHEMA = None
-# HOST = "localhost"
-# DATABASE = "postgres"
-# USER = "postgres"
-# PASSWORD = "mysecretpassword"
-# PORT = 5432
 
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
 

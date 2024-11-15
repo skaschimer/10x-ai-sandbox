@@ -200,7 +200,7 @@
 # # HOST = "localhost"
 # # DATABASE = "postgres"
 # # USER = "postgres"
-# # PASSWORD = "mysecretpassword"
+# # PASSWORD = "mysecretpassword" # pragma: allowlist secret
 # # PORT = 5432
 
 # # # Connect to Postgres and register the vector extension
