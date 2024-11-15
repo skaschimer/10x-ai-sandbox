@@ -1165,11 +1165,6 @@ VECTOR_CLIENT = None
 REDIS_CLIENT = None
 CHROMA_CLIENT = None
 REDIS_VL_SCHEMA = None
-# HOST = "localhost"
-# DATABASE = "postgres"
-# USER = "postgres"
-# PASSWORD = "mysecretpassword"
-# PORT = 5432
 
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATA_DIR}/webui.db")
 

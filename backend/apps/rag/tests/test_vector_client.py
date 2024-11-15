@@ -17,7 +17,7 @@ async def initialize_client():
     HOST = "localhost"
     DATABASE = "postgres"
     USER = "postgres"
-    PASSWORD = "mysecretpassword"
+    PASSWORD = "mysecretpassword"  # pragma: allowlist secret
     PORT = 5432
     if VECTOR_STORE == "postgres":
         return PGVectorClient(

@@ -182,7 +182,7 @@ app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = (
 app.state.MODELS = {}
 
 app.add_middleware(
-    SessionMiddleware, secret_key="your_secret_key", max_age=None
+    SessionMiddleware, secret_key=str(secrets.token_urlsafe(32)), max_age=None
 )  # TODO: fix max_age
 
 origins = ["*"]
