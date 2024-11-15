@@ -314,7 +314,7 @@ async def update_embedding_config(
     form_data: EmbeddingModelUpdateForm, user=Depends(get_admin_user)
 ):
     log.info(
-        f"Updating embedding model: {app.state.config.RAG_EMBEDDING_MODEL} to {form_data.embedding_model}"
+        f"Updating embedding model from {app.state.config.RAG_EMBEDDING_MODEL} to {form_data.embedding_model}"
     )
     try:
         app.state.config.RAG_EMBEDDING_ENGINE = form_data.embedding_engine
@@ -324,11 +324,22 @@ async def update_embedding_config(
             if form_data.openai_config is not None:
                 app.state.config.RAG_OPENAI_API_BASE_URL = form_data.openai_config.url
                 app.state.config.RAG_OPENAI_API_KEY = form_data.openai_config.key
-                app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE = (
-                    form_data.openai_config.batch_size
-                    if form_data.openai_config.batch_size
-                    else 1
-                )
+                if form_data.openai_config.batch_size:
+                    log.info(
+                        f"Updating batch size from {app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE} to {form_data.openai_config.batch_size}"
+                    )
+                    app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE = (
+                        form_data.openai_config.batch_size
+                    )
+        if app.state.config.RAG_EMBEDDING_ENGINE in ["openai"]:
+            if form_data.openai_config is not None:
+                if form_data.openai_config.batch_size:
+                    log.info(
+                        f"Updating batch size from {app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE} to {form_data.openai_config.batch_size}"
+                    )
+                    app.state.config.RAG_EMBEDDING_OPENAI_BATCH_SIZE = (
+                        form_data.openai_config.batch_size
+                    )
 
         update_embedding_model(app.state.config.RAG_EMBEDDING_MODEL)
 
@@ -957,8 +968,6 @@ async def store_docs_in_vector_db(
 
         embeddings = await compute_embeddings(texts)
 
-        log_and_print_summary(texts, embeddings, collection_name)
-
         items_to_upsert: List[VectorItem] = []
         for text, embedding, metadata in zip(texts, embeddings, metadatas):
             vector_item = VectorItem(
@@ -970,6 +979,8 @@ async def store_docs_in_vector_db(
             items_to_upsert.append(vector_item)
 
         VECTOR_CLIENT.upsert(collection_name, items_to_upsert)
+
+        log_and_print_summary(texts, embeddings, collection_name)
 
         return True
     except Exception as e:
@@ -1014,6 +1025,11 @@ async def compute_embeddings(texts):
 
     # Replace newlines
     embedding_texts = [text.replace("\n", " ") for text in texts]
+
+    log.info(f"Computing embeddings for {len(embedding_texts)} texts")
+    log.debug(
+        f"First text: {embedding_texts[0][0:100]} \nAnd last text: {embedding_texts[-1][0:100]}"
+    )
     return await embedding_func(embedding_texts)
 
 
@@ -1025,7 +1041,7 @@ def log_and_print_summary(texts, embeddings, collection_name):
     log.info(f"Number of embeddings: {len(embeddings)} for {len(texts)} texts.")
     log.debug(f"First text: {texts[0]} \nAnd last text: {texts[-1]}")
     log.info(f"Estimated memory usage: {memory_usage / (1024 ** 2):.2f} MB")
-    log.warning(f"Adding {len(texts)} documents to collection {collection_name}")
+    log.info(f"Adding {len(texts)} documents to collection {collection_name}")
 
 
 def get_loader(filename: str, file_content_type: str, file_path: str):

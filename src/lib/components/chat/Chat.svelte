@@ -96,6 +96,8 @@
 		currentId: null
 	};
 
+	let currentDollarAmount = 0.0;
+
 	$: if (history.currentId !== null) {
 		let _messages = [];
 
@@ -489,7 +491,7 @@
 									}, []);
 								}
 
-								console.log(userContext);
+								console.log('userContext:', userContext);
 							}
 						}
 					}
@@ -948,21 +950,36 @@
 
 			scrollToBottom();
 
+			// get "X-Input-Cost" header from response
+			if (res && res.ok && res.headers) {
+				const inputCost = res.headers.get('x-input-cost');
+				if (inputCost) {
+					currentDollarAmount += parseFloat(inputCost);
+				}
+			}
+
 			if (res && res.ok && res.body) {
 				const textStream = await createOpenAITextStream(res.body, $settings.splitLargeChunks);
 				let lastUsage = null;
 
 				for await (const update of textStream) {
 					const { value, done, citations, cost, error, usage } = update;
-					console.log('update', update);
-					console.log('cost', cost);
 					if (error) {
 						await handleOpenAIError(error, null, model, responseMessage);
 						break;
 					}
+
+					console.log('update', update);
+
 					if (done || stopResponseFlag || _chatId !== $chatId) {
 						responseMessage.done = true;
 						messages = messages;
+
+						// console.log('cost on stop is:', cost);
+
+						// if (cost) {
+						// 	currentDollarAmount += cost;
+						// }
 
 						if (stopResponseFlag) {
 							controller.abort('User: Stop Response');
@@ -1082,6 +1099,18 @@
 
 		if (autoScroll) {
 			scrollToBottom();
+		}
+
+		if (responseMessage.content) {
+			// get model name
+			const modelName = model.name ?? model.id;
+			console.log(`modelName: ${modelName}`); // i.e. FedRamp High Azure GPT 4 Omni
+			// count and log the number of words in the response
+			const tokens = Math.round(responseMessage.content.split(' ').length / 0.75);
+			console.log(`Response contains ${tokens} tokens`);
+			const tokenCost = tokens * 0.00001;
+			currentDollarAmount += tokenCost;
+			currentDollarAmount = Math.round(currentDollarAmount * 10000) / 10000;
 		}
 
 		if (messages.length == 2) {
@@ -1399,6 +1428,7 @@
 				bind:selectedToolIds
 				bind:webSearchEnabled
 				bind:atSelectedModel
+				dollarAmount={currentDollarAmount}
 				availableToolIds={selectedModelIds.reduce((a, e, i, arr) => {
 					const model = $models.find((m) => m.id === e);
 					if (model?.info?.meta?.toolIds ?? false) {

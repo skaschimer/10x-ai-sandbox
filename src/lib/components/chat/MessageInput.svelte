@@ -181,6 +181,8 @@
 		}
 	};
 
+	export let dollarAmount = 0.0; // Initial dollar amount
+
 	onMount(() => {
 		window.setTimeout(() => chatTextAreaElement?.focus(), 0);
 
@@ -1004,6 +1006,9 @@
 
 				<div class="mt-1.5 text-xs text-gray-500 text-center line-clamp-1">
 					{$i18n.t('LLMs can make mistakes. Verify important information.')}
+					<span class="ml-2 px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs"
+						>${dollarAmount}</span
+					>
 				</div>
 			</div>
 		</div>

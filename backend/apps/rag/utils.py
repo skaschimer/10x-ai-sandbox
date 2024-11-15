@@ -246,14 +246,13 @@ async def generate_openai_batch_embeddings_async(
     try:
         if "azure.com" in url:
             initial_delay = 0.2
-            max_retries = 10
+            max_retries = 15
             attempt = 0
             retry_delay = initial_delay  # Start with the initial delay
 
             while attempt <= max_retries:
-                log.debug(
-                    f"Generating async OpenAI embeddings for {texts[0][0:25]}..."
-                    + f"(Attempt {attempt + 1}/{max_retries + 1})"
+                log.info(
+                    f"Attempting to sending batch of {len(texts)} texts to Azure OpenAI..."
                 )
                 async with session.post(
                     f"{url}/embeddings?api-version=2023-05-15",
@@ -321,7 +320,9 @@ def get_embedding_function(
     openai_url,
     batch_size,
 ):
-    log.debug(f"Getting embedding function for {embedding_engine} & {embedding_model}")
+    log.debug(
+        f"Getting embedding function for {embedding_engine} & {embedding_model} with batch size {batch_size}"
+    )
     embedding_engine = str(embedding_engine).strip()
     if embedding_engine == "":
         return lambda query: embedding_function.encode(query).tolist()
@@ -434,6 +435,8 @@ async def get_rag_context(
 
         if context:
             log.info(f"Adding context from doc {idx+1} to relevant contexts")
+            log.info(f"context is: {context}")
+            log.info(f"doc is: {context}")
             relevant_contexts.append({**context, "source": doc})
         else:
             log.warning(f"No context found for doc {idx+1}")
@@ -455,9 +458,15 @@ async def get_rag_context(
                 log.info(f"Context documents: {context['documents'][0]}")
                 texts = [text for text in context["documents"][0] if text is not None]
                 log.debug(f"Found texts: {texts[0]}")
-                context_string += "\n\n".join(texts)
 
                 if "metadatas" in context:
+                    for idx, metadata in enumerate(context["metadatas"][0]):
+                        file_name = metadata["source"].split("/")[-1]
+                        page_num = metadata.get("page", 1)
+                        pre_string = f"<excerpt>\n<source>{file_name}</source>\n<page number>{page_num}</page>\n"
+                        post_string = f"\n</excerpt>"
+                        texts[idx] = pre_string + texts[idx] + post_string
+
                     log.info("Adding citation from metadata")
                     log.info(f"Metadata: {context['metadatas']}")
                     citation = {
@@ -466,6 +475,8 @@ async def get_rag_context(
                         "metadata": context["metadatas"][0],
                     }
                     citations.append(citation)
+
+                context_string += "\n\n".join(texts)
                 log.info(f"Updated context string: {context_string[:100]}...")
                 log.debug(f"Updated citations: {citations}")
             else:
