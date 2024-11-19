@@ -976,7 +976,6 @@ MILVUS_URI = os.environ.get("MILVUS_URI", f"{DATA_DIR}/vector_db/milvus.db")
 # Qdrant
 QDRANT_URI = os.environ.get("QDRANT_URI", None)
 
-
 ####################################
 # Information Retrieval (RAG)
 ####################################
