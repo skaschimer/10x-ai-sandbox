@@ -2,14 +2,11 @@ import base64
 import logging
 import mimetypes
 import uuid
-import os
 
 import aiohttp
 from authlib.integrations.starlette_client import OAuth
 from authlib.common.security import generate_token
 from authlib.oidc.core import UserInfo
-
-# from authlib.oauth2.rfc7523 import PrivateKeyJWT
 from fastapi import (
     HTTPException,
     status,
@@ -43,8 +40,6 @@ from open_webui.utils.utils import get_password_hash, create_token
 from open_webui.utils.webhook import post_webhook
 
 log = logging.getLogger(__name__)
-# set level to debug
-log.setLevel(logging.DEBUG)
 
 auth_manager_config = AppConfig()
 auth_manager_config.DEFAULT_USER_ROLE = DEFAULT_USER_ROLE

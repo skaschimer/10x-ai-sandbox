@@ -296,12 +296,6 @@ def get_embedding_function(
             url=openai_url if embedding_engine == "openai" else "",
         )
 
-        print(f"embedding_engine: {embedding_engine}")
-        print(f"embedding_model: {embedding_model}")
-        print(f"openai_key: {openai_key}")
-        print(f"openai_url: {openai_url}")
-        print(f"embedding_batch_size: {embedding_batch_size}")
-
         def generate_multiple(query, func):
             if isinstance(query, list):
                 embeddings = []
@@ -476,8 +470,6 @@ def generate_openai_batch_embeddings(
     model: str, texts: list[str], key: str, url: str = "https://api.openai.com/v1"
 ) -> Optional[list[list[float]]]:
     try:
-        print(f"trying {url}/embeddings with key: {key}")
-        print(f"trying input texts:\n{texts}\n...with model: {model}")
         r = requests.post(
             f"{url}/embeddings",
             headers={
@@ -515,10 +507,6 @@ def generate_embeddings(engine: str, model: str, text: Union[str, list[str]], **
     elif engine == "openai":
         key = kwargs.get("key", "")
         url = kwargs.get("url", "https://api.openai.com/v1")
-        model = kwargs.get("model", "text-embedding-3-small")
-
-        if "text-embedding" not in model:
-            model = "text-embedding-3-small"
 
         if isinstance(text, list):
             embeddings = generate_openai_batch_embeddings(model, text, key, url)

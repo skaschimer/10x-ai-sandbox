@@ -1,9 +1,5 @@
 from open_webui.config import VECTOR_DB
 
-if VECTOR_DB == "pgvector":
-    from open_webui.apps.retrieval.vector.dbs.pgvector import PGVectorClient
-
-    VECTOR_DB_CLIENT = PGVectorClient()
 if VECTOR_DB == "milvus":
     from open_webui.apps.retrieval.vector.dbs.milvus import MilvusClient
 

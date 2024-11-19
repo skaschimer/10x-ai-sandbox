@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import base64
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -951,7 +950,7 @@ TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = PersistentConfig(
 # Vector Database
 ####################################
 
-VECTOR_DB = os.environ.get("VECTOR_DB", "pgvector")
+VECTOR_DB = os.environ.get("VECTOR_DB", "chroma")
 
 # Chroma
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
