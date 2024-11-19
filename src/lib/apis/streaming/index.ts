@@ -85,6 +85,7 @@ async function* openAIStreamToIterator(
 			};
 		} catch (e) {
 			console.error('Error extracting delta from SSE event:', e);
+			console.error('Error extracting delta from SSE event with data:', data);
 		}
 	}
 }

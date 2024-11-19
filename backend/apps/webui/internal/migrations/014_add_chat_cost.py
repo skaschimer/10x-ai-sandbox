@@ -37,12 +37,10 @@ with suppress(ImportError):
 def migrate(migrator: Migrator, database: pw.Database, *, fake=False):
     """Write your migrations here."""
 
-    # Adding fields info to the 'user' table
-    migrator.add_fields("user", info=pw.TextField(null=True))
+    migrator.add_fields("chat", cost=pw.FloatField(default=0.0))
 
 
 def rollback(migrator: Migrator, database: pw.Database, *, fake=False):
     """Write your rollback migrations here."""
 
-    # Remove the settings field
-    migrator.remove_fields("user", "info")
+    migrator.remove_fields("chat", "cost")

@@ -218,6 +218,8 @@
 						? chatContent.history
 						: convertMessagesToHistory(chatContent.messages);
 				title = chatContent.title;
+				currentDollarAmount = chatContent.cost ?? 0.0;
+				console.log('Found cost in stored chat', currentDollarAmount);
 
 				const userSettings = await getUserSettings(localStorage.token);
 
@@ -969,7 +971,7 @@
 						break;
 					}
 
-					console.log('update', update);
+					// console.log('update', update);
 
 					if (done || stopResponseFlag || _chatId !== $chatId) {
 						responseMessage.done = true;
@@ -1058,12 +1060,26 @@
 					responseMessage.info = { ...lastUsage, openai: true };
 				}
 
+				if (responseMessage.content) {
+					// get model name
+					const modelName = model.name ?? model.id;
+					console.log(`modelName: ${modelName}`); // i.e. FedRamp High Azure GPT 4 Omni
+					// count and log the number of words in the response
+					const tokens = Math.round(responseMessage.content.split(' ').length / 0.75);
+					console.log(`Response contains ${tokens} tokens`);
+					const tokenCost = tokens * 0.00001;
+					currentDollarAmount += tokenCost;
+					currentDollarAmount = Math.round(currentDollarAmount * 10000) / 10000;
+					console.log(`Cost: ${currentDollarAmount}`);
+				}
+
 				if ($chatId == _chatId) {
 					if ($settings.saveChatHistory ?? true) {
 						chat = await updateChatById(localStorage.token, _chatId, {
 							models: selectedModels,
 							messages: messages,
-							history: history
+							history: history,
+							cost: currentDollarAmount
 						});
 						await chats.set(await getChatList(localStorage.token));
 					}
@@ -1099,18 +1115,6 @@
 
 		if (autoScroll) {
 			scrollToBottom();
-		}
-
-		if (responseMessage.content) {
-			// get model name
-			const modelName = model.name ?? model.id;
-			console.log(`modelName: ${modelName}`); // i.e. FedRamp High Azure GPT 4 Omni
-			// count and log the number of words in the response
-			const tokens = Math.round(responseMessage.content.split(' ').length / 0.75);
-			console.log(`Response contains ${tokens} tokens`);
-			const tokenCost = tokens * 0.00001;
-			currentDollarAmount += tokenCost;
-			currentDollarAmount = Math.round(currentDollarAmount * 10000) / 10000;
 		}
 
 		if (messages.length == 2) {

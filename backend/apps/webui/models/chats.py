@@ -26,6 +26,8 @@ class Chat(Model):
     share_id = CharField(null=True, unique=True)
     archived = BooleanField(default=False)
 
+    cost = FloatField(default=0.0)
+
     class Meta:
         database = DB
 
