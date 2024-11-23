@@ -56,16 +56,16 @@ async function* openAIStreamToIterator(
 		const data = value.data;
 
 		try {
+			if (data.startsWith('[DONE]')) {
+				yield { done: true, value: '', cost: cost };
+				break;
+			}
+
 			const parsedData = JSON.parse(data);
 			// console.log('parsedData', parsedData);
 
 			if (parsedData.cost) {
 				cost = parsedData.cost;
-			}
-
-			if (data.startsWith('[DONE]')) {
-				yield { done: true, value: '', cost: cost };
-				break;
 			}
 
 			if (parsedData.error) {
