@@ -230,7 +230,7 @@ async def signin_oauth(request: Request, provider: str, form_data: SigninFormOau
         user_email_domains.append(domain)
         if provider == "github":
             log.error(f"github provided email is: {this_email}")
-            if domain in ["gsa.gov"]:
+            if domain in ["gsa.gov", "census.gov"]:
                 email = this_email
                 user_has_permitted_domain = True
                 break
@@ -411,7 +411,7 @@ async def signup(request: Request, form_data: SignupForm):
                 names = names[0].split(".")
                 if names and len(names) > 1:
                     first_name = names[0]
-                    last_name = names[1]
+                    last_name = names[-1]
                     if first_name and last_name:
                         name = first_name.capitalize() + " " + last_name.capitalize()
 

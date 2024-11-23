@@ -909,9 +909,6 @@ async def store_web_search(form_data: SearchForm, user=Depends(get_current_user)
         )
 
 
-from langchain_experimental.text_splitter import SemanticChunker
-
-
 async def store_data_in_vector_db(
     data, collection_name, overwrite: bool = False
 ) -> bool:
