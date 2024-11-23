@@ -130,6 +130,7 @@
 	}
 
 	onMount(async () => {
+		currentDollarAmount = 0.0;
 		if (!$chatId) {
 			chatId.subscribe(async (value) => {
 				if (!value) {
