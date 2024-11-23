@@ -110,6 +110,7 @@
 		messages = _messages;
 	} else {
 		messages = [];
+		currentDollarAmount = 0.0;
 	}
 
 	$: if (chatIdProp) {
@@ -149,6 +150,7 @@
 	const initNewChat = async () => {
 		window.history.replaceState(history.state, '', `/`);
 		await chatId.set('');
+		currentDollarAmount = 0.0;
 
 		autoScroll = true;
 
