@@ -1243,13 +1243,19 @@ async def scan_database_docs(user=Depends(get_admin_user)):
             log.info(f"Doc: {doc}")
             log.info(f"Content: {content}")
 
+            docs_in_collection = VECTOR_CLIENT.get(collection_name)
+            ids = docs_in_collection.ids[0]
+            chunks = docs_in_collection.documents[0]
+            metadatas = docs_in_collection.metadatas[0]
+
+            log.info(f"Found {len(chunks)} chunks in collection {collection_name}")
+            #
+
             # Ensure the content is properly loaded for processing
             if content and isinstance(content, str):
                 data = content  # You can convert to the format needed for further processing
 
-                # Here you could add your logic to split documents if needed
-                await sleep(60)
-                await store_data_in_vector_db(data, collection_name)
+                # await store_data_in_vector_db(data, collection_name)
 
         except Exception as e:
             log.exception(e)

@@ -17,7 +17,7 @@ class VectorItem(BaseModel):
 
 
 class GetResult(BaseModel):
-    ids: Optional[List[List[str]]]
+    ids: Optional[List[List[str | int]]]
     documents: Optional[List[List[str]]]
     metadatas: Optional[List[List[Any]]]
 
@@ -109,11 +109,11 @@ class PGVectorClient:
                 return GetResult(
                     ids=[[row[0] for row in result]],
                     documents=[[row[1] for row in result]],
-                    metadatas=[row[2] for row in result],
+                    metadatas=[[row[2] for row in result]],
                 )
             return None
         except Exception as e:
-            log.error("Get Error:", e)
+            log.error(f"Get Error: {e}")
             return None
 
     def insert(self, collection_name: str, items: list[VectorItem]):

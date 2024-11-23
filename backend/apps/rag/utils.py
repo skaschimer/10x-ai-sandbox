@@ -225,8 +225,17 @@ async def generate_openai_embeddings_async(
     key: str,
     url: str = "https://api.openai.com/v1",
 ):
+    # The default limit is 100
+    # connector = aiohttp.TCPConnector(limit=10)
+    # async with aiohttp.ClientSession(connector=connector) as session:
+
+    # from aiolimiter import AsyncLimiter
+    # RATE_LIMIT_IN_MINUTE = 5
+    # rate_limiter = AsyncLimiter(RATE_LIMIT_IN_MINUTE, 60.0)
+
     async with aiohttp.ClientSession() as session:
         if isinstance(text, list):
+            # async with rate_limiter:
             embeddings = await generate_openai_batch_embeddings_async(
                 model, text, key, url, session
             )
