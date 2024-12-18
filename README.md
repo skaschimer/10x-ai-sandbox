@@ -14,23 +14,16 @@
    brew install python@3.11
    ```
 
-2. **Navigate to your project directory and Create the virtual environment**:
+2. **Create the virtual environment (or however you prefer)**:
 
    - Run:
 
    ```bash
    python3.11 -m venv venv
-   ```
-
-3. **Activate the virtual environment**:
-
-   - Run:
-
-   ```bash
    source ./venv/bin/activate
    ```
 
-4. **Install and use node 20.15.1**:
+3. **Install and use node 20.15.1**:
 
    - If you don't have nvm, you can install with `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash` and `source ~/.zshrc` (or `source ~/.bashrc` if you use bash):
 
@@ -39,7 +32,7 @@
    nvm use 20.15.1
    ```
 
-5. **Install gitleaks**:
+4. **Install gitleaks**:
 
    - Install with homebrew, then start a new terminal:
 
@@ -47,15 +40,7 @@
    brew install gitleaks
    ```
 
-6. **Run redis**:
-
-   - Check for redis on the default `lsof -i:6379`, if it's there, make sure it's using the default creds, or kill it and run:
-
-   ```bash
-   docker run -d --name redis -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-   ```
-
-7. **Install deps, build and run**:
+5. **Install deps, build and run**:
 
    - Make sure you've got the .env file set up, then install, build and run with hot reloading:
 
