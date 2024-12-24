@@ -3,8 +3,6 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
-./backend/open-webui-pipelines/start.sh &
-
 KEY_FILE=.webui_secret_key
 
 PORT="${PORT:-8080}"

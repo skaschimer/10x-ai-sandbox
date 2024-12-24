@@ -3,8 +3,8 @@
   "dockerFile": "Dockerfile",
   "context": "..",
   "containerEnv": {
-      "REQUESTS_CA_BUNDLE": "/workspace/venv/lib/python3.11/site-packages/certifi/cacert.pem",
-      "SSL_CERT_FILE": "/workspace/venv/lib/python3.11/site-packages/certifi/cacert.pem"
+      "REQUESTS_CA_BUNDLE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem",
+      "SSL_CERT_FILE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem"
   },
   "workspaceFolder": "/workspace",
   "customizations": {

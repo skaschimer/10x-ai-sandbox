@@ -1,4 +1,4 @@
-# FROM node:20.15.1
+# FROM node:20.18.1
 # FROM python:3.X-slim
 FROM cloudfoundry/cflinuxfs4:1.232.0
 
@@ -18,6 +18,15 @@ RUN apt-get autoclean && apt-get clean && apt-get install -y \
     python3.11-venv \
     python3-pip 
 
+# Update the alternatives system to include Python 3.11
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+# Set Python 3.11 as the default Python version
+RUN update-alternatives --set python3 /usr/bin/python3.11
+
+# Update the alternatives system to include Python 3.11 for the command 'python'
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
 # Copy the Node.js tarball to the /tmp directory
 COPY node-v20.18.1-linux-x64.tar.xz /tmp/
 
@@ -31,24 +40,22 @@ RUN node -v
 COPY z-root-public.crt /usr/local/share/ca-certificates
 RUN update-ca-certificates
 
-# Create a non-root user
-RUN useradd -m appuser
-RUN chown -R appuser:appuser /workspace
-USER appuser
+RUN rm -rf workspace/package-lock.json workspace/node_modules
 
-# Add /home/appuser/.local/bin to PATH
-ENV PATH=/home/appuser/.local/bin:$PATH
+# # Create a non-root user
+# RUN useradd -m appuser
+# RUN chown -R appuser:appuser /workspace
+# RUN mkdir /build
+# RUN chown -R appuser:appuser /build
+# USER appuser
+# ENV PATH=/home/appuser/.local/bin:$PATH
+
+COPY package.json ./
+RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.crt npm install --verbose
 
 COPY backend/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 RUN echo $(pip show torch)
-
-EXPOSE 8080
-
-RUN rm -rf workspace/package-lock.json workspace/node_modules
-COPY package.json ./
-# RUN npm install yarn --verbose
-RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.crt npm yarn --verbose
 
 COPY . .
 
@@ -56,15 +63,18 @@ COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
-# Define local variables
-ARG COMBINED_CERT_PATH=/workspace/venv/lib/python3.11/site-packages/certifi/cacert.pem
-RUN cat /workspace/z-root-public.crt >> ${COMBINED_CERT_PATH}
-ENV REQUESTS_CA_BUNDLE=$COMBINED_CERT_PATH
-ENV SSL_CERT_FILE=$COMBINED_CERT_PATH
+# zscaler certs, in case update-ca-certificates didn't do the trick
+COPY z-root-public.crt .
+ARG CERT_PATH=/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem
+RUN cat /workspace/z-root-public.crt >> $CERT_PATH
+ENV REQUESTS_CA_BUNDLE=$CERT_PATH
+ENV SSL_CERT_FILE=$CERT_PATH
 
 # # Run the install_ollama.sh script
 # RUN ./install_ollama.sh
 # RUN ollama serve & sleep 5 && ollama pull llama3.2
+
+EXPOSE 8080
 
 # Prevent pulling sentence transformers model
 ENV RAG_EMBEDDING_ENGINE=openai
