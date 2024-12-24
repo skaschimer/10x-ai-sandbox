@@ -9,6 +9,7 @@ pipelines/*
 !pipelines/azure_openai_GPT4Omni_pipeline.py
 !pipelines/bedrock_claude_instant_pipeline.py
 !pipelines/bedrock_claude_sonnet35_pipeline.py
+!pipelines/bedrock_llama32_11b_pipeline.py
 
 .DS_Store
 
