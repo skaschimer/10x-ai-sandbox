@@ -4,6 +4,7 @@
 # ollama serve &
 
 # Start the application
+printenv
 ./backend/open-webui-pipelines/start.sh &
 ./backend/start.sh &
 
