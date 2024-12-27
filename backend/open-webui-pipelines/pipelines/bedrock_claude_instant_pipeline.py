@@ -1,24 +1,11 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-"""Helper utilities for working with Amazon Bedrock from Python notebooks"""
-# Python Built-Ins:
 import os
 import json
 import requests
 from typing import List, Union, Generator, Iterator, Optional
 from pydantic import BaseModel
 
-# External Dependencies:
 import boto3
 from botocore.config import Config
-
-# from botocore.exceptions import (
-#     EndpointConnectionError,
-#     NoCredentialsError,
-#     ParamValidationError,
-# )
-
-# import asyncio
 
 
 def get_bedrock_client(
@@ -95,7 +82,7 @@ class Pipeline:
         AWS_DEFAULT_REGION: str
 
     def __init__(self):
-        self.name = "FedRamp Moderate AWS Claude Instant (no vision)"
+        self.name = "Claude Instant (no vision)"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(

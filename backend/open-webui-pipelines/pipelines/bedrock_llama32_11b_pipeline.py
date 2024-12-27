@@ -1,24 +1,27 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-"""Helper utilities for working with Amazon Bedrock from Python notebooks"""
-# Python Built-Ins:
 import os
 import json
 import requests
 from typing import List, Union, Generator, Iterator, Optional
 from pydantic import BaseModel
 
-# External Dependencies:
 import boto3
 from botocore.config import Config
 
-# from botocore.exceptions import (
-#     EndpointConnectionError,
-#     NoCredentialsError,
-#     ParamValidationError,
-# )
 
-# import asyncio
+def format_llama_prompt(body):
+    messages = body.get("messages", [])
+    formatted_prompt = "<|begin_of_text|>"
+
+    for message in messages:
+        role = message.get("role", "")
+        content = message.get("content", "")
+        formatted_prompt += (
+            f"<|start_header_id|>{role}<|end_header_id|>\n\n{content}<|eot_id|>"
+        )
+
+    formatted_prompt += "<|start_header_id|>assistant<|end_header_id|>"
+
+    return formatted_prompt
 
 
 def assume_role(role_arn):
@@ -114,9 +117,10 @@ class Pipeline:
         AWS_DEFAULT_REGION: Optional[str]
         BEDROCK_ENDPOINT_URL: Optional[str]
         BEDROCK_ASSUME_ROLE: Optional[str]
+        BEDROCK_LLAMA3211B_ARN: Optional[str]
 
     def __init__(self):
-        self.name = "FedRamp Moderate AWS Claude Instant (no vision)"
+        self.name = "Meta LLaMa 3.2 (11B)"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(
@@ -131,6 +135,7 @@ class Pipeline:
                     "https://bedrock.us-east-1.amazonaws.com",  # bedrock-fips.us-east-1.amazonaws.com
                 ),
                 "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
+                "BEDROCK_LLAMA3211B_ARN": os.getenv("BEDROCK_LLAMA3211B_ARN", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -151,70 +156,42 @@ class Pipeline:
     ) -> Union[str, Generator, Iterator]:
         # print(f"pipe:{__name__}")
 
-        # print(messages)
-        # print(user_message)
+        # print(f"messages: {messages}")
+        # print(f"user_message: {user_message}")
+        # print(f"model_id: {model_id}")
+        # print(f"body: {body}")
 
-        # allowed_roles = {"user", "assistant"}
+        if "pipeline" in model_id:
+            model_id = self.valves.BEDROCK_LLAMA3211B_ARN
 
-        model_id = "meta.llama3-2-11b-instruct-v1:0"  # "anthropic.claude-3-5-sonnet-20240620-v1:0"
-
-        # TODO modify for LLama prompt style
-        # # Define the system message and user messages
-        # system_message = {"role": "system", "content": "You are an AI assistant."}
-        # user_messages = [
-        #     {"role": "user", "content": "Hello, how can I improve my Python code?"},
-        #     {"role": "user", "content": "Can you provide some tips on best practices?"}
-        # ]
-
-        # # Combine the system message and user messages into a payload
-        # messages = [system_message] + user_messages
-        if "messages" in body:
-            # remove messages with system role and insert content into body
-            new_msgs = []
-            for message in body["messages"]:
-                if message["role"] == "system":
-                    system_msg = message["content"]
-                    body["system"] = system_msg
-                else:
-                    new_msgs.append(message)
-            body["messages"] = new_msgs
+        formatted_prompt = format_llama_prompt(body)
 
         allowed_params = {"prompt" "temperature" "top_p" "max_gen_len"}
+
         if "user" in body and not isinstance(body["user"], str):
             body["user"] = (
                 body["user"]["id"] if "id" in body["user"] else str(body["user"])
             )
+
         filtered_body = {k: v for k, v in body.items() if k in allowed_params}
+
         if len(body) != len(filtered_body):
             print(
                 f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
             )
 
-        if "anthropic_version" not in filtered_body:
-            filtered_body["anthropic_version"] = "bedrock-2023-05-31"
+        if "max_gen_len" not in filtered_body:
+            filtered_body["max_gen_len"] = 2048
 
-        if "max_tokens" not in filtered_body:
-            filtered_body["max_tokens"] = 4000
+        filtered_body["prompt"] = formatted_prompt
 
-        # Claude instant has no vision
-        for message in filtered_body["messages"]:
-            if message["role"] == "user":
-                if isinstance(message["content"], list):
-                    for content in message["content"]:
-                        if content["type"] == "image_url":
-                            # remove this content from the message
-                            message["content"].remove(content)
+        request = json.dumps(filtered_body)
 
         try:
 
             r = self.bedrock_client.invoke_model_with_response_stream(
-                body=json.dumps(filtered_body), modelId=model_id
+                body=request, modelId=model_id
             )
-
-            for event in r["body"]:
-                chunk = json.loads(event["chunk"]["bytes"])
-                if chunk["type"] == "content_block_delta":
-                    yield chunk["delta"].get("text", "")
 
         except requests.exceptions.HTTPError as e:  # This will catch HTTP errors
             if r.status_code == 400:
@@ -233,6 +210,19 @@ class Pipeline:
                 f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
             )
             return f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
+
+        try:
+
+            for event in r["body"]:
+                chunk = json.loads(event["chunk"]["bytes"])
+                if "generation" in chunk:
+                    yield chunk["generation"]
+
+        except Exception as e:
+            if r:
+                print(f"Error iterating r: {e} for r:\n{r}")
+            print(f"Error iterating r: {e} for filtered_body:\n{filtered_body}")
+            return f"Error iterating r: {e} for filtered_body:\n{filtered_body}"
 
 
 # import logging
