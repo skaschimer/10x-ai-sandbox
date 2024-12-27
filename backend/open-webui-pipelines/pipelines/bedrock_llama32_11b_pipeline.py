@@ -68,7 +68,7 @@ def get_bedrock_client(
         creds = assume_role(assumed_role)
         aws_access_key_id = creds["AccessKeyId"]
         aws_secret_access_key = creds["SecretAccessKey"]
-        # aws_session_token = creds["SessionToken"]
+        aws_session_token = creds["SessionToken"]
     else:
         aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -76,9 +76,9 @@ def get_bedrock_client(
     os.environ.pop("AWS_PROFILE", None)
     os.environ.pop("AWS_DEFAULT_PROFILE", None)
 
-    if not aws_access_key_id or not aws_secret_access_key:
+    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         raise ValueError(
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set in environment variables"
+            "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN must be set in environment variables"
         )
 
     retry_config = Config(
@@ -101,6 +101,7 @@ def get_bedrock_client(
         region_name=target_region,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
         config=retry_config,
         endpoint_url=endpoint_url,
     )
@@ -188,7 +189,6 @@ class Pipeline:
         request = json.dumps(filtered_body)
 
         try:
-
             r = self.bedrock_client.invoke_model_with_response_stream(
                 body=request, modelId=model_id
             )
