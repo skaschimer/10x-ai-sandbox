@@ -164,15 +164,25 @@
 									{$i18n.t(`Sign up to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
 								{/if}
 							</div>
+							<div class=" mt-4 text-sm text-center">
+								powered by
+								<img
+									crossorigin="anonymous"
+									src="{WEBUI_BASE_URL}/static/10x_ai.png"
+									class=" w-7 inline-block"
+									style="vertical-align: baseline;"
+									alt="10x logo"
+								/>
+							</div>
 
-							{#if mode === 'signup'}
+							<!-- {#if mode === 'signup'}
 								<div class=" mt-1 text-xs font-medium text-gray-500">
 									ⓘ {$WEBUI_NAME}
 									{$i18n.t(
 										'does not make any external connections, and your data stays securely on your locally hosted server.'
 									)}
 								</div>
-							{/if}
+							{/if} -->
 						</div>
 
 						{#if $config?.features.enable_login_form}

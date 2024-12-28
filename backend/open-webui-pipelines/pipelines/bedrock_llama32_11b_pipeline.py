@@ -64,6 +64,8 @@ def get_bedrock_client(
 
     print(f"Create new client\n  Using region: {target_region}")
 
+    aws_session_token = None
+
     if assumed_role:
         creds = assume_role(assumed_role)
         aws_access_key_id = creds["AccessKeyId"]
@@ -76,10 +78,13 @@ def get_bedrock_client(
     os.environ.pop("AWS_PROFILE", None)
     os.environ.pop("AWS_DEFAULT_PROFILE", None)
 
-    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
+    if assumed_role and not aws_session_token:
         raise ValueError(
-            "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN must be set in environment variables"
+            "AWS_SESSION_TOKEN must be set if using an assumed role for AWS credentials"
         )
+
+    if not aws_access_key_id or not aws_secret_access_key:
+        raise ValueError("AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set")
 
     retry_config = Config(
         region_name=target_region,
@@ -96,15 +101,19 @@ def get_bedrock_client(
 
     print(f"Creating client with region: {target_region}")
 
-    bedrock_client = boto3.client(
-        service_name,
-        region_name=target_region,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        aws_session_token=aws_session_token,
-        config=retry_config,
-        endpoint_url=endpoint_url,
-    )
+    client_params = {
+        "service_name": service_name,
+        "region_name": target_region,
+        "aws_access_key_id": aws_access_key_id,
+        "aws_secret_access_key": aws_secret_access_key,
+        "config": retry_config,
+        "endpoint_url": endpoint_url,
+    }
+
+    if aws_session_token:
+        client_params["aws_session_token"] = aws_session_token
+
+    bedrock_client = boto3.client(**client_params)
 
     print("boto3 Bedrock client successfully created!")
     print(bedrock_client._endpoint)
@@ -162,9 +171,6 @@ class Pipeline:
         # print(f"model_id: {model_id}")
         # print(f"body: {body}")
 
-        if "pipeline" in model_id:
-            model_id = self.valves.BEDROCK_LLAMA3211B_ARN
-
         formatted_prompt = format_llama_prompt(body)
 
         allowed_params = {"prompt" "temperature" "top_p" "max_gen_len"}
@@ -188,9 +194,12 @@ class Pipeline:
 
         request = json.dumps(filtered_body)
 
+        model_id = self.valves.BEDROCK_LLAMA3211B_ARN
+
         try:
             r = self.bedrock_client.invoke_model_with_response_stream(
-                body=request, modelId=model_id
+                body=request,
+                modelId=model_id,
             )
 
         except requests.exceptions.HTTPError as e:  # This will catch HTTP errors

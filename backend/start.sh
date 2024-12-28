@@ -3,6 +3,8 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
+./open-webui-pipelines/start.sh &
+
 KEY_FILE=.webui_secret_key
 
 PORT="${PORT:-8080}"
@@ -13,7 +15,7 @@ if test "$WEBUI_SECRET_KEY $WEBUI_JWT_SECRET_KEY" = " "; then
   if ! [ -e "$KEY_FILE" ]; then
     echo "Generating WEBUI_SECRET_KEY"
     # Generate a random value to use as a WEBUI_SECRET_KEY in case the user didn't provide one.
-    echo $(head -c 12 /dev/random | base64) >"$KEY_FILE"
+    echo $(openssl rand -base64 24) >"$KEY_FILE"
   fi
 
   echo "Loading WEBUI_SECRET_KEY from $KEY_FILE"

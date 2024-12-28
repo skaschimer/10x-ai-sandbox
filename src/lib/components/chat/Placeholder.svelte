@@ -127,8 +127,9 @@
 											src={model?.info?.meta?.profile_image_url ??
 												($i18n.language === 'dg-DG'
 													? `/doge.png`
-													: `${WEBUI_BASE_URL}/static/favicon.png`)}
-											class=" size-9 sm:size-10 rounded-full border-[1px] border-gray-200 dark:border-none"
+													: `${WEBUI_BASE_URL}/static/gsai.png`)}
+											class=" size-9 sm:size-20"
+											style=" height:fit-content"
 											alt="logo"
 											draggable="false"
 										/>
