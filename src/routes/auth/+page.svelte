@@ -164,17 +164,6 @@
 									{$i18n.t(`Sign up to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
 								{/if}
 							</div>
-							<div class=" mt-4 text-sm text-center">
-								powered by
-								<img
-									crossorigin="anonymous"
-									src="{WEBUI_BASE_URL}/static/10x_ai.png"
-									class=" w-7 inline-block"
-									style="vertical-align: baseline;"
-									alt="10x logo"
-								/>
-							</div>
-
 							<!-- {#if mode === 'signup'}
 								<div class=" mt-1 text-xs font-medium text-gray-500">
 									ⓘ {$WEBUI_NAME}
@@ -266,7 +255,7 @@
 
 					{#if Object.keys($config?.oauth?.providers ?? {}).length > 0}
 						<div class="inline-flex items-center justify-center w-full">
-							<hr class="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+							<hr class="w-32 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
 							{#if $config?.features.enable_login_form}
 								<span
 									class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-white left-1/2 dark:text-white dark:bg-gray-950"
@@ -355,6 +344,21 @@
 								</button>
 							{/if}
 						</div>
+						<div class="inline-flex items-center justify-center w-full">
+							<hr class="w-32 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+						</div>
+						<a href="https://10x.gsa.gov" target="_blank" rel="noopener noreferrer">
+							<div class=" text-sm text-center">
+								powered by
+								<img
+									crossorigin="anonymous"
+									src="{WEBUI_BASE_URL}/static/10x_ai.png"
+									class=" w-7 inline-block"
+									style="vertical-align: baseline;"
+									alt="10x logo"
+								/>
+							</div>
+						</a>
 					{/if}
 				</div>
 			{/if}
