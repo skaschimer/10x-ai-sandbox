@@ -117,7 +117,7 @@ def get_bedrock_client(
 
     print("boto3 Bedrock client successfully created!")
     # create os env with current time
-    os.environ["BEDROCK_CLIENT_CREATED"] = str(datetime.now().timestamp())
+    os.environ["BEDROCK_CLIENT_CREATED"] = str(datetime.datetime.now().timestamp())
 
     return bedrock_client
 
@@ -177,7 +177,8 @@ class Pipeline:
         if (
             "BEDROCK_CLIENT_CREATED" not in os.environ
             or (
-                datetime.now().timestamp() - float(os.environ["BEDROCK_CLIENT_CREATED"])
+                datetime.datetime.now().timestamp()
+                - float(os.environ["BEDROCK_CLIENT_CREATED"])
             )
             > 1800
         ):
