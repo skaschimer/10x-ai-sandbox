@@ -1,3 +1,4 @@
+import datetime
 import os
 import json
 import requests
@@ -65,7 +66,6 @@ def get_bedrock_client(
     print(f"Create new client\n  Using region: {target_region}")
 
     aws_session_token = None
-
     if assumed_role:
         creds = assume_role(assumed_role)
         aws_access_key_id = creds["AccessKeyId"]
@@ -116,7 +116,9 @@ def get_bedrock_client(
     bedrock_client = boto3.client(**client_params)
 
     print("boto3 Bedrock client successfully created!")
-    print(bedrock_client._endpoint)
+    # create os env with current time
+    os.environ["BEDROCK_CLIENT_CREATED"] = str(datetime.now().timestamp())
+
     return bedrock_client
 
 
@@ -170,6 +172,20 @@ class Pipeline:
         # print(f"user_message: {user_message}")
         # print(f"model_id: {model_id}")
         # print(f"body: {body}")
+
+        # Refresh client's temp credentials after 30 minutes
+        if (
+            "BEDROCK_CLIENT_CREATED" not in os.environ
+            or (
+                datetime.now().timestamp() - float(os.environ["BEDROCK_CLIENT_CREATED"])
+            )
+            > 1800
+        ):
+            print("Recreating Bedrock client")
+            self.bedrock_client = get_bedrock_client(
+                assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
+                region=os.environ.get("AWS_DEFAULT_REGION", None),
+            )
 
         formatted_prompt = format_llama_prompt(body)
 

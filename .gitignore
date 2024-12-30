@@ -308,6 +308,9 @@ cypress/videos
 cypress/screenshots
 .vscode/settings.json
 
+# github
+# .github/
+
 # docker stuff
 docker-*
 Makefile
@@ -317,4 +320,5 @@ run-*
 confirm_remove.sh
 demo.gif
 update_ollama_models.sh
+# Caddyfile.localhost
 
