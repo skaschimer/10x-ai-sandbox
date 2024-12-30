@@ -308,13 +308,13 @@ cypress/videos
 cypress/screenshots
 .vscode/settings.json
 
-# # docker stuff
-# docker-*
-# Makefile
-# run-*
+# docker stuff
+docker-*
+Makefile
+run-*
 
-# # misc
-# confirm_remove.sh
-# demo.gif
-# update_ollama_models.sh
+# misc
+confirm_remove.sh
+demo.gif
+update_ollama_models.sh
 
