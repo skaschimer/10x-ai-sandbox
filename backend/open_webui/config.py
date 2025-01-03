@@ -455,6 +455,22 @@ OAUTH_ADMIN_ROLES = PersistentConfig(
     [role.strip() for role in os.environ.get("OAUTH_ADMIN_ROLES", "admin").split(",")],
 )
 
+OAUTH_ACR_CLAIM = PersistentConfig(
+    "OAUTH_ACR_CLAIM",
+    "oauth.oidc.acr_claim",
+    os.environ.get("OAUTH_ACR_CLAIM", ""),
+)
+OAUTH_NONCE_CLAIM = PersistentConfig(
+    "OAUTH_NONCE_CLAIM",
+    "oauth.oidc.nonce_claim",
+    os.environ.get("OAUTH_NONCE_CLAIM", ""),
+)
+
+OAUTH_USE_PKCE = PersistentConfig(
+    "OAUTH_USE_PKCE",
+    "oauth.oidc.use_pkce",
+    os.environ.get("OAUTH_USE_PKCE", ""),
+
 OAUTH_ALLOWED_DOMAINS = PersistentConfig(
     "OAUTH_ALLOWED_DOMAINS",
     "oauth.allowed_domains",
@@ -503,6 +519,10 @@ def load_oauth_providers():
             "redirect_uri": OPENID_REDIRECT_URI.value,
         }
 
+        # TODO: does this work out of the box for google and microsoft, too?
+        if OAUTH_USE_PKCE.value:
+            OAUTH_PROVIDERS["oidc"]["pkce"] = OAUTH_USE_PKCE.value
+
 
 load_oauth_providers()
 
@@ -532,6 +552,25 @@ if frontend_splash.exists():
 else:
     logging.warning(f"Frontend splash not found at {frontend_splash}")
 
+gsai_logo = FRONTEND_BUILD_DIR / "static" / "gsai.png"
+
+if gsai_logo.exists():
+    try:
+        shutil.copyfile(gsai_logo, STATIC_DIR / "gsai.png")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+else:
+    logging.warning(f"Built by logo not found at {gsai_logo}")
+
+built_by_logo = FRONTEND_BUILD_DIR / "static" / "10x_ai.png"
+
+if built_by_logo.exists():
+    try:
+        shutil.copyfile(built_by_logo, STATIC_DIR / "10x_ai.png")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+else:
+    logging.warning(f"Built by logo not found at {built_by_logo}")
 
 ####################################
 # CUSTOM_NAME
@@ -539,41 +578,41 @@ else:
 
 CUSTOM_NAME = os.environ.get("CUSTOM_NAME", "")
 
-if CUSTOM_NAME:
-    try:
-        r = requests.get(f"https://api.openwebui.com/api/v1/custom/{CUSTOM_NAME}")
-        data = r.json()
-        if r.ok:
-            if "logo" in data:
-                WEBUI_FAVICON_URL = url = (
-                    f"https://api.openwebui.com{data['logo']}"
-                    if data["logo"][0] == "/"
-                    else data["logo"]
-                )
+# if CUSTOM_NAME:
+#     try:
+#         r = requests.get(f"https://api.openwebui.com/api/v1/custom/{CUSTOM_NAME}")
+#         data = r.json()
+#         if r.ok:
+#             if "logo" in data:
+#                 WEBUI_FAVICON_URL = url = (
+#                     f"https://api.openwebui.com{data['logo']}"
+#                     if data["logo"][0] == "/"
+#                     else data["logo"]
+#                 )
 
-                r = requests.get(url, stream=True)
-                if r.status_code == 200:
-                    with open(f"{STATIC_DIR}/favicon.png", "wb") as f:
-                        r.raw.decode_content = True
-                        shutil.copyfileobj(r.raw, f)
+#                 r = requests.get(url, stream=True)
+#                 if r.status_code == 200:
+#                     with open(f"{STATIC_DIR}/favicon.png", "wb") as f:
+#                         r.raw.decode_content = True
+#                         shutil.copyfileobj(r.raw, f)
 
-            if "splash" in data:
-                url = (
-                    f"https://api.openwebui.com{data['splash']}"
-                    if data["splash"][0] == "/"
-                    else data["splash"]
-                )
+#             if "splash" in data:
+#                 url = (
+#                     f"https://api.openwebui.com{data['splash']}"
+#                     if data["splash"][0] == "/"
+#                     else data["splash"]
+#                 )
 
-                r = requests.get(url, stream=True)
-                if r.status_code == 200:
-                    with open(f"{STATIC_DIR}/splash.png", "wb") as f:
-                        r.raw.decode_content = True
-                        shutil.copyfileobj(r.raw, f)
+#                 r = requests.get(url, stream=True)
+#                 if r.status_code == 200:
+#                     with open(f"{STATIC_DIR}/splash.png", "wb") as f:
+#                         r.raw.decode_content = True
+#                         shutil.copyfileobj(r.raw, f)
 
-            WEBUI_NAME = data["name"]
-    except Exception as e:
-        log.exception(e)
-        pass
+#             WEBUI_NAME = data["name"]
+#     except Exception as e:
+#         log.exception(e)
+#         pass
 
 
 ####################################

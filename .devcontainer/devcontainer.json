@@ -1,0 +1,30 @@
+{
+  "name": "Python DevContainer",
+  "dockerFile": "devDockerfile",
+  "context": "..",
+  "containerEnv": {
+      "REQUESTS_CA_BUNDLE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem",
+      "SSL_CERT_FILE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem"
+  },
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.pythonPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "args": ["--init-file", "/workspace/.devcontainer/init.sh"]
+          }
+        }
+      }
+    }
+  },
+  "forwardPorts": [8080]
+}

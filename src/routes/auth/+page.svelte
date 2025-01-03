@@ -403,7 +403,6 @@
 								{/if}
 							</div>
 						{/if}
-
 						{#if $config?.features.enable_ldap && $config?.features.enable_login_form}
 							<div class="mt-2">
 								<button
@@ -421,11 +420,26 @@
 											: $i18n.t('Continue with LDAP')}</span
 									>
 								</button>
+							{/if}
+						</div>
+						<div class="inline-flex items-center justify-center w-full">
+							<hr class="w-32 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+						</div>
+						<a href="https://10x.gsa.gov" target="_blank" rel="noopener noreferrer">
+							<div class=" text-sm text-center">
+								powered by
+								<img
+									crossorigin="anonymous"
+									src="{WEBUI_BASE_URL}/static/10x_ai.png"
+									class=" w-7 inline-block"
+									style="vertical-align: baseline;"
+									alt="10x logo"
+								/>
 							</div>
-						{/if}
-					</div>
-				{/if}
-			</div>
+						</a>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
