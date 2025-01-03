@@ -420,8 +420,8 @@
 											: $i18n.t('Continue with LDAP')}</span
 									>
 								</button>
-							{/if}
-						</div>
+							</div>
+						{/if}
 						<div class="inline-flex items-center justify-center w-full">
 							<hr class="w-32 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
 						</div>
@@ -437,9 +437,9 @@
 								/>
 							</div>
 						</a>
-					{/if}
-				</div>
-			{/if}
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </div>
