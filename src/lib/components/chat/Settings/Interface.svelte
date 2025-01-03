@@ -31,11 +31,22 @@
 	let defaultModelId = '';
 	let showUsername = false;
 	let richTextInput = true;
+	let largeTextAsFile = false;
+	let notificationSound = true;
 
 	let landingPageMode = '';
 	let chatBubble = true;
 	let chatDirection: 'LTR' | 'RTL' = 'LTR';
+
+	let imageCompression = false;
+	let imageCompressionSize = {
+		width: '',
+		height: ''
+	};
+
+	// Admin - Show Update Available Toast
 	let showUpdateToast = true;
+	let showChangelog = true;
 
 	let showEmojiInCall = false;
 	let voiceInterruption = false;
@@ -71,6 +82,16 @@
 		saveSettings({ showUpdateToast: showUpdateToast });
 	};
 
+	const toggleNotificationSound = async () => {
+		notificationSound = !notificationSound;
+		saveSettings({ notificationSound: notificationSound });
+	};
+
+	const toggleShowChangelog = async () => {
+		showChangelog = !showChangelog;
+		saveSettings({ showChangelog: showChangelog });
+	};
+
 	const toggleShowUsername = async () => {
 		showUsername = !showUsername;
 		saveSettings({ showUsername: showUsername });
@@ -84,6 +105,11 @@
 	const toggleVoiceInterruption = async () => {
 		voiceInterruption = !voiceInterruption;
 		saveSettings({ voiceInterruption: voiceInterruption });
+	};
+
+	const toggleImageCompression = async () => {
+		imageCompression = !imageCompression;
+		saveSettings({ imageCompression });
 	};
 
 	const toggleHapticFeedback = async () => {
@@ -131,6 +157,11 @@
 		saveSettings({ richTextInput });
 	};
 
+	const toggleLargeTextAsFile = async () => {
+		largeTextAsFile = !largeTextAsFile;
+		saveSettings({ largeTextAsFile });
+	};
+
 	const toggleResponseAutoCopy = async () => {
 		const permission = await navigator.clipboard
 			.readText()
@@ -162,7 +193,8 @@
 
 	const updateInterfaceHandler = async () => {
 		saveSettings({
-			models: [defaultModelId]
+			models: [defaultModelId],
+			imageCompressionSize: imageCompressionSize
 		});
 	};
 
@@ -174,11 +206,14 @@
 
 		showUsername = $settings.showUsername ?? false;
 		showUpdateToast = $settings.showUpdateToast ?? true;
+		showChangelog = $settings.showChangelog ?? true;
 
 		showEmojiInCall = $settings.showEmojiInCall ?? false;
 		voiceInterruption = $settings.voiceInterruption ?? false;
 
 		richTextInput = $settings.richTextInput ?? true;
+		largeTextAsFile = $settings.largeTextAsFile ?? false;
+
 		landingPageMode = $settings.landingPageMode ?? '';
 		chatBubble = $settings.chatBubble ?? true;
 		widescreenMode = $settings.widescreenMode ?? false;
@@ -187,7 +222,12 @@
 		chatDirection = $settings.chatDirection ?? 'LTR';
 		userLocation = $settings.userLocation ?? false;
 
+		notificationSound = $settings.notificationSound ?? true;
+
 		hapticFeedback = $settings.hapticFeedback ?? false;
+
+		imageCompression = $settings.imageCompression ?? false;
+		imageCompressionSize = $settings.imageCompressionSize ?? { width: '', height: '' };
 
 		defaultModelId = $settings?.models?.at(0) ?? '';
 		if ($config?.default_models) {
@@ -233,29 +273,7 @@
 		}}
 	/>
 
-	<div class=" space-y-3 pr-1.5 overflow-y-scroll max-h-[25rem] scrollbar-hidden">
-		<div class=" space-y-1 mb-3">
-			<div class="mb-2">
-				<div class="flex justify-between items-center text-xs">
-					<div class=" text-sm font-medium">{$i18n.t('Default Model')}</div>
-				</div>
-			</div>
-
-			<div class="flex-1 mr-2">
-				<select
-					class="w-full rounded-lg py-2 px-4 text-sm dark:text-gray-300 dark:bg-gray-850 outline-none"
-					bind:value={defaultModelId}
-					placeholder="Select a model"
-				>
-					<option value="" disabled selected>{$i18n.t('Select a model')}</option>
-					{#each $models.filter((model) => model.id) as model}
-						<option value={model.id} class="bg-gray-100 dark:bg-gray-700">{model.name}</option>
-					{/each}
-				</select>
-			</div>
-		</div>
-		<hr class=" dark:border-gray-850" />
-
+	<div class=" space-y-3 overflow-y-scroll max-h-[28rem] lg:max-h-full">
 		<div>
 			<div class=" mb-1.5 text-sm font-medium">{$i18n.t('UI')}</div>
 
@@ -361,6 +379,28 @@
 				</div>
 			</div>
 
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Notification Sound')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleNotificationSound();
+						}}
+						type="button"
+					>
+						{#if notificationSound === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
 			{#if $user.role === 'admin'}
 				<div>
 					<div class=" py-0.5 flex w-full justify-between">
@@ -383,100 +423,29 @@
 						</button>
 					</div>
 				</div>
+
+				<div>
+					<div class=" py-0.5 flex w-full justify-between">
+						<div class=" self-center text-xs">
+							{$i18n.t(`Show "What's New" modal on login`)}
+						</div>
+
+						<button
+							class="p-1 px-3 text-xs flex rounded transition"
+							on:click={() => {
+								toggleShowChangelog();
+							}}
+							type="button"
+						>
+							{#if showChangelog === true}
+								<span class="ml-2 self-center">{$i18n.t('On')}</span>
+							{:else}
+								<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+							{/if}
+						</button>
+					</div>
+				</div>
 			{/if}
-
-			<div>
-				<div class=" py-0.5 flex w-full justify-between">
-					<div class=" self-center text-xs">
-						{$i18n.t('Fluidly stream large external response chunks')}
-					</div>
-
-					<button
-						class="p-1 px-3 text-xs flex rounded transition"
-						on:click={() => {
-							toggleSplitLargeChunks();
-						}}
-						type="button"
-					>
-						{#if splitLargeChunks === true}
-							<span class="ml-2 self-center">{$i18n.t('On')}</span>
-						{:else}
-							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
-						{/if}
-					</button>
-				</div>
-			</div>
-
-			<div>
-				<div class=" py-0.5 flex w-full justify-between">
-					<div class=" self-center text-xs">
-						{$i18n.t('Scroll to bottom when switching between branches')}
-					</div>
-
-					<button
-						class="p-1 px-3 text-xs flex rounded transition"
-						on:click={() => {
-							togglesScrollOnBranchChange();
-						}}
-						type="button"
-					>
-						{#if scrollOnBranchChange === true}
-							<span class="ml-2 self-center">{$i18n.t('On')}</span>
-						{:else}
-							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
-						{/if}
-					</button>
-				</div>
-			</div>
-
-			<div>
-				<div class=" py-0.5 flex w-full justify-between">
-					<div class=" self-center text-xs">
-						{$i18n.t('Rich Text Input for Chat')}
-					</div>
-
-					<button
-						class="p-1 px-3 text-xs flex rounded transition"
-						on:click={() => {
-							toggleRichTextInput();
-						}}
-						type="button"
-					>
-						{#if richTextInput === true}
-							<span class="ml-2 self-center">{$i18n.t('On')}</span>
-						{:else}
-							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
-						{/if}
-					</button>
-				</div>
-			</div>
-
-			<div>
-				<div class=" py-0.5 flex w-full justify-between">
-					<div class=" self-center text-xs">
-						{$i18n.t('Chat Background Image')}
-					</div>
-
-					<button
-						class="p-1 px-3 text-xs flex rounded transition"
-						on:click={() => {
-							if (backgroundImageUrl !== null) {
-								backgroundImageUrl = null;
-								saveSettings({ backgroundImageUrl });
-							} else {
-								filesInputElement.click();
-							}
-						}}
-						type="button"
-					>
-						{#if backgroundImageUrl !== null}
-							<span class="ml-2 self-center">{$i18n.t('Reset')}</span>
-						{:else}
-							<span class="ml-2 self-center">{$i18n.t('Upload')}</span>
-						{/if}
-					</button>
-				</div>
-			</div>
 
 			<div class=" my-1.5 text-sm font-medium">{$i18n.t('Chat')}</div>
 
@@ -523,7 +492,7 @@
 			<div>
 				<div class=" py-0.5 flex w-full justify-between">
 					<div class=" self-center text-xs">
-						{$i18n.t('Response AutoCopy to Clipboard')}
+						{$i18n.t('Auto-Copy Response to Clipboard')}
 					</div>
 
 					<button
@@ -537,6 +506,77 @@
 							<span class="ml-2 self-center">{$i18n.t('On')}</span>
 						{:else}
 							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Rich Text Input for Chat')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleRichTextInput();
+						}}
+						type="button"
+					>
+						{#if richTextInput === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Paste Large Text as File')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleLargeTextAsFile();
+						}}
+						type="button"
+					>
+						{#if largeTextAsFile === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Chat Background Image')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							if (backgroundImageUrl !== null) {
+								backgroundImageUrl = null;
+								saveSettings({ backgroundImageUrl });
+							} else {
+								filesInputElement.click();
+							}
+						}}
+						type="button"
+					>
+						{#if backgroundImageUrl !== null}
+							<span class="ml-2 self-center">{$i18n.t('Reset')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Upload')}</span>
 						{/if}
 					</button>
 				</div>
@@ -574,6 +614,50 @@
 						type="button"
 					>
 						{#if hapticFeedback === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			<!-- <div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Fluidly stream large external response chunks')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleSplitLargeChunks();
+						}}
+						type="button"
+					>
+						{#if splitLargeChunks === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div> -->
+
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">
+						{$i18n.t('Scroll to bottom when switching between branches')}
+					</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							togglesScrollOnBranchChange();
+						}}
+						type="button"
+					>
+						{#if scrollOnBranchChange === true}
 							<span class="ml-2 self-center">{$i18n.t('On')}</span>
 						{:else}
 							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
@@ -623,6 +707,53 @@
 					</button>
 				</div>
 			</div>
+
+			<div class=" my-1.5 text-sm font-medium">{$i18n.t('File')}</div>
+
+			<div>
+				<div class=" py-0.5 flex w-full justify-between">
+					<div class=" self-center text-xs">{$i18n.t('Image Compression')}</div>
+
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleImageCompression();
+						}}
+						type="button"
+					>
+						{#if imageCompression === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			{#if imageCompression}
+				<div>
+					<div class=" py-0.5 flex w-full justify-between text-xs">
+						<div class=" self-center text-xs">{$i18n.t('Image Max Compression Size')}</div>
+
+						<div>
+							<input
+								bind:value={imageCompressionSize.width}
+								type="number"
+								class="w-20 bg-transparent outline-none text-center"
+								min="0"
+								placeholder="Width"
+							/>x
+							<input
+								bind:value={imageCompressionSize.height}
+								type="number"
+								class="w-20 bg-transparent outline-none text-center"
+								min="0"
+								placeholder="Height"
+							/>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 

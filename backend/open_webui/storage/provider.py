@@ -51,7 +51,10 @@ class StorageProvider:
 
         try:
             self.s3_client.upload_file(file_path, self.bucket_name, filename)
-            return open(file_path, "rb").read(), file_path
+            return (
+                open(file_path, "rb").read(),
+                "s3://" + self.bucket_name + "/" + filename,
+            )
         except ClientError as e:
             raise RuntimeError(f"Error uploading file to S3: {e}")
 
@@ -144,8 +147,10 @@ class StorageProvider:
             return self._get_file_from_s3(file_path)
         return self._get_file_from_local(file_path)
 
-    def delete_file(self, filename: str) -> None:
+    def delete_file(self, file_path: str) -> None:
         """Deletes a file either from S3 or the local file system."""
+        filename = file_path.split("/")[-1]
+
         if self.storage_provider == "s3":
             self._delete_from_s3(filename)
 

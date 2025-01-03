@@ -12,7 +12,7 @@
 	} from '$lib/constants';
 	import { WEBUI_NAME, config, user, models, settings } from '$lib/stores';
 
-	import { generateOpenAIChatCompletion } from '$lib/apis/openai';
+	import { chatCompletion, generateOpenAIChatCompletion } from '$lib/apis/openai';
 
 	import { splitStream } from '$lib/utils';
 	import Collapsible from '../common/Collapsible.svelte';
@@ -61,7 +61,7 @@
 	const chatCompletionHandler = async () => {
 		const model = $models.find((model) => model.id === selectedModelId);
 
-		const [res, controller] = await generateOpenAIChatCompletion(
+		const [res, controller] = await chatCompletion(
 			localStorage.token,
 			{
 				model: model.id,
@@ -225,7 +225,7 @@
 			</div>
 		</Sidebar>
 
-		<div class=" flex flex-col h-full px-4 py-1">
+		<div class=" flex flex-col h-full px-3.5">
 			<div class="flex w-full items-start gap-1.5">
 				<Collapsible
 					className="w-full flex-1"
