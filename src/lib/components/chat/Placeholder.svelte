@@ -124,7 +124,7 @@
 											($i18n.language === 'dg-DG'
 												? `/doge.png`
 												: `${WEBUI_BASE_URL}/static/gsai.png`)}
-										class=" size-9 sm:size-10 rounded-full border-[1px] border-gray-200 dark:border-none"
+										class=" w-16 sm:w-20 h-fit"
 										alt="logo"
 										draggable="false"
 									/>
