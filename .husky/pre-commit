@@ -13,10 +13,10 @@ cleanup() {
     kill $spinner_pid
 }
 
-# if ! gitleaks protect --staged -v --redact; then
-#     cleanup
-#     exit 1
-# fi
+if ! gitleaks protect --staged -v --redact; then
+    cleanup
+    exit 1
+fi
 
 if ! git diff --staged --name-only -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline; then
     cleanup
