@@ -57,7 +57,6 @@ async def set_models_config(
     request: Request, form_data: ModelsConfigForm, user=Depends(get_admin_user)
 ):
     request.app.state.config.DEFAULT_MODELS = form_data.DEFAULT_MODELS
-    print(f"setting form_data.DEFAULT_MODELS: {form_data.DEFAULT_MODELS}")
     request.app.state.config.MODEL_ORDER_LIST = form_data.MODEL_ORDER_LIST
     return {
         "DEFAULT_MODELS": request.app.state.config.DEFAULT_MODELS,
