@@ -49,12 +49,6 @@ RUN apt-get update \
 RUN sed -i '/testing main/d' /etc/apt/sources.list \
     && rm -f /etc/apt/preferences.d/zlib1g
 
-# ARG DEBIAN_FRONTEND=noninteractive
-# ENV TZ=America/New_York
-
-# (Optional) Install pip for Python 3.11:
-# RUN python3.11 -m ensurepip --upgrade
-
 # We re-declare our ARGs/ENVs as needed
 ARG USE_CUDA=false
 ARG USE_OLLAMA=false
