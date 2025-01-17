@@ -5,7 +5,6 @@
 FROM node:22-bookworm-slim AS build-frontend
 
 COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
 RUN apt-get update && \
     apt-get install -y ca-certificates && \
     update-ca-certificates
