@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: would be nice if this were idempotent and could be run on an empty repo
+# TODO: ...we would need to take an arg for branch to clone from, i.e. development
+
 # Check if the branch argument is provided
 if [ -z "$1" ]; then
     echo "Usage: $0 <public branch name>"
