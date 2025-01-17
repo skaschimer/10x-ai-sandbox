@@ -653,7 +653,6 @@ app.state.config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH = (
     AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH
 )
 
-
 ########################################
 #
 # WEBUI

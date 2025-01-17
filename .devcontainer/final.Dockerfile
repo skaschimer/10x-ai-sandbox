@@ -4,15 +4,9 @@
 # ##############################################################################
 FROM node:22-bookworm-slim AS build-frontend
 
-COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
-
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.pem npm ci
+RUN npm ci
 
 COPY . .
 ENV APP_BUILD_HASH=dev-build
@@ -28,11 +22,6 @@ FROM jimmoffetgsa/gsai:bookworm-builder-011525 AS builder
 # ###               3) FINAL RUNTIME IMAGE                                   ###
 # ##############################################################################
 FROM python:3.11-slim-bookworm AS final
-
-COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
 
 # 2) Add the Debian testing (or unstable) repo to sources.list
 RUN echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list

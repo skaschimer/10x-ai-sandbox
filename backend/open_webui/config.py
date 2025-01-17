@@ -1347,7 +1347,6 @@ RAG_EMBEDDING_MODEL = PersistentConfig(
     "rag.embedding_model",
     os.environ.get("RAG_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
 )
-log.info(f"Embedding model set: {RAG_EMBEDDING_MODEL.value}")
 
 RAG_EMBEDDING_MODEL_AUTO_UPDATE = (
     not OFFLINE_MODE

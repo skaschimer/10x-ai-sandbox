@@ -45,7 +45,6 @@
    - Make sure you've got the .env file set up, then install, build and run with hot reloading:
 
    ```bash
-   loadenv .env && \
    rm ./backend/data/webui.db || true && \
    pip install -r ./backend/requirements.txt && \
    rm -rf node_modules || true && \
