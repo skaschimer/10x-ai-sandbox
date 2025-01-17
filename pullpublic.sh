@@ -35,22 +35,3 @@ else
     echo "Error: Branch '$BRANCH' does not exist in the upstream repository."
     exit 1
 fi
-
-# Copy open-webui's Dockerfile to .devcontainer/ow-docker.file
-if [ -f Dockerfile ]; then
-    mkdir -p .devcontainer
-    cp Dockerfile .devcontainer/ow-docker.file
-    echo "Dockerfile copied to .devcontainer/ow-docker.file"
-else
-    echo "Error: Dockerfile does not exist."
-    exit 1
-fi
-
-# Copy .devcontainer/devDockerfile to the current directory and rename it to Dockerfile
-if [ -f .devcontainer/devDockerfile ]; then
-    cp .devcontainer/devDockerfile Dockerfile
-    echo ".devcontainer/devDockerfile copied to current directory as Dockerfile"
-else
-    echo "Error: .devcontainer/devDockerfile does not exist."
-    exit 1
-fi
