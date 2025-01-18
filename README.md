@@ -12,7 +12,7 @@ The **10x AI Sandbox** is an innovative project by **10x**, a venture studio in 
 
 ## Demo
 
-[Placeholder for Video Demo: Insert link here.]
+https://github.com/user-attachments/assets/6f74680a-879a-4336-b021-2e626e28c600
 
 ## Mission
 
@@ -49,4 +49,5 @@ Government/NGO/Academic developers and program officials can reach out to **Jim 
 
 **10x AI Sandbox** – Empowering federal agencies to explore the future of AI securely and effectively.
 
-_powered by_
+
+<sub><sup>_powered by_ </sub></sup>![10x_ai_purple](https://github.com/user-attachments/assets/7824f908-7f41-4cf7-bbc7-38960657ce6d)
