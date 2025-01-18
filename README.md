@@ -1,66 +1,52 @@
-# GSA Quickstart
+# 10x AI Sandbox
 
-1. **Ensure Python 3.11 is installed**:
+The **10x AI Sandbox** is an innovative project by **10x**, a venture studio in collaboration with the **General Services Administration (GSA)**. Its primary goal is to enable federal agencies to experiment with artificial intelligence (AI) in a secure, FedRAMP-compliant environment. By providing access to base models from leading AI companies and offering advanced UI features, the sandbox empowers agencies to test and validate new AI use cases efficiently.
 
-   - You can check your Python3.11.x version by running:
+## Features
 
-   ```bash
-   python3.11 --version
-   ```
+- **FedRAMP-Approved Access**: Secure access to AI base models from multiple leading providers.
+- **Prompt Playground**: A user-friendly interface for tweaking and optimizing system prompts.
+- **Document Upload & Management**: Upload documents, tag collections, and reference them in chat using the `#` character.
+- **Custom Models**: Create custom AI models by combining different system prompts, base models, and knowledge bases (via document upload and collection tagging).
+- **Efficient Testing**: Rapidly test AI product offerings against real-world government use cases.
 
-   - If Python 3.11 is not installed, you will need to install it first.
+## Demo
 
-   ```bash
-   brew install python@3.11
-   ```
+[Placeholder for Video Demo: Insert link here.]
 
-2. **Create the virtual environment (or however you prefer)**:
+## Mission
 
-   - Run:
+The 10x AI Sandbox is designed to help federal agencies quickly and cost-effectively:
 
-   ```bash
-   python3.11 -m venv venv
-   source ./venv/bin/activate
-   ```
+1. Gain clarity about agency AI needs, potential value, and risks in a hands-on manner against real-world use cases.
+2. Enable multi-disciplinary teams to check assumptions early and often during use case development.
+3. Continuously test the latest AI offerings against a pipeline of real-world government use cases and measure output quality.
+4. Enable smart, modular technology procurement based on value proven through hands-on testing of real work.
 
-3. **Install and use node 20.15.1**:
+## How to get access
 
-   - If you don't have nvm, you can install with `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash` and `source ~/.zshrc` (or `source ~/.bashrc` if you use bash):
+The project team is working on publishing an easy-to-consume containerized version of the app to the AWS and AWS GovCloud marketplaces, see #contributing below.
 
-   ```bash
-   nvm install 20.15.1
-   nvm use 20.15.1
-   ```
+## Local Installation
 
-4. **Install gitleaks**:
+Developers: detailed installation instructions are available in the [DEVLOCAL.md](./DEVLOCAL.md) file.
 
-   - Install with homebrew, then start a new terminal:
+## Acknowledgments
 
-   ```bash
-   brew install gitleaks
-   ```
+We would like to acknowledge the open-source project **[Open WebUI](https://github.com/openwebui)** for providing the underlying framework that powers this project. Their work has been instrumental in building a robust and flexible platform.
 
-5. **Install deps, build and run**:
+## Contributing
 
-   - Make sure you've got the .env file set up, then install, build and run with hot reloading:
+We are actively seeking contributions from government and civic tech developers to help build a comprehensive security and privacy compliance wrapper around the Open WebUI project. We aim to ensure that government and non-profits with stringent compliance requirements can continuously benefit from the exceptional work being done by the Open WebUI community.
 
-   ```bash
-   loadenv .env && \
-   rm ./backend/data/webui.db || true && \
-   pip install -r ./backend/requirements.txt && \
-   rm -rf node_modules || true && \
-   npm install && \
-   npx husky init && \
-   cp pre-commit .husky/pre-commit && \
-   npm run build && \
-   ./backend/start.sh
-   ```
+If you are interested in contributing, please contact us using the details below.
 
-   - The first user to sign up to a new installation should get the admin role. You can also predefine user roles in the .env file. Github auth checks that email domain is in ['gsa.gov'], but you can easily modify it at `backend/apps/webui/routers/auths.py:233`. Eventually we'll need to make github for local dev only for compliance reasons.
-   - After the first install, you can just run `./backend/start.sh`. First app startup will take a minute even after it says `Uvicorn running on http://0.0.0.0:8080`, once you see the ascii art, all of the features should be available. You may see a 500 the first time and need to refresh. You can run a front end dev server that hot reloads via `npm run dev` but connecting it to the backend and getting auth redirects with live servers working is unresolved due to the frontend and back running on different ports. We probably need to mock auth locally.
-   - ollama is not required for the app to run, but it is assumed, you can ignore the 500s if its not running. If you want to use it, you can install it with `brew install ollama`. You can then run `ollama serve` to start the server. You can then add a model to ollama with `ollama run mistral`.
+## Contact
 
-8. **Set up pipelines to access models via API**:
+Government/NGO/Academic developers and program officials can reach out to **Jim Moffet** at **[jim.moffet@gsa.gov](mailto:jim.moffet@gsa.gov)** for more information.
 
-- Once you're in, you should see the four default models available in the chat. If not, check that the pipelines server is running on 9099 and in the UI click on your user in the lower left > Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to [<http://localhost:9099](http://localhost:9099>) and the API key to 0p3n-w3bu! and hit refresh to see if it connects to the pipeline server.
-- After completing these steps, the models specified in the pipeline settings should be available in the drop down at the upper left when you create a new conversation.
+---
+
+**10x AI Sandbox** – Empowering federal agencies to explore the future of AI securely and effectively.
+
+_powered by_
