@@ -12,7 +12,7 @@ The **10x AI Sandbox** is an innovative project by **10x**, a venture studio in 
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/6f74680a-879a-4336-b021-2e626e28c600" width="640" height="360">
+<video src="https://github.com/user-attachments/assets/2118ef9f-6fae-4d94-af33-c26eac1eb3fc" width="640" height="427">
 <track src="https://raw.githubusercontent.com/GSA-TTS/10x-ai-sandbox/refs/heads/main/demo/subtitles.vtt" kind="subtitles" srclang="en" label="English">
 Your browser does not support the video tag.
 </video>
