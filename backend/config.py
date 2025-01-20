@@ -1204,7 +1204,7 @@ if VECTOR_STORE == "postgres":
         HOST = "localhost"
         DATABASE = "postgres"
         USER = "postgres"
-        PASSWORD = os.getenv("DB_PASSWORD", None)
+        PASSWORD = os.getenv("DB_PASSWORD", "postgres")
         PORT = 5432
         VECTOR_CLIENT = PGVectorClient(
             dbname=DATABASE, user=USER, password=PASSWORD, host=HOST, port=PORT
