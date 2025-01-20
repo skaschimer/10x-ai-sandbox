@@ -39,6 +39,7 @@ class PGVectorClient:
             autocommit=True,
         )
         self.conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        log.info("Established connection to the database")
         register_vector(self.conn)
 
     def has_collection(self, collection_name: str) -> bool:
