@@ -18,24 +18,14 @@ jobs:
         with:
           fetch-depth: 2
       - uses: ./.github/actions/setup-project
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.15.1'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build Svelte App
-        run: npm run build
-      - name: Commit build artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT_TOKEN secret for authentication
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          git add -f build/ # Force add the build directory
-          git commit -m 'Add build artifacts for deployment' || echo "No changes to commit"
-          git push
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '20.15.1'
+      # - name: Install dependencies
+      #   run: npm ci
+      # - name: Build Svelte App
+      #   run: npm run build
       - name: Deploy to cloud.gov
         uses: 18f/cg-deploy-action@main
         env:
@@ -86,15 +76,6 @@ jobs:
             --var RAG_OPENAI_API_BASE_URL="$RAG_OPENAI_API_BASE_URL"
             --var RAG_OPENAI_API_KEY="$RAG_OPENAI_API_KEY"
             --var RAG_EMBEDDING_ENGINE="$RAG_EMBEDDING_ENGINE"
-      # New Step: Clean up build artifacts
-      - name: Remove build artifacts and commit
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT_TOKEN secret for authentication
-        run: |
-          git rm -rf build/
-          git add .
-          git commit -m "Remove build artifacts after deployment" || echo "No changes to commit"
-          git push --force
 
   bail:
     runs-on: ubuntu-latest
