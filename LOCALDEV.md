@@ -71,4 +71,4 @@
 
 `docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5432:5432 pgvector/pgvector:pg15`
 
-- To mimic the production env, ensure that `DATABASE_URL` provides a connection string to the container above.
+- To mimic the production env, ensure that `DATABASE_URL` provides a connection string to the container above
