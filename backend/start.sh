@@ -3,6 +3,7 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
+uvicorn azure-proxy.proxy:app --host 0.0.0.0 --port 9100 --reload --forwarded-allow-ips '*' &
 ./open-webui-pipelines/start.sh &
 
 KEY_FILE=.webui_secret_key
