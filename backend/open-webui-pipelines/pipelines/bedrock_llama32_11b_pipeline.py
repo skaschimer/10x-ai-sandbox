@@ -47,7 +47,7 @@ def get_bedrock_client(
     else:
         target_region = region
 
-    print(f"Create new client\n Using region: {target_region}")
+    print(f"Create new client\n  Using region: {target_region}")
 
     aws_session_token = None
     if assumed_role:
