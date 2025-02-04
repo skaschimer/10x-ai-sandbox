@@ -67,4 +67,4 @@
 7. **Clean up running servers/services if needed**:
 
 - Sometimes there are server processes that don't shut down completely and prevent you from running the app successfully on subsequent sessions. Clean these up with these commands:
-`lsof -ti:9100 | xargs kill -9` and `lsof -ti:9099 | xargs kill -9`
+  `lsof -ti:9100 | xargs kill -9` and `lsof -ti:9099 | xargs kill -9`
