@@ -47,7 +47,7 @@ def get_bedrock_client(
     else:
         target_region = region
 
-    print(f"Create new client for llama\n  Using region: {target_region}")
+    print(f"Create new client\n Using region: {target_region}")
 
     aws_session_token = None
     if assumed_role:
@@ -69,8 +69,6 @@ def get_bedrock_client(
 
     if not aws_access_key_id or not aws_secret_access_key:
         raise ValueError("AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set")
-
-    print(f"Created new llama creds\n  Using region: {target_region}")
 
     retry_config = Config(
         region_name=target_region,
