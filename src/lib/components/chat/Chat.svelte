@@ -157,7 +157,7 @@
 
 				window.setTimeout(() => scrollToBottom(), 0);
 				const chatInput = document.getElementById('chat-input');
-				chatInput?.focus();
+				// chatInput?.focus();
 			} else {
 				await goto('/');
 			}
@@ -343,7 +343,7 @@
 
 			if (inputElement) {
 				prompt = event.data.text;
-				inputElement.focus();
+				// inputElement.focus();
 			}
 		}
 
@@ -419,7 +419,7 @@
 		});
 
 		const chatInput = document.getElementById('chat-input');
-		chatInput?.focus();
+		// chatInput?.focus();
 
 		chats.subscribe(() => {});
 	});
@@ -736,9 +736,6 @@
 		} else {
 			settings.set(JSON.parse(localStorage.getItem('settings') ?? '{}'));
 		}
-
-		const chatInput = document.getElementById('chat-input');
-		setTimeout(() => chatInput?.focus(), 0);
 	};
 
 	const loadChat = async () => {
