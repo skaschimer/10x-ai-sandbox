@@ -1,12 +1,13 @@
 import datetime
-import os
 import json
-import requests
-from typing import List, Union, Generator, Iterator, Optional
-from pydantic import BaseModel
+import os
+from typing import Generator, Iterator, List, Optional, Union
 
 import boto3
+import requests
 from botocore.config import Config
+from pydantic import BaseModel
+from utils.pipelines.aws import assume_role
 
 
 def format_llama_prompt(body):
@@ -23,15 +24,6 @@ def format_llama_prompt(body):
     formatted_prompt += "<|start_header_id|>assistant<|end_header_id|>"
 
     return formatted_prompt
-
-
-def assume_role(role_arn):
-    sts_client = boto3.client("sts")
-    assumed_role = sts_client.assume_role(
-        RoleArn=role_arn, RoleSessionName="BedrockInvokeSession"
-    )
-
-    return assumed_role["Credentials"]
 
 
 def get_bedrock_client(

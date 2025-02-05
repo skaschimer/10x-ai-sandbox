@@ -14,6 +14,7 @@ def get_bedrock_client(
     assumed_role: Optional[str] = None,
     region: Optional[str] = None,
     runtime: Optional[bool] = True,
+    endpoint_url: Optional[str] = None,
 ):
     """Create a boto3 client for Amazon Bedrock, with optional configuration overrides
 
@@ -79,6 +80,7 @@ def get_bedrock_client(
         "aws_access_key_id": aws_access_key_id,
         "aws_secret_access_key": aws_secret_access_key,
         "config": retry_config,
+        "endpoint_url": endpoint_url,
     }
 
     if aws_session_token:
@@ -99,9 +101,10 @@ class Pipeline:
         AWS_DEFAULT_REGION: Optional[str]
         BEDROCK_ENDPOINT_URL: Optional[str]
         BEDROCK_ASSUME_ROLE: Optional[str]
+        BEDROCK_LLAMA3211B_ARN: Optional[str]
 
     def __init__(self):
-        self.name = "Claude Sonnet 3.5 v1"
+        self.name = "Claude Sonnet 3.5 v2"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(
@@ -116,6 +119,7 @@ class Pipeline:
                     "https://bedrock.us-east-1.amazonaws.com",
                 ),
                 "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
+                "BEDROCK_LLAMA3211B_ARN": os.getenv("BEDROCK_LLAMA3211B_ARN", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -141,7 +145,7 @@ class Pipeline:
 
         # allowed_roles = {"user", "assistant"}
 
-        model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+        model_id = "anthropic.claude-3-5-sonnet-20241022-v2:0"
 
         if "messages" in body:
             # remove messages with system role and insert content into body

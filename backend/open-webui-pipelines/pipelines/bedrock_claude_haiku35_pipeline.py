@@ -101,7 +101,7 @@ class Pipeline:
         BEDROCK_ASSUME_ROLE: Optional[str]
 
     def __init__(self):
-        self.name = "Claude Sonnet 3.5 v1"
+        self.name = "Claude Haiku 3.5"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(
@@ -141,7 +141,7 @@ class Pipeline:
 
         # allowed_roles = {"user", "assistant"}
 
-        model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
 
         if "messages" in body:
             # remove messages with system role and insert content into body
