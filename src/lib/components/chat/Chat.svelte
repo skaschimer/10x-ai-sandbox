@@ -366,6 +366,8 @@
 		}
 	};
 
+	export let mainContentId;
+
 	onMount(async () => {
 		console.log('mounted');
 		window.addEventListener('message', onMessageHandler);
@@ -1895,7 +1897,10 @@
 					</div>
 				{/if}
 
-				<div class="flex flex-col flex-auto z-10 w-full">
+				<svelte:element
+					this={mainContentId ? 'main' : 'div'}
+					id={mainContentId}
+					class="flex flex-col flex-auto z-10 w-full">
 					{#if $settings?.landingPageMode === 'chat' || createMessagesList(history.currentId).length > 0}
 						<div
 							class=" pb-2.5 flex flex-col justify-between w-full flex-auto overflow-auto h-0 max-w-full z-10 scrollbar-hidden"
@@ -2012,7 +2017,7 @@
 							/>
 						</div>
 					{/if}
-				</div>
+				</svelte:element>
 			</Pane>
 
 			<ChatControls

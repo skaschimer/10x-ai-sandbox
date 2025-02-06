@@ -40,6 +40,7 @@
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
+	import { MAIN_CONTENT_ID as mainContentId } from '$lib/constants';
 	//import ChangelogModal from '$lib/components/ChangelogModal.svelte';
 	import TermsModal from '$lib/components/TermsModal.svelte';
 	import AccountPending from '$lib/components/layout/Overlay/AccountPending.svelte';
@@ -221,18 +222,13 @@
 <!--<ChangelogModal bind:show={$showChangelog} />-->
 <TermsModal bind:show={$showChangelog} />
 
-{#if version && compareVersion(version.latest, version.current) && ($settings?.showUpdateToast ?? true)}
-	<div class=" absolute bottom-8 right-8 z-50" in:fade={{ duration: 100 }}>
-		<UpdateInfoToast
-			{version}
-			on:close={() => {
-				localStorage.setItem('dismissedUpdateToast', Date.now().toString());
-				version = null;
-			}}
-		/>
-	</div>
+{#if loaded}
+<a
+	href=#{mainContentId}
+	class="px-4 py-1.5 text-sm rounded-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition font-medium space-x-1 absolute -top-full -left-full focus:top-5 focus:left-5 z-1000">
+	Skip to main content
+</a>
 {/if}
-
 <div class="app relative">
 	<div
 		class=" text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] overflow-auto flex flex-row"
@@ -299,6 +295,17 @@
 		{/if}
 	</div>
 </div>
+{#if version && compareVersion(version.latest, version.current) && ($settings?.showUpdateToast ?? true)}
+	<div class=" absolute bottom-8 right-8 z-50" in:fade={{ duration: 100 }}>
+		<UpdateInfoToast
+			{version}
+			on:close={() => {
+				localStorage.setItem('dismissedUpdateToast', Date.now().toString());
+				version = null;
+			}}
+		/>
+	</div>
+{/if}
 
 <style>
 	.loading {
