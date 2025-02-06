@@ -14,7 +14,7 @@ class Pipeline:
         AWS_DEFAULT_REGION: Optional[str]
         BEDROCK_ENDPOINT_URL: Optional[str]
         BEDROCK_ASSUME_ROLE: Optional[str]
-        BEDROCK_LLAMA3211B_ARN: Optional[str]
+        BEDROCK_CLAUDE_ARN: Optional[str]
 
     def __init__(self):
         self.name = "Claude Sonnet 3.5 v2"
@@ -32,7 +32,7 @@ class Pipeline:
                     "https://bedrock.us-east-1.amazonaws.com",
                 ),
                 "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
-                "BEDROCK_LLAMA3211B_ARN": os.getenv("BEDROCK_LLAMA3211B_ARN", None),
+                "BEDROCK_CLAUDE_ARN": os.getenv("BEDROCK_CLAUDE_ARN", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -58,7 +58,7 @@ class Pipeline:
 
         # allowed_roles = {"user", "assistant"}
 
-        model_id = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+        model_id = self.valves.BEDROCK_CLAUDE_ARN
 
         if "messages" in body:
             # remove messages with system role and insert content into body
