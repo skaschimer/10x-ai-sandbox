@@ -5,6 +5,7 @@
 	import { WEBUI_NAME, showSidebar, user } from '$lib/stores';
 	import MenuLines from '$lib/components/icons/MenuLines.svelte';
 	import { page } from '$app/stores';
+	import { MAIN_CONTENT_ID as mainContentId } from '$lib/constants';
 
 	const i18n = getContext('i18n');
 
@@ -25,7 +26,9 @@
 </svelte:head>
 
 {#if loaded}
-	<div
+	<svelte:element
+		this={mainContentId ? 'main' : 'div'}
+		id={mainContentId}
 		class=" flex flex-col w-full min-h-screen max-h-screen {$showSidebar
 			? 'md:max-w-[calc(100%-260px)]'
 			: ''}"
@@ -86,5 +89,5 @@
 		<div class=" pb-1 px-[16px] flex-1 max-h-full overflow-y-auto">
 			<slot />
 		</div>
-	</div>
+	</svelte:element>
 {/if}
