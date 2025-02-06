@@ -15,6 +15,7 @@
 	import { goto } from '$app/navigation';
 
 	import MenuLines from '$lib/components/icons/MenuLines.svelte';
+	import { MAIN_CONTENT_ID as mainContentId } from '$lib/constants';
 
 	const i18n = getContext('i18n');
 
@@ -50,7 +51,9 @@
 </svelte:head>
 
 {#if loaded}
-	<div
+	<svelte:element
+		this={mainContentId ? 'main' : 'div'}
+		id={mainContentId}
 		class=" relative flex flex-col w-full h-screen max-h-[100dvh] {$showSidebar
 			? 'md:max-w-[calc(100%-260px)]'
 			: ''}"
@@ -131,5 +134,5 @@
 		<div class="  pb-1 px-[18px] flex-1 max-h-full overflow-y-auto" id="workspace-container">
 			<slot />
 		</div>
-	</div>
+	</svelte:element>
 {/if}
