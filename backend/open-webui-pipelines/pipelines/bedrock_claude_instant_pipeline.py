@@ -1,78 +1,10 @@
-import os
 import json
+import os
+from typing import Generator, Iterator, List, Union
+
 import requests
-from typing import List, Union, Generator, Iterator, Optional
 from pydantic import BaseModel
-
-import boto3
-from botocore.config import Config
-
-
-def get_bedrock_client(
-    assumed_role: Optional[str] = None,
-    region: Optional[str] = None,
-    runtime: Optional[bool] = True,
-):
-    """Create a boto3 client for Amazon Bedrock, with optional configuration overrides
-
-    Parameters
-    ----------
-    assumed_role :
-        Optional ARN of an AWS IAM role to assume for calling the Bedrock service. If not
-        specified, the current active credentials will be used.
-    region :
-        Optional name of the AWS Region in which the service should be called (e.g. "us-east-1").
-        If not specified, AWS_REGION or AWS_DEFAULT_REGION environment variable will be used.
-    runtime :
-        Optional choice of getting different client to perform operations with the Amazon Bedrock service.
-    """
-    if region is None:
-        target_region = os.environ.get(
-            "AWS_REGION", os.environ.get("AWS_DEFAULT_REGION")
-        )
-    else:
-        target_region = region
-
-    print(f"Create new client\n  Using region: {target_region}")
-
-    # Get the access key and secret key from the environment variables
-    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
-    os.environ.pop("AWS_PROFILE", None)
-    os.environ.pop("AWS_DEFAULT_PROFILE", None)
-
-    if not aws_access_key_id or not aws_secret_access_key:
-        raise ValueError(
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set in environment variables"
-        )
-
-    retry_config = Config(
-        region_name=target_region,
-        retries={
-            "max_attempts": 10,
-            "mode": "standard",
-        },
-    )
-
-    if runtime:
-        service_name = "bedrock-runtime"
-    else:
-        service_name = "bedrock"
-
-    print(f"Creating client with region: {target_region}")
-
-    bedrock_client = boto3.client(
-        service_name,
-        region_name=target_region,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        config=retry_config,
-    )
-
-    print("boto3 Bedrock client successfully created!")
-    print(bedrock_client._endpoint)
-    return bedrock_client
+from utils.pipelines.aws import get_bedrock_client
 
 
 class Pipeline:
@@ -187,7 +119,6 @@ class Pipeline:
                             message["content"].remove(content)
 
         try:
-
             r = self.bedrock_client.invoke_model_with_response_stream(
                 body=json.dumps(filtered_body), modelId=model_id
             )
