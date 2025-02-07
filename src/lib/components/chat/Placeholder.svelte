@@ -117,6 +117,7 @@
 									on:click={() => {
 										selectedModelIdx = modelIdx;
 									}}
+									disabled={!models.length < 2}
 								>
 									<img
 										crossorigin="anonymous"
