@@ -207,13 +207,14 @@
 								<div class="flex flex-col mt-4">
 									{#if mode === 'signup'}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1">{$i18n.t('Name')}</div>
+											<div class=" text-sm font-medium text-left mb-1"><label for="fullname">{$i18n.t('Name')}</label></div>
 											<input
 												bind:value={name}
 												type="text"
 												class="my-0.5 w-full text-sm outline-none bg-transparent"
 												autocomplete="name"
 												placeholder={$i18n.t('Enter Your Full Name')}
+												id="fullname"
 												required
 											/>
 										</div>
@@ -221,7 +222,7 @@
 
 									{#if mode === 'ldap'}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1">{$i18n.t('Username')}</div>
+											<div class=" text-sm font-medium text-left mb-1"><label for="username">{$i18n.t('Username')}</label></div>
 											<input
 												bind:value={ldapUsername}
 												type="text"
@@ -229,12 +230,13 @@
 												autocomplete="username"
 												name="username"
 												placeholder={$i18n.t('Enter Your Username')}
+												id="username"
 												required
 											/>
 										</div>
 									{:else}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1">{$i18n.t('Email')}</div>
+											<div class=" text-sm font-medium text-left mb-1"><label for="email">{$i18n.t('Email')}</label></div>
 											<input
 												bind:value={email}
 												type="email"
@@ -242,13 +244,14 @@
 												autocomplete="email"
 												name="email"
 												placeholder={$i18n.t('Enter Your Email')}
+												id="email"
 												required
 											/>
 										</div>
 									{/if}
 
 									<div>
-										<div class=" text-sm font-medium text-left mb-1">{$i18n.t('Password')}</div>
+										<div class=" text-sm font-medium text-left mb-1"><label for="current-password">{$i18n.t('Password')}</label></div>
 
 										<input
 											bind:value={password}
@@ -257,6 +260,7 @@
 											placeholder={$i18n.t('Enter Your Password')}
 											autocomplete="current-password"
 											name="current-password"
+											id="current-password"
 											required
 										/>
 									</div>
