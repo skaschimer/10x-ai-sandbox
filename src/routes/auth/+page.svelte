@@ -207,7 +207,9 @@
 								<div class="flex flex-col mt-4">
 									{#if mode === 'signup'}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1"><label for="fullname">{$i18n.t('Name')}</label></div>
+											<div class=" text-sm font-medium text-left mb-1">
+												<label for="fullname">{$i18n.t('Name')}</label>
+											</div>
 											<input
 												bind:value={name}
 												type="text"
@@ -222,7 +224,9 @@
 
 									{#if mode === 'ldap'}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1"><label for="username">{$i18n.t('Username')}</label></div>
+											<div class=" text-sm font-medium text-left mb-1">
+												<label for="username">{$i18n.t('Username')}</label>
+											</div>
 											<input
 												bind:value={ldapUsername}
 												type="text"
@@ -236,7 +240,9 @@
 										</div>
 									{:else}
 										<div class="mb-2">
-											<div class=" text-sm font-medium text-left mb-1"><label for="email">{$i18n.t('Email')}</label></div>
+											<div class=" text-sm font-medium text-left mb-1">
+												<label for="email">{$i18n.t('Email')}</label>
+											</div>
 											<input
 												bind:value={email}
 												type="email"
@@ -251,7 +257,9 @@
 									{/if}
 
 									<div>
-										<div class=" text-sm font-medium text-left mb-1"><label for="current-password">{$i18n.t('Password')}</label></div>
+										<div class=" text-sm font-medium text-left mb-1">
+											<label for="current-password">{$i18n.t('Password')}</label>
+										</div>
 
 										<input
 											bind:value={password}
