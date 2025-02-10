@@ -46,6 +46,6 @@
 	});
 </script>
 
-<div bind:this={tooltipElement} aria-label={DOMPurify.sanitize(content)} class={className}>
+<div bind:this={tooltipElement} aria-label={DOMPurify.sanitize(content).length ? DOMPurify.sanitize(content) : null} class={className}>
 	<slot />
 </div>
