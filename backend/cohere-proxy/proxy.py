@@ -123,7 +123,11 @@ async def proxy_embeddings(request: Request):
         body_inputs = body.get("input")
         logger.info(f"body_inputs: {body_inputs}")
 
-        # Prepare the request body for the Cohere Embed model
+        tokens = 0
+        for input in body_inputs:
+            words = input.split(" ")
+            tokens += len(words) / 0.75 # we can get accurate token count from tiktoken
+
         body = json.dumps(
             {
                 "texts": body_inputs,
@@ -136,44 +140,30 @@ async def proxy_embeddings(request: Request):
         )
         logger.info(f"response: {response}")
 
-        embeddings = response.get("embeddings")
-        for e in embeddings:
-            logger.info(f"embedding: {e}")
-
-        # Parse the response
         response_body = json.loads(response.get("body").read())
-        logger.info(f"response_body: {response_body}")
+        embeddings = response_body.get("embeddings")
+        logger.info(f"embeddings: {embeddings}")
 
-        # {
-        #   "data": [
-        #     {
-        #       "object": "embedding",
-        #       "index": 0,
-        #       "embedding": [
-        #         0.0023064255, 0.0017623018, ...  // list of floats representing the embedding vector
-        #       ]
-        #     }
-        #     // More embeddings can be listed here if the request had multiple inputs
-        #   ],
-        #   "model": "text-embedding-ada-002",  // Example model name used
-        #   "usage": {
-        #     "prompt_tokens": 8,  // Number of tokens in the input
-        #     "total_tokens": 8   // Total number of tokens used
-        #   }
-        # }
+        response_obj = {}
+        response_obj["model"] = model_id
+        response_obj["usage"] = {}
+        response_obj["usage"]["prompt_tokens"] = tokens
+        response_obj["usage"]["total_tokens"] = tokens
+        response_obj["data"] = []
+        for e in embeddings:
+            response_obj["data"].append(
+                {
+                    "object": "embedding",
+                    "index": 0,
+                    "embedding": e,
+                }
+            )
 
-
-        logger.info(f"end of proxy_embeddings")
-
-        # Extract the embeddings
-        # embeddings = response_body.get("embeddings")
-        # logger.info(f"embeddings: {embeddings}")
-
-        # return Response(
-        #     content=response_body,
-        #     status_code=200,
-        #     headers={"Content-Type": "application/json"},
-        # )
+        return Response(
+            content=json.dumps(response_obj),
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return JSONResponse(status_code=500, content={"error": "Internal server error"})
