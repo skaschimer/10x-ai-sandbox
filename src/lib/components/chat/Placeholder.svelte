@@ -126,7 +126,7 @@
 												? `/doge.png`
 												: `${WEBUI_BASE_URL}/static/gsai.png`)}
 										class=" w-16 sm:w-20 h-fit"
-										alt="logo"
+										alt="GSAI"
 										draggable="false"
 									/>
 								</button>
