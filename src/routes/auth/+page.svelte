@@ -445,7 +445,7 @@
 									src="{WEBUI_BASE_URL}/static/10x_ai.png"
 									class=" w-7 inline-block"
 									style="vertical-align: baseline;"
-									alt="10x logo"
+									alt="10x AI"
 								/>
 							</div>
 						</a>
