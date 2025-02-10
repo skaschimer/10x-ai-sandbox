@@ -264,7 +264,7 @@
 										<input
 											bind:value={password}
 											type="password"
-											class="my-0.5 w-full text-sm outline-1 border rounded p-2.5"
+											class="my-0.5 w-full text-sm outline-1 border rounded p-2.5 dark:text-slate-500"
 											placeholder={$i18n.t('Enter Your Password')}
 											autocomplete="current-password"
 											name="current-password"
