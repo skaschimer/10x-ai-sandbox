@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Generator, Iterator, List, Union
+from typing import Generator, Iterator, List, Optional, Union
 
 import requests
 from pydantic import BaseModel
@@ -9,12 +9,15 @@ from utils.pipelines.aws import get_bedrock_client
 
 class Pipeline:
     class Valves(BaseModel):
-        AWS_ACCESS_KEY_ID: str
-        AWS_SECRET_ACCESS_KEY: str
-        AWS_DEFAULT_REGION: str
+        AWS_ACCESS_KEY_ID: Optional[str]
+        AWS_SECRET_ACCESS_KEY: Optional[str]
+        AWS_DEFAULT_REGION: Optional[str]
+        BEDROCK_ENDPOINT_URL: Optional[str]
+        BEDROCK_ASSUME_ROLE: Optional[str]
+        BEDROCK_CLAUDE_ARN: Optional[str]
 
     def __init__(self):
-        self.name = "Claude Instant (no vision)"
+        self.name = "Claude Sonnet 3.5 v2"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(
@@ -23,9 +26,13 @@ class Pipeline:
                 "AWS_SECRET_ACCESS_KEY": os.getenv(
                     "AWS_SECRET_ACCESS_KEY", "your-aws-secret-access-key-here"
                 ),
-                "AWS_DEFAULT_REGION": os.getenv(
-                    "AWS_DEFAULT_REGION", "your-aws-region-here"
+                "AWS_DEFAULT_REGION": os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
+                "BEDROCK_ENDPOINT_URL": os.getenv(
+                    "BEDROCK_ENDPOINT_URL",
+                    "https://bedrock.us-east-1.amazonaws.com",
                 ),
+                "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
+                "BEDROCK_CLAUDE_ARN": os.getenv("BEDROCK_CLAUDE_ARN", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -51,9 +58,7 @@ class Pipeline:
 
         # allowed_roles = {"user", "assistant"}
 
-        model_id = (
-            "anthropic.claude-instant-v1"  # "anthropic.claude-3-5-sonnet-20240620-v1:0"
-        )
+        model_id = self.valves.BEDROCK_CLAUDE_ARN
 
         if "messages" in body:
             # remove messages with system role and insert content into body
@@ -109,14 +114,23 @@ class Pipeline:
         if "max_tokens" not in filtered_body:
             filtered_body["max_tokens"] = 4000
 
-        # Claude instant has no vision
+        # Claude likes a different format for images than OpenAI
         for message in filtered_body["messages"]:
             if message["role"] == "user":
                 if isinstance(message["content"], list):
                     for content in message["content"]:
                         if content["type"] == "image_url":
-                            # remove this content from the message
-                            message["content"].remove(content)
+                            content["type"] = "image"
+                            image_type = (
+                                content["image_url"]["url"].split(";")[0].split("/")[1]
+                            )
+                            data = content["image_url"]["url"].split(",")[1]
+                            content["source"] = {
+                                "type": "base64",  # base64
+                                "media_type": f"image/{image_type}",  # i.e. image/jpeg
+                                "data": data,
+                            }
+                            del content["image_url"]
 
         try:
             r = self.bedrock_client.invoke_model_with_response_stream(
@@ -145,44 +159,3 @@ class Pipeline:
                 f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
             )
             return f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
-
-
-# import logging
-
-# logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
-
-
-# async def main():
-#     pipeline = Pipeline()
-
-#     await pipeline.on_startup()
-
-#     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
-#     prompt = "Describe the purpose of a 'hello world' program in one line."
-#     messages = [
-#         {
-#             "role": "user",
-#             "content": [{"type": "text", "text": prompt}],
-#         }
-#     ]
-
-#     body = {
-#         "anthropic_version": "bedrock-2023-05-31",
-#         "max_tokens": 512,
-#         "temperature": 0.5,
-#         "messages": messages,
-#     }
-
-#     r = pipeline.pipe(
-#         user_message=prompt, model_id=model_id, messages=messages, body=body
-#     )
-
-#     for event in r:
-#         print(event)
-
-#     await pipeline.on_shutdown()
-
-
-# # Run the example
-# asyncio.run(main())

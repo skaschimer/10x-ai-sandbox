@@ -1,88 +1,22 @@
-import os
 import json
+import os
+from typing import Generator, Iterator, List, Optional, Union
+
 import requests
-from typing import List, Union, Generator, Iterator, Optional
 from pydantic import BaseModel
-
-import boto3
-from botocore.config import Config
-
-
-def get_bedrock_client(
-    assumed_role: Optional[str] = None,
-    region: Optional[str] = None,
-    runtime: Optional[bool] = True,
-):
-    """Create a boto3 client for Amazon Bedrock, with optional configuration overrides
-
-    Parameters
-    ----------
-    assumed_role :
-        Optional ARN of an AWS IAM role to assume for calling the Bedrock service. If not
-        specified, the current active credentials will be used.
-    region :
-        Optional name of the AWS Region in which the service should be called (e.g. "us-east-1").
-        If not specified, AWS_REGION or AWS_DEFAULT_REGION environment variable will be used.
-    runtime :
-        Optional choice of getting different client to perform operations with the Amazon Bedrock service.
-    """
-    if region is None:
-        target_region = os.environ.get(
-            "AWS_REGION", os.environ.get("AWS_DEFAULT_REGION")
-        )
-    else:
-        target_region = region
-
-    print(f"Create new client\n  Using region: {target_region}")
-
-    # Get the access key and secret key from the environment variables
-    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
-    os.environ.pop("AWS_PROFILE", None)
-    os.environ.pop("AWS_DEFAULT_PROFILE", None)
-
-    if not aws_access_key_id or not aws_secret_access_key:
-        raise ValueError(
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set in environment variables"
-        )
-
-    retry_config = Config(
-        region_name=target_region,
-        retries={
-            "max_attempts": 10,
-            "mode": "standard",
-        },
-    )
-
-    if runtime:
-        service_name = "bedrock-runtime"
-    else:
-        service_name = "bedrock"
-
-    print(f"Creating client with region: {target_region}")
-
-    bedrock_client = boto3.client(
-        service_name,
-        region_name=target_region,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        config=retry_config,
-    )
-
-    print("boto3 Bedrock client successfully created!")
-    print(bedrock_client._endpoint)
-    return bedrock_client
+from utils.pipelines.aws import get_bedrock_client
 
 
 class Pipeline:
     class Valves(BaseModel):
-        AWS_ACCESS_KEY_ID: str
-        AWS_SECRET_ACCESS_KEY: str
-        AWS_DEFAULT_REGION: str
+        AWS_ACCESS_KEY_ID: Optional[str]
+        AWS_SECRET_ACCESS_KEY: Optional[str]
+        AWS_DEFAULT_REGION: Optional[str]
+        BEDROCK_ENDPOINT_URL: Optional[str]
+        BEDROCK_ASSUME_ROLE: Optional[str]
 
     def __init__(self):
-        self.name = "Claude Sonnet 3.5"
+        self.name = "Claude Haiku 3.5"
         self.valves = self.Valves(
             **{
                 "AWS_ACCESS_KEY_ID": os.getenv(
@@ -91,9 +25,12 @@ class Pipeline:
                 "AWS_SECRET_ACCESS_KEY": os.getenv(
                     "AWS_SECRET_ACCESS_KEY", "your-aws-secret-access-key-here"
                 ),
-                "AWS_DEFAULT_REGION": os.getenv(
-                    "AWS_DEFAULT_REGION", "your-aws-region-here"
+                "AWS_DEFAULT_REGION": os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
+                "BEDROCK_ENDPOINT_URL": os.getenv(
+                    "BEDROCK_ENDPOINT_URL",
+                    "https://bedrock.us-east-1.amazonaws.com",
                 ),
+                "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -119,7 +56,7 @@ class Pipeline:
 
         # allowed_roles = {"user", "assistant"}
 
-        model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
 
         if "messages" in body:
             # remove messages with system role and insert content into body
@@ -194,7 +131,6 @@ class Pipeline:
                             del content["image_url"]
 
         try:
-
             r = self.bedrock_client.invoke_model_with_response_stream(
                 body=json.dumps(filtered_body), modelId=model_id
             )
@@ -221,44 +157,3 @@ class Pipeline:
                 f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
             )
             return f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
-
-
-# import logging
-
-# logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
-
-
-# async def main():
-#     pipeline = Pipeline()
-
-#     await pipeline.on_startup()
-
-#     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
-#     prompt = "Describe the purpose of a 'hello world' program in one line."
-#     messages = [
-#         {
-#             "role": "user",
-#             "content": [{"type": "text", "text": prompt}],
-#         }
-#     ]
-
-#     body = {
-#         "anthropic_version": "bedrock-2023-05-31",
-#         "max_tokens": 512,
-#         "temperature": 0.5,
-#         "messages": messages,
-#     }
-
-#     r = pipeline.pipe(
-#         user_message=prompt, model_id=model_id, messages=messages, body=body
-#     )
-
-#     for event in r:
-#         print(event)
-
-#     await pipeline.on_shutdown()
-
-
-# # Run the example
-# asyncio.run(main())
