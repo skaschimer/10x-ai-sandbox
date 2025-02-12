@@ -45,8 +45,8 @@
 	};
 
 	// Admin - Show Update Available Toast
-	let showUpdateToast = false;
-	let showChangelog = false;
+	let showUpdateToast = true;
+	let showChangelog = true;
 
 	let showEmojiInCall = false;
 	let voiceInterruption = false;
@@ -205,8 +205,8 @@
 		responseAutoCopy = $settings.responseAutoCopy ?? false;
 
 		showUsername = $settings.showUsername ?? false;
-		showUpdateToast = $settings.showUpdateToast ?? false;
-		showChangelog = $settings.showChangelog ?? false;
+		showUpdateToast = $settings.showUpdateToast ?? true;
+		showChangelog = $settings.showChangelog ?? true;
 
 		showEmojiInCall = $settings.showEmojiInCall ?? false;
 		voiceInterruption = $settings.voiceInterruption ?? false;
