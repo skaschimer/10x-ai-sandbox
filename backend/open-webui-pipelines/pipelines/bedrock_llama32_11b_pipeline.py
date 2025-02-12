@@ -76,7 +76,6 @@ class Pipeline:
             )
             > 1800
         ):
-            print("Recreating Bedrock client")
             self.bedrock_client = get_bedrock_client(
                 assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
                 region=os.environ.get("AWS_DEFAULT_REGION", None),

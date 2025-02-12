@@ -95,6 +95,12 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages \
     /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
+RUN uv pip uninstall --system posthog && \
+    uv cache clean && \
+    rm -rf root/.cache/pip/* && \
+    rm -rf root/.cache/uv/* && \
+    uv pip install --upgrade --system posthog==3.11.0 && \ 
+    rm -rf root/.cache/*
 # # Copy any caches or model downloads you want at runtime
 # COPY --from=builder /root/.cache /root/.cache
 

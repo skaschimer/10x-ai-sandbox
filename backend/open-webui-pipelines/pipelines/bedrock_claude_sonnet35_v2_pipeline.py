@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from typing import Generator, Iterator, List, Optional, Union
@@ -51,12 +52,18 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        # print(f"pipe:{__name__}")
-
-        # print(messages)
-        # print(user_message)
-
-        # allowed_roles = {"user", "assistant"}
+        if (
+            "BEDROCK_CLIENT_CREATED" not in os.environ
+            or (
+                datetime.datetime.now().timestamp()
+                - float(os.environ["BEDROCK_CLIENT_CREATED"])
+            )
+            > 1800
+        ):
+            self.bedrock_client = get_bedrock_client(
+                assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
+                region=os.environ.get("AWS_DEFAULT_REGION", None),
+            )
 
         model_id = self.valves.BEDROCK_CLAUDE_ARN
 

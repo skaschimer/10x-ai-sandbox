@@ -32,17 +32,20 @@ async def proxy_embeddings(request: Request):
         tokens = 0
         for input in body_input:
             words = input.split(" ")
-            tokens += len(words) / 0.75 # we can get accurate token count from tiktoken
+            tokens += len(words) / 0.75  # we can get accurate token count from tiktoken
 
         body = json.dumps(
             {
                 "texts": body_input,
-                "input_type": "search_document",  # You can change this to 'search_query', 'classification', or 'clustering' based on your use case
+                "input_type": "search_document",  # You can change this to 'search_query', 'classification', or 'clustering' based on your use case  # noqa E501
             }
         )
 
         response = bedrock_client.invoke_model(
-            body=body, modelId=model_id, accept="application/json", contentType="application/json"
+            body=body,
+            modelId=model_id,
+            accept="application/json",
+            contentType="application/json",
         )
 
         response_body = json.loads(response.get("body").read())
