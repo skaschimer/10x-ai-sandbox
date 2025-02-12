@@ -29,7 +29,7 @@ git checkout development
 git reset --hard origin/development
 
 # Create a new branch with the current Unix time
-git checkout -b "feature/$BRANCH/$(date +%s)"
+git checkout -b "feature/$BRANCH-$(date +%s)"
 
 if git ls-remote --exit-code --heads upstream $BRANCH; then
     # Merge the changes from the specified upstream branch
