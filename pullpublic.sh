@@ -33,7 +33,7 @@ git checkout -b "feature/$BRANCH-$(date +%s)"
 
 if git ls-remote --exit-code --heads upstream $BRANCH; then
     # Merge the changes from the specified upstream branch
-    git merge -X theirs upstream/$BRANCH --allow-unrelated-histories --no-edit
+    git reset --hard upstream/$BRANCH
 else
     echo "Error: Branch '$BRANCH' does not exist in the upstream repository."
     exit 1
