@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from typing import Generator, Iterator, List, Optional, Union
@@ -14,6 +15,7 @@ class Pipeline:
         AWS_DEFAULT_REGION: Optional[str]
         BEDROCK_ENDPOINT_URL: Optional[str]
         BEDROCK_ASSUME_ROLE: Optional[str]
+        BEDROCK_CLAUDE_HAIKU_ARN: Optional[str]
 
     def __init__(self):
         self.name = "Claude Haiku 3.5"
@@ -31,6 +33,7 @@ class Pipeline:
                     "https://bedrock.us-east-1.amazonaws.com",
                 ),
                 "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
+                "BEDROCK_CLAUDE_HAIKU_ARN": os.getenv("BEDROCK_CLAUDE_HAIKU_ARN", None),
             }
         )
         self.bedrock_client = get_bedrock_client(
@@ -49,14 +52,20 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        # print(f"pipe:{__name__}")
+        if (
+            "BEDROCK_CLIENT_CREATED" not in os.environ
+            or (
+                datetime.datetime.now().timestamp()
+                - float(os.environ["BEDROCK_CLIENT_CREATED"])
+            )
+            > 1800
+        ):
+            self.bedrock_client = get_bedrock_client(
+                assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
+                region=os.environ.get("AWS_DEFAULT_REGION", None),
+            )
 
-        # print(messages)
-        # print(user_message)
-
-        # allowed_roles = {"user", "assistant"}
-
-        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+        model_id = self.valves.BEDROCK_CLAUDE_HAIKU_ARN
 
         if "messages" in body:
             # remove messages with system role and insert content into body
