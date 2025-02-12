@@ -35,13 +35,14 @@
 		banners,
 		showSettings,
 		showChangelog,
+		showUpdateToast,
 		temporaryChatEnabled
 	} from '$lib/stores';
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
 	import { MAIN_CONTENT_ID as mainContentId } from '$lib/constants';
-	//import ChangelogModal from '$lib/components/ChangelogModal.svelte';
+	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
 	import TermsModal from '$lib/components/TermsModal.svelte';
 	import AccountPending from '$lib/components/layout/Overlay/AccountPending.svelte';
 	import UpdateInfoToast from '$lib/components/layout/UpdateInfoToast.svelte';
@@ -180,7 +181,7 @@
 				}
 			});
 
-			if ($user.role === 'admin' && ($settings?.showChangelog ?? true)) {
+			if ($user.role === 'admin' && ($settings?.showChangelog ?? false)) {
 				showChangelog.set($settings?.version !== $config.version);
 			}
 
@@ -189,7 +190,7 @@
 			}
 
 			// Check for version updates
-			if ($user.role === 'admin') {
+			if ($user.role === 'admin' && ($settings?.showUpdateToast ?? false)) {
 				// Check if the user has dismissed the update toast in the last 24 hours
 				if (localStorage.dismissedUpdateToast) {
 					const dismissedUpdateToast = new Date(Number(localStorage.dismissedUpdateToast));
@@ -219,8 +220,8 @@
 </script>
 
 <SettingsModal bind:show={$showSettings} />
-<!--<ChangelogModal bind:show={$showChangelog} />-->
-<TermsModal bind:show={$showChangelog} />
+<ChangelogModal bind:show={$showChangelog} />
+<!-- <TermsModal bind:show={$showChangelog} /> -->
 
 {#if loaded}
 <a
