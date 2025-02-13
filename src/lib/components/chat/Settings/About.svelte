@@ -43,7 +43,7 @@
 </script>
 
 <div class="flex flex-col h-full justify-between space-y-3 text-sm mb-6">
-	<div class=" space-y-3">
+	<div class=" space-y-3 overflow-y-scroll max-h-[28rem] lg:max-h-full">
 		<div>
 			<div class=" mb-2.5 text-sm font-medium flex space-x-2 items-center">
 				<div>
@@ -65,8 +65,8 @@
 							{updateAvailable === null
 								? $i18n.t('Checking for updates...')
 								: updateAvailable
-								? `(v${version.latest} ${$i18n.t('available!')})`
-								: $i18n.t('(latest)')}
+									? `(v${version.latest} ${$i18n.t('available!')})`
+									: $i18n.t('(latest)')}
 						</a>
 					</div>
 
@@ -106,6 +106,12 @@
 
 		<hr class=" dark:border-gray-850" />
 
+		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+			Emoji graphics provided by
+			<a href="https://github.com/jdecked/twemoji" target="_blank">Twemoji</a>, licensed under
+			<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0</a>.
+		</div>
+
 		<div class="flex space-x-1">
 			<a href="https://discord.gg/5rJgQTnV4s" target="_blank">
 				<img
@@ -130,12 +136,14 @@
 		</div>
 
 		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-			<span class=" text-gray-500 dark:text-gray-300 font-medium">{$WEBUI_NAME}</span> -
+			{#if !$WEBUI_NAME.includes('Open WebUI')}
+				<span class=" text-gray-500 dark:text-gray-300 font-medium">{$WEBUI_NAME}</span> -
+			{/if}
 			{$i18n.t('Created by')}
 			<a
 				class=" text-gray-500 dark:text-gray-300 font-medium"
-				href="https://10x.gsa.gov"
-				target="_blank">10x Public Venture Studio</a
+				href="https://github.com/tjbck"
+				target="_blank">Timothy J. Baek</a
 			>
 		</div>
 	</div>

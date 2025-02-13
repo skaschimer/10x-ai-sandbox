@@ -17,7 +17,7 @@
 	let themes = ['dark', 'light', 'rose-pine dark', 'rose-pine-dawn light', 'oled-dark'];
 	let selectedTheme = 'system';
 
-	let languages = [];
+	let languages: Awaited<ReturnType<typeof getLanguages>> = [];
 	let lang = $i18n.language;
 	let notificationEnabled = false;
 	let system = '';
@@ -32,17 +32,20 @@
 			saveSettings({ notificationEnabled: notificationEnabled });
 		} else {
 			toast.error(
-				'Response notifications cannot be activated as the website permissions have been denied. Please visit your browser settings to grant the necessary access.'
+				$i18n.t(
+					'Response notifications cannot be activated as the website permissions have been denied. Please visit your browser settings to grant the necessary access.'
+				)
 			);
 		}
 	};
 
 	// Advanced
 	let requestFormat = '';
-	let keepAlive = null;
+	let keepAlive: string | null = null;
 
 	let params = {
 		// Advanced
+		stream_response: null,
 		seed: null,
 		temperature: null,
 		frequency_penalty: null,
@@ -52,12 +55,14 @@
 		mirostat_tau: null,
 		top_k: null,
 		top_p: null,
+		min_p: null,
 		stop: null,
 		tfs_z: null,
 		num_ctx: null,
 		num_batch: null,
 		num_keep: null,
-		max_tokens: null
+		max_tokens: null,
+		num_gpu: null
 	};
 
 	const toggleRequestFormat = async () => {
@@ -93,6 +98,8 @@
 		}
 
 		if (themeToApply === 'dark' && !_theme.includes('oled')) {
+			document.documentElement.style.setProperty('--color-gray-800', '#333');
+			document.documentElement.style.setProperty('--color-gray-850', '#262626');
 			document.documentElement.style.setProperty('--color-gray-900', '#171717');
 			document.documentElement.style.setProperty('--color-gray-950', '#0d0d0d');
 		}
@@ -109,6 +116,29 @@
 			document.documentElement.classList.add(e);
 		});
 
+		const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+		if (metaThemeColor) {
+			if (_theme.includes('system')) {
+				const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+					? 'dark'
+					: 'light';
+				console.log('Setting system meta theme color: ' + systemTheme);
+				metaThemeColor.setAttribute('content', systemTheme === 'light' ? '#ffffff' : '#171717');
+			} else {
+				console.log('Setting meta theme color: ' + _theme);
+				metaThemeColor.setAttribute(
+					'content',
+					_theme === 'dark'
+						? '#171717'
+						: _theme === 'oled-dark'
+							? '#000000'
+							: _theme === 'her'
+								? '#983724'
+								: '#ffffff'
+				);
+			}
+		}
+
 		console.log(_theme);
 	};
 
@@ -116,6 +146,8 @@
 		theme.set(_theme);
 		localStorage.setItem('theme', _theme);
 		if (_theme.includes('oled')) {
+			document.documentElement.style.setProperty('--color-gray-800', '#101010');
+			document.documentElement.style.setProperty('--color-gray-850', '#050505');
 			document.documentElement.style.setProperty('--color-gray-900', '#000000');
 			document.documentElement.style.setProperty('--color-gray-950', '#000000');
 			document.documentElement.classList.add('dark');
@@ -125,7 +157,7 @@
 </script>
 
 <div class="flex flex-col h-full justify-between text-sm">
-	<div class="  pr-1.5 overflow-y-scroll max-h-[25rem]">
+	<div class="  overflow-y-scroll max-h-[28rem] lg:max-h-full">
 		<div class="">
 			<div class=" mb-1 text-sm font-medium">{$i18n.t('WebUI Settings')}</div>
 
@@ -174,7 +206,7 @@
 						href="https://github.com/open-webui/open-webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization"
 						target="_blank"
 					>
-						Help us translate this sandbox!
+						Help us translate Open WebUI!
 					</a>
 				</div>
 			{/if}
@@ -292,11 +324,12 @@
 
 	<div class="flex justify-end pt-3 text-sm font-medium">
 		<button
-			class="  px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-gray-100 transition rounded-lg"
+			class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full"
 			on:click={() => {
 				saveSettings({
 					system: system !== '' ? system : undefined,
 					params: {
+						stream_response: params.stream_response !== null ? params.stream_response : undefined,
 						seed: (params.seed !== null ? params.seed : undefined) ?? undefined,
 						stop: params.stop ? params.stop.split(',').filter((e) => e) : undefined,
 						temperature: params.temperature !== null ? params.temperature : undefined,
@@ -308,6 +341,7 @@
 						mirostat_tau: params.mirostat_tau !== null ? params.mirostat_tau : undefined,
 						top_k: params.top_k !== null ? params.top_k : undefined,
 						top_p: params.top_p !== null ? params.top_p : undefined,
+						min_p: params.min_p !== null ? params.min_p : undefined,
 						tfs_z: params.tfs_z !== null ? params.tfs_z : undefined,
 						num_ctx: params.num_ctx !== null ? params.num_ctx : undefined,
 						num_batch: params.num_batch !== null ? params.num_batch : undefined,
@@ -315,7 +349,8 @@
 						max_tokens: params.max_tokens !== null ? params.max_tokens : undefined,
 						use_mmap: params.use_mmap !== null ? params.use_mmap : undefined,
 						use_mlock: params.use_mlock !== null ? params.use_mlock : undefined,
-						num_thread: params.num_thread !== null ? params.num_thread : undefined
+						num_thread: params.num_thread !== null ? params.num_thread : undefined,
+						num_gpu: params.num_gpu !== null ? params.num_gpu : undefined
 					},
 					keepAlive: keepAlive ? (isNaN(keepAlive) ? keepAlive : parseInt(keepAlive)) : undefined
 				});

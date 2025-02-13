@@ -1,6 +1,0 @@
-{
-	"makefile.configureOnOpen": false,
-	"terminal.integrated.shell.linux": "/bin/bash",
-	"python.terminal.activateEnvironment": true,
-	"python.pythonPath": "./venv/bin/python"
-}

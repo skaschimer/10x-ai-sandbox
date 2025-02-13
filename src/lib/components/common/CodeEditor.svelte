@@ -6,27 +6,64 @@
 	import { acceptCompletion } from '@codemirror/autocomplete';
 	import { indentWithTab } from '@codemirror/commands';
 
-	import { indentUnit } from '@codemirror/language';
-	import { python } from '@codemirror/lang-python';
+	import { indentUnit, LanguageDescription } from '@codemirror/language';
+	import { languages } from '@codemirror/language-data';
+
 	import { oneDark } from '@codemirror/theme-one-dark';
 
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount, createEventDispatcher, getContext, tick } from 'svelte';
+
 	import { formatPythonCode } from '$lib/apis/utils';
 	import { toast } from 'svelte-sonner';
 
 	const dispatch = createEventDispatcher();
+	const i18n = getContext('i18n');
 
 	export let boilerplate = '';
 	export let value = '';
+	let _value = '';
+
+	$: if (value) {
+		updateValue();
+	}
+
+	const updateValue = () => {
+		if (_value !== value) {
+			_value = value;
+			if (codeEditor) {
+				codeEditor.dispatch({
+					changes: [{ from: 0, to: codeEditor.state.doc.length, insert: _value }]
+				});
+			}
+		}
+	};
+
+	export let id = '';
+	export let lang = '';
 
 	let codeEditor;
 
 	let isDarkMode = false;
 	let editorTheme = new Compartment();
+	let editorLanguage = new Compartment();
+
+	languages.push(
+		LanguageDescription.of({
+			name: 'HCL',
+			extensions: ['hcl', 'tf'],
+			load() {
+				return import('codemirror-lang-hcl').then((m) => m.hcl());
+			}
+		})
+	);
+	const getLang = async () => {
+		const language = languages.find((l) => l.alias.includes(lang));
+		return await language?.load();
+	};
 
 	export const formatPythonCodeHandler = async () => {
 		if (codeEditor) {
-			const res = await formatPythonCode(value).catch((error) => {
+			const res = await formatPythonCode(_value).catch((error) => {
 				toast.error(error);
 				return null;
 			});
@@ -37,7 +74,11 @@
 					changes: [{ from: 0, to: codeEditor.state.doc.length, insert: formattedCode }]
 				});
 
-				toast.success('Code formatted successfully');
+				_value = formattedCode;
+				dispatch('change', { value: _value });
+				await tick();
+
+				toast.success($i18n.t('Code formatted successfully'));
 				return true;
 			}
 			return false;
@@ -48,16 +89,30 @@
 	let extensions = [
 		basicSetup,
 		keymap.of([{ key: 'Tab', run: acceptCompletion }, indentWithTab]),
-		python(),
 		indentUnit.of('    '),
 		placeholder('Enter your code here...'),
 		EditorView.updateListener.of((e) => {
 			if (e.docChanged) {
-				value = e.state.doc.toString();
+				_value = e.state.doc.toString();
+				dispatch('change', { value: _value });
 			}
 		}),
-		editorTheme.of([])
+		editorTheme.of([]),
+		editorLanguage.of([])
 	];
+
+	$: if (lang) {
+		setLanguage();
+	}
+
+	const setLanguage = async () => {
+		const language = await getLang();
+		if (language && codeEditor) {
+			codeEditor.dispatch({
+				effects: editorLanguage.reconfigure(language)
+			});
+		}
+	};
 
 	onMount(() => {
 		console.log(value);
@@ -65,16 +120,18 @@
 			value = boilerplate;
 		}
 
+		_value = value;
+
 		// Check if html class has dark mode
 		isDarkMode = document.documentElement.classList.contains('dark');
 
 		// python code editor, highlight python code
 		codeEditor = new EditorView({
 			state: EditorState.create({
-				doc: value,
+				doc: _value,
 				extensions: extensions
 			}),
-			parent: document.getElementById('code-textarea')
+			parent: document.getElementById(`code-textarea-${id}`)
 		});
 
 		if (isDarkMode) {
@@ -132,4 +189,4 @@
 	});
 </script>
 
-<div id="code-textarea" class="h-full w-full" />
+<div id="code-textarea-{id}" class="h-full w-full" />

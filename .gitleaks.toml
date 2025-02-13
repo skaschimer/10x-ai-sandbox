@@ -1,9 +1,0 @@
-title = "Gitleaks development"
-[extend]
-useDefault = true
-
-[allowlist]
-paths = [
-  '''.env''',
-  '''.secrets.baseline'''
-]

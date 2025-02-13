@@ -1,5 +1,39 @@
 import { OLLAMA_API_BASE_URL } from '$lib/constants';
-import { titleGenerationTemplate } from '$lib/utils';
+
+export const verifyOllamaConnection = async (
+	token: string = '',
+	url: string = '',
+	key: string = ''
+) => {
+	let error = null;
+
+	const res = await fetch(`${OLLAMA_API_BASE_URL}/verify`, {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			url,
+			key
+		})
+	})
+		.then(async (res) => {
+			if (!res.ok) throw await res.json();
+			return res.json();
+		})
+		.catch((err) => {
+			error = `Ollama: ${err?.error?.message ?? 'Network Problem'}`;
+			return [];
+		});
+
+	if (error) {
+		throw error;
+	}
+
+	return res;
+};
 
 export const getOllamaConfig = async (token: string = '') => {
 	let error = null;
@@ -33,7 +67,13 @@ export const getOllamaConfig = async (token: string = '') => {
 	return res;
 };
 
-export const updateOllamaConfig = async (token: string = '', enable_ollama_api: boolean) => {
+type OllamaConfig = {
+	ENABLE_OLLAMA_API: boolean;
+	OLLAMA_BASE_URLS: string[];
+	OLLAMA_API_CONFIGS: object;
+};
+
+export const updateOllamaConfig = async (token: string = '', config: OllamaConfig) => {
 	let error = null;
 
 	const res = await fetch(`${OLLAMA_API_BASE_URL}/config/update`, {
@@ -44,7 +84,7 @@ export const updateOllamaConfig = async (token: string = '', enable_ollama_api: 
 			...(token && { authorization: `Bearer ${token}` })
 		},
 		body: JSON.stringify({
-			enable_ollama_api: enable_ollama_api
+			...config
 		})
 	})
 		.then(async (res) => {
@@ -167,10 +207,10 @@ export const getOllamaVersion = async (token: string, urlIdx?: number) => {
 	return res?.version ?? false;
 };
 
-export const getOllamaModels = async (token: string = '') => {
+export const getOllamaModels = async (token: string = '', urlIdx: null | number = null) => {
 	let error = null;
 
-	const res = await fetch(`${OLLAMA_API_BASE_URL}/api/tags`, {
+	const res = await fetch(`${OLLAMA_API_BASE_URL}/api/tags${urlIdx !== null ? `/${urlIdx}` : ''}`, {
 		method: 'GET',
 		headers: {
 			Accept: 'application/json',
@@ -201,55 +241,6 @@ export const getOllamaModels = async (token: string = '') => {
 		.sort((a, b) => {
 			return a.name.localeCompare(b.name);
 		});
-};
-
-// TODO: migrate to backend
-export const generateTitle = async (
-	token: string = '',
-	template: string,
-	model: string,
-	prompt: string
-) => {
-	let error = null;
-
-	template = titleGenerationTemplate(template, prompt);
-
-	console.log(template);
-
-	const res = await fetch(`${OLLAMA_API_BASE_URL}/api/generate`, {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`
-		},
-		body: JSON.stringify({
-			model: model,
-			prompt: template,
-			stream: false,
-			options: {
-				// Restrict the number of tokens generated to 50
-				num_predict: 50
-			}
-		})
-	})
-		.then(async (res) => {
-			if (!res.ok) throw await res.json();
-			return res.json();
-		})
-		.catch((err) => {
-			console.log(err);
-			if ('detail' in err) {
-				error = err.detail;
-			}
-			return null;
-		});
-
-	if (error) {
-		throw error;
-	}
-
-	return res?.response.replace(/["']/g, '') ?? 'New Chat';
 };
 
 export const generatePrompt = async (token: string = '', model: string, conversation: string) => {
@@ -345,7 +336,7 @@ export const generateTextCompletion = async (token: string = '', model: string, 
 };
 
 export const generateChatCompletion = async (token: string = '', body: object) => {
-	const controller = new AbortController();
+	let controller = new AbortController();
 	let error = null;
 
 	const res = await fetch(`${OLLAMA_API_BASE_URL}/api/chat`, {
@@ -446,7 +437,7 @@ export const deleteModel = async (token: string, tagName: string, urlIdx: string
 	return res;
 };
 
-export const pullModel = async (token: string, tagName: string, urlIdx: string | null = null) => {
+export const pullModel = async (token: string, tagName: string, urlIdx: number | null = null) => {
 	let error = null;
 	const controller = new AbortController();
 

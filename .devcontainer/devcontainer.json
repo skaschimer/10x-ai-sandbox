@@ -1,29 +1,27 @@
 {
-	"name": "Webui Dev Container",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": "."
+	"name": "Python DevContainer",
+	"dockerFile": "devDockerfile",
+	"context": "..",
+	"containerEnv": {
+		"REQUESTS_CA_BUNDLE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem",
+		"SSL_CERT_FILE": "/usr/local/lib/python3.11/dist-packages/certifi/cacert.pem"
 	},
-	"forwardPorts": [8080, 9099],
+	"workspaceFolder": "/workspace",
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"ms-azuretools.vscode-docker",
-				"GitHub.copilot",
-				"GitHub.copilot-chat",
-				"ms-python.python",
-				"ms-python.debugpy",
-				"esbenp.prettier-vscode",
-				"mikestead.dotenv",
-				"dbaeumer.vscode-eslint",
-				"DavidAnson.vscode-markdownlint",
-				"christian-kohler.path-intellisense",
-				"redhat.vscode-yaml",
-				"ms-python.vscode-pylance",
-				"github.vscode-github-actions",
-				"jock.svg"
-			]
+			"extensions": ["ms-python.python", "ms-python.vscode-pylance"],
+			"settings": {
+				"python.pythonPath": "/usr/local/bin/python",
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"terminal.integrated.shell.linux": "/bin/bash",
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash",
+						"args": ["--init-file", "/workspace/.devcontainer/init.sh"]
+					}
+				}
+			}
 		}
 	},
-	"postCreateCommand": "./.devcontainer/build.sh"
+	"forwardPorts": [8080]
 }

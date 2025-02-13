@@ -1,6 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { sourcemapExclude } from './sourcemapExclude';
 
 // /** @type {import('vite').Plugin} */
 // const viteServerConfig = {
@@ -17,7 +16,7 @@ import { sourcemapExclude } from './sourcemapExclude';
 // };
 
 export default defineConfig({
-	plugins: [sveltekit(), sourcemapExclude({ excludeNodeModules: true })],
+	plugins: [sveltekit()],
 	define: {
 		APP_VERSION: JSON.stringify(process.env.npm_package_version),
 		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')

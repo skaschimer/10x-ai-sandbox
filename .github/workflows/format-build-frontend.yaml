@@ -21,8 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.15.1' # Or specify any other version you want to use
-      
+          node-version: '22' # Or specify any other version you want to use
+
       - name: Install Dependencies
         run: npm install
 
@@ -38,23 +38,20 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-  # test-frontend:
-  #   name: 'Frontend Unit Tests'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
+  test-frontend:
+    name: 'Frontend Unit Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20.15.1'
-      
-  #     - name: Install NPM
-  #       run: npm install -g npm@10.8.3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-  #     - name: Install Dependencies
-  #       run: npm ci
+      - name: Install Dependencies
+        run: npm ci
 
-  #     - name: Run vitest
-  #       run: npm run test:frontend
+      - name: Run vitest
+        run: npm run test:frontend

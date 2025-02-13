@@ -1,65 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<link rel="manifest" href="%sveltekit.assets%/manifest.json" crossorigin="use-credentials" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-
-		<!-- iOS Specific Tags -->
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<link rel="apple-touch-icon" href="%sveltekit.assets%/favicon-ios.png" />
-		<meta name="apple-mobile-web-app-title" content="GSA AI Sandbox" />
-		<meta name="format-detection" content="telephone=no" />
-		<meta name="apple-touch-fullscreen" content="yes" />
-		<!-- Ensures Fullscreen mode on iOS -->
-		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-
-		<!-- Android Specific Tags -->
-		<meta name="theme-color" content="#000000" />
-		<link rel="manifest" href="/manifest.json" />
-		<meta name="mobile-web-app-capable" content="yes" />
-		<meta name="application-name" content="GSA AI Sandbox" />
-		<link rel="icon" sizes="192x192" href="%sveltekit.assets%/favicon-192x192.png" />
-		<link rel="icon" sizes="512x512" href="%sveltekit.assets%/favicon-512x512.png" />
-
-		<!-- General PWA Tags -->
-		<meta name="description" content="GSA AI Sandbox - Powered by 10x" />
-
+		<link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+		<link rel="shortcut icon" href="/favicon/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-title" content="Open WebUI" />
+		<link rel="manifest" href="/favicon/site.webmanifest" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="theme-color" content="#171717" />
 		<meta name="robots" content="noindex,nofollow" />
+		<meta name="description" content="Open WebUI" />
 		<link
 			rel="search"
 			type="application/opensearchdescription+xml"
-			title="GSA AI Sandbox"
+			title="Open WebUI"
 			href="/opensearch.xml"
 		/>
 
 		<script>
+			function resizeIframe(obj) {
+				obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+			}
+		</script>
+
+		<script>
 			// On page load or when changing themes, best to add inline in `head` to avoid FOUC
 			(() => {
-				if (localStorage?.theme && localStorage?.theme.includes('oled')) {
+				const metaThemeColorTag = document.querySelector('meta[name="theme-color"]');
+				const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				if (!localStorage?.theme) {
+					localStorage.theme = 'system';
+				}
+
+				if (localStorage.theme === 'system') {
+					document.documentElement.classList.add(prefersDarkTheme ? 'dark' : 'light');
+					metaThemeColorTag.setAttribute('content', prefersDarkTheme ? '#171717' : '#ffffff');
+				} else if (localStorage.theme === 'oled-dark') {
+					document.documentElement.style.setProperty('--color-gray-800', '#101010');
+					document.documentElement.style.setProperty('--color-gray-850', '#050505');
 					document.documentElement.style.setProperty('--color-gray-900', '#000000');
 					document.documentElement.style.setProperty('--color-gray-950', '#000000');
 					document.documentElement.classList.add('dark');
-				} else if (
-					localStorage.theme === 'light' ||
-					(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)
-				) {
+					metaThemeColorTag.setAttribute('content', '#000000');
+				} else if (localStorage.theme === 'light') {
 					document.documentElement.classList.add('light');
-				} else if (localStorage.theme && localStorage.theme !== 'system') {
-					localStorage.theme.split(' ').forEach((e) => {
-						document.documentElement.classList.add(e);
-					});
-				} else if (localStorage.theme && localStorage.theme === 'system') {
-					systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-					document.documentElement.classList.add(systemTheme ? 'dark' : 'light');
-				} else if (localStorage.theme && localStorage.theme === 'her') {
+					metaThemeColorTag.setAttribute('content', '#ffffff');
+				} else if (localStorage.theme === 'her') {
 					document.documentElement.classList.add('dark');
 					document.documentElement.classList.add('her');
+					metaThemeColorTag.setAttribute('content', '#983724');
 				} else {
 					document.documentElement.classList.add('dark');
+					metaThemeColorTag.setAttribute('content', '#171717');
 				}
 
 				window.matchMedia('(prefers-color-scheme: dark)').addListener((e) => {
@@ -67,41 +62,23 @@
 						if (e.matches) {
 							document.documentElement.classList.add('dark');
 							document.documentElement.classList.remove('light');
+							metaThemeColorTag.setAttribute('content', '#171717');
 						} else {
 							document.documentElement.classList.add('light');
 							document.documentElement.classList.remove('dark');
+							metaThemeColorTag.setAttribute('content', '#ffffff');
 						}
 					}
 				});
 			})();
-			function isIosSafari() {
-				const ua = window.navigator.userAgent;
-				return !!ua.match(/iP(ad|hone|od)/i) && !!ua.match(/WebKit/i) && !ua.match(/CriOS/i);
-			}
-
-			function getViewportHeight() {
-				return window.innerHeight;
-			}
-
-			let initialViewportHeight = getViewportHeight();
-
-			window.addEventListener('resize', () => {
-				if (isIosSafari()) {
-					const currentViewportHeight = getViewportHeight();
-					if (currentViewportHeight > initialViewportHeight) {
-						document.documentElement.classList.add('ios-safari-toolbar-hidden');
-					} else {
-						document.documentElement.classList.remove('ios-safari-toolbar-hidden');
-					}
-				}
-			});
 		</script>
 
-		<title>GSA AI Sandbox</title>
+		<title>Open WebUI</title>
 
 		%sveltekit.head%
 	</head>
-	<body data-sveltekit-preload-data="hover" class="ios-safari-toolbar-hidden">
+
+	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 
 		<div
@@ -118,13 +95,13 @@
 				id="logo"
 				style="
 					position: absolute;
-					width: 6rem;
+					width: auto;
 					height: 6rem;
-					top: 41%;
+					top: 44%;
 					left: 50%;
-					margin-left: -3rem;
+					transform: translateX(-50%);
 				"
-				src="/logo.svg"
+				src="/static/splash.png"
 			/>
 
 			<div
@@ -134,7 +111,7 @@
 					left: 50%;
 
 					width: 24rem;
-					margin-left: -12rem;
+					transform: translateX(-50%);
 
 					display: flex;
 					flex-direction: column;
@@ -143,8 +120,8 @@
 			>
 				<img
 					id="logo-her"
-					style="width: 13rem; height: 13rem"
-					src="/logo.svg"
+					style="width: auto; height: 13rem"
+					src="/static/splash.png"
 					class="animate-pulse-fast"
 				/>
 
@@ -186,33 +163,18 @@
 	html {
 		overflow-y: hidden !important;
 	}
-	/* Ensure html and body use safe area insets with a black background */
-	html,
-	body {
-		padding-top: env(safe-area-inset-top);
-		padding-bottom: env(safe-area-inset-bottom);
-		background-color: #000;
-	}
-	.ios-safari-toolbar-hidden body {
-		background-color: lightcoral;
-		padding-bottom: 100px;
-	}
-	/* Ensure the splash screen respects safe area insets with a black background */
-	#splash-screen {
-		padding-top: env(safe-area-inset-top);
-		padding-bottom: env(safe-area-inset-bottom);
-	}
 
 	#splash-screen {
 		background: #fff;
 	}
+
 	html.dark #splash-screen {
 		background: #000;
 	}
 
-	html.dark #splash-screen img {
-		filter: invert(1) hue-rotate(180deg);
-	}
+	/* html.dark #splash-screen img {
+		filter: invert(1);
+	} */
 
 	html.her #splash-screen {
 		background: #983724;
@@ -236,7 +198,7 @@
 
 	html.her #logo-her {
 		display: block;
-		filter: invert(1) hue-rotate(180deg);
+		/*filter: invert(1);*/
 	}
 
 	html.her #progress-background {
@@ -262,6 +224,7 @@
 			opacity: 0.65;
 		}
 	}
+
 	.animate-pulse-fast {
 		animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}

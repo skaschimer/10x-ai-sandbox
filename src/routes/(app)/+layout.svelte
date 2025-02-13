@@ -4,38 +4,47 @@
 	import { openDB, deleteDB } from 'idb';
 	import fileSaver from 'file-saver';
 	const { saveAs } = fileSaver;
+	import mermaid from 'mermaid';
 
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { fade } from 'svelte/transition';
 
-	import { getModels as _getModels } from '$lib/apis';
-	import { getAllChatTags } from '$lib/apis/chats';
-
+	import { getKnowledgeBases } from '$lib/apis/knowledge';
+	import { getFunctions } from '$lib/apis/functions';
+	import { getModels, getVersionUpdates } from '$lib/apis';
+	import { getAllTags } from '$lib/apis/chats';
 	import { getPrompts } from '$lib/apis/prompts';
-	import { getDocs } from '$lib/apis/documents';
 	import { getTools } from '$lib/apis/tools';
-
 	import { getBanners } from '$lib/apis/configs';
 	import { getUserSettings } from '$lib/apis/users';
 
+	import { WEBUI_VERSION } from '$lib/constants';
+	import { compareVersion } from '$lib/utils';
+
 	import {
+		config,
 		user,
-		showSettings,
 		settings,
 		models,
 		prompts,
-		documents,
+		knowledge,
+		tools,
+		functions,
 		tags,
 		banners,
+		showSettings,
 		showChangelog,
-		config,
-		showCallOverlay,
-		tools
+		temporaryChatEnabled
 	} from '$lib/stores';
 
-	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
-	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
+	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
+	import { MAIN_CONTENT_ID as mainContentId } from '$lib/constants';
+	//import ChangelogModal from '$lib/components/ChangelogModal.svelte';
+	import TermsModal from '$lib/components/TermsModal.svelte';
 	import AccountPending from '$lib/components/layout/Overlay/AccountPending.svelte';
+	import UpdateInfoToast from '$lib/components/layout/UpdateInfoToast.svelte';
 
 	const i18n = getContext('i18n');
 
@@ -43,9 +52,7 @@
 	let DB = null;
 	let localDBChats = [];
 
-	const getModels = async () => {
-		return _getModels(localStorage.token);
-	};
+	let version;
 
 	onMount(async () => {
 		if ($user === undefined) {
@@ -75,33 +82,24 @@
 			});
 
 			if (userSettings) {
-				await settings.set(userSettings.ui);
+				settings.set(userSettings.ui);
 			} else {
-				await settings.set(JSON.parse(localStorage.getItem('settings') ?? '{}'));
+				let localStorageSettings = {} as Parameters<(typeof settings)['set']>[0];
+
+				try {
+					localStorageSettings = JSON.parse(localStorage.getItem('settings') ?? '{}');
+				} catch (e: unknown) {
+					console.error('Failed to parse settings from localStorage', e);
+				}
+
+				settings.set(localStorageSettings);
 			}
 
-			await Promise.all([
-				(async () => {
-					models.set(await getModels());
-				})(),
-				(async () => {
-					prompts.set(await getPrompts(localStorage.token));
-				})(),
-				(async () => {
-					documents.set(await getDocs(localStorage.token));
-				})(),
-				(async () => {
-					tools.set(await getTools(localStorage.token));
-				})(),
-				(async () => {
-					banners.set(await getBanners(localStorage.token));
-				})(),
-				(async () => {
-					tags.set(await getAllChatTags(localStorage.token));
-				})()
-			]);
+			models.set(await getModels(localStorage.token));
+			banners.set(await getBanners(localStorage.token));
+			tools.set(await getTools(localStorage.token));
 
-			document.addEventListener('keydown', function (event) {
+			document.addEventListener('keydown', async function (event) {
 				const isCtrlPressed = event.ctrlKey || event.metaKey; // metaKey is for Cmd key on Mac
 				// Check if the Shift key is pressed
 				const isShiftPressed = event.shiftKey;
@@ -117,7 +115,7 @@
 				if (isShiftPressed && event.key === 'Escape') {
 					event.preventDefault();
 					console.log('focusInput');
-					document.getElementById('chat-textarea')?.focus();
+					document.getElementById('chat-input')?.focus();
 				}
 
 				// Check if Ctrl + Shift + ; is pressed
@@ -145,7 +143,11 @@
 				}
 
 				// Check if Ctrl + Shift + Backspace is pressed
-				if (isCtrlPressed && isShiftPressed && event.key === 'Backspace') {
+				if (
+					isCtrlPressed &&
+					isShiftPressed &&
+					(event.key === 'Backspace' || event.key === 'Delete')
+				) {
 					event.preventDefault();
 					console.log('deleteChat');
 					document.getElementById('delete-chat-button')?.click();
@@ -164,22 +166,70 @@
 					console.log('showShortcuts');
 					document.getElementById('show-shortcuts-button')?.click();
 				}
+
+				// Check if Ctrl + Shift + ' is pressed
+				if (isCtrlPressed && isShiftPressed && event.key.toLowerCase() === `'`) {
+					event.preventDefault();
+					console.log('temporaryChat');
+					temporaryChatEnabled.set(!$temporaryChatEnabled);
+					await goto('/');
+					const newChatButton = document.getElementById('new-chat-button');
+					setTimeout(() => {
+						newChatButton?.click();
+					}, 0);
+				}
 			});
 
-			if ($user.role === 'admin') {
-				showChangelog.set(localStorage.version !== $config.version);
+			if ($user.role === 'admin' && ($settings?.showChangelog ?? true)) {
+				showChangelog.set($settings?.version !== $config.version);
 			}
 
+			if ($page.url.searchParams.get('temporary-chat') === 'true') {
+				temporaryChatEnabled.set(true);
+			}
+
+			// Check for version updates
+			if ($user.role === 'admin') {
+				// Check if the user has dismissed the update toast in the last 24 hours
+				if (localStorage.dismissedUpdateToast) {
+					const dismissedUpdateToast = new Date(Number(localStorage.dismissedUpdateToast));
+					const now = new Date();
+
+					if (now - dismissedUpdateToast > 24 * 60 * 60 * 1000) {
+						checkForVersionUpdates();
+					}
+				} else {
+					checkForVersionUpdates();
+				}
+			}
 			await tick();
 		}
 
 		loaded = true;
 	});
+
+	const checkForVersionUpdates = async () => {
+		version = await getVersionUpdates(localStorage.token).catch((error) => {
+			return {
+				current: WEBUI_VERSION,
+				latest: WEBUI_VERSION
+			};
+		});
+	};
 </script>
 
 <SettingsModal bind:show={$showSettings} />
-<ChangelogModal bind:show={$showChangelog} />
+<!--<ChangelogModal bind:show={$showChangelog} />-->
+<TermsModal bind:show={$showChangelog} />
 
+{#if loaded}
+	<a
+		href="#{mainContentId}"
+		class="px-4 py-1.5 text-sm rounded-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition font-medium space-x-1 absolute -top-full -left-full focus:top-5 focus:left-5 z-1000"
+	>
+		Skip to main content
+	</a>
+{/if}
 <div class="app relative">
 	<div
 		class=" text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] overflow-auto flex flex-row"
@@ -246,6 +296,17 @@
 		{/if}
 	</div>
 </div>
+{#if version && compareVersion(version.latest, version.current) && ($settings?.showUpdateToast ?? true)}
+	<div class=" absolute bottom-8 right-8 z-50" in:fade={{ duration: 100 }}>
+		<UpdateInfoToast
+			{version}
+			on:close={() => {
+				localStorage.setItem('dismissedUpdateToast', Date.now().toString());
+				version = null;
+			}}
+		/>
+	</div>
+{/if}
 
 <style>
 	.loading {

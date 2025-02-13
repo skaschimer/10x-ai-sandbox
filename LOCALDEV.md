@@ -42,6 +42,10 @@
 
 5. **Install deps, build and run**:
 
+   - It is recommended to run against the stock pgvector postgres container, which can be run like so:
+
+   `docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 pgvector/pgvector:pg15`
+
    - Make sure you've got the .env file set up, then install, build and run with hot reloading:
 
    ```bash
@@ -64,11 +68,7 @@
 - Once you're in, you should see the four default models available in the chat. If not, check that the pipelines server is running on 9099 and in the UI click on your user in the lower left > Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to [<http://localhost:9099](http://localhost:9099>) and the API key to 0p3n-w3bu! and hit refresh to see if it connects to the pipeline server.
 - After completing these steps, the models specified in the pipeline settings should be available in the drop down at the upper left when you create a new conversation.
 
-7. **Setup postgres with pgvector for local RAG testing**:
+7. **Clean up running servers/services if needed**:
 
-- Remember to turn off any existing postgres services.
-- Ensure docker engine is available and run a postgres 15 container with pgvector already installed:
-
-`docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5432:5432 pgvector/pgvector:pg15`
-
-- To mimic the production env, ensure that `DATABASE_URL` provides a connection string to the container above
+- Sometimes there are server processes that don't shut down completely and prevent you from running the app successfully on subsequent sessions. Clean these up with these commands:
+  `lsof -ti:9100 | xargs kill -9` and `lsof -ti:9099 | xargs kill -9`
