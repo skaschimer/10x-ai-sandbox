@@ -43,7 +43,7 @@
 	// Inject Datadog init
 	import { initDataDog } from '$lib/logging/datadog';
 	initDataDog();
-	
+
 	setContext('i18n', i18n);
 
 	let loaded = false;
