@@ -54,6 +54,9 @@ RUN sed -i '/testing main/d' /etc/apt/sources.list \
 
 # (Optional) Install pip for Python 3.11:
 # RUN python3.11 -m ensurepip --upgrade
+ARG PUBLIC_DATADOG_APP_ID
+ARG PUBLIC_DATADOG_CLIENT_TOKEN
+ARG PUBLIC_DATADOG_SERVICE
 
 # We re-declare our ARGs/ENVs as needed
 ARG USE_CUDA=false

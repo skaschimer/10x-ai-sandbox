@@ -33,6 +33,10 @@ jobs:
       - name: Build and run Compose Stack
         run: |
           docker compose \
+            --build-arg PUBLIC_DATADOG_APP_ID=$PUBLIC_DATADOG_APP_ID \
+            --build-arg PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN \
+            --build-arg PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE \
+
             --file docker-compose.yaml \
             --file docker-compose.api.yaml \
             --file docker-compose.a1111-test.yaml \
