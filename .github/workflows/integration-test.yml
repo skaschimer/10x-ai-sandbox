@@ -32,9 +32,9 @@ jobs:
           PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }}
 
         run: |
-          export PUBLIC_DATADOG_APP_ID=$PUBLIC_DATADOG_APP_ID \
-          export PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN \
-          export PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE \
+          export PUBLIC_DATADOG_APP_ID=$PUBLIC_DATADOG_APP_ID 
+          export PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN 
+          export PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE 
           docker compose \
             --file docker-compose.yaml \
             --file docker-compose.api.yaml \
