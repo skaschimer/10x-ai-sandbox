@@ -307,7 +307,9 @@ def add_file_to_knowledge_by_id(
                 log.info(
                     f"User {user.name} ({user.id}) added file {form_data.file_id} to knowledge '{knowledge.name}' ({knowledge.id})"
                 )
-                log.info(f"Files currently in knowledge '{knowledge.name}' ({knowledge.id}): {[{f.id: f.filename} for f in files]}")
+                log.info(
+                    f"Files currently in knowledge '{knowledge.name}' ({knowledge.id}): {[{f.id: f.filename} for f in files]}"
+                )
 
                 return KnowledgeFilesResponse(
                     **knowledge.model_dump(),

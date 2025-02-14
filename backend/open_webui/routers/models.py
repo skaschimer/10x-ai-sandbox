@@ -79,9 +79,7 @@ async def create_new_model(
     else:
         model = Models.insert_new_model(form_data, user.id)
         if model:
-            log.info(
-                f"User {user.name} ({user.id}) created model '{model.id}'"
-            )
+            log.info(f"User {user.name} ({user.id}) created model '{model.id}'")
             return model
         else:
             raise HTTPException(
