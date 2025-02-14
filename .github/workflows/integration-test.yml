@@ -11,9 +11,9 @@ on:
       - dev
 
 env:
-    PUBLIC_DATADOG_APP_ID: ${{ secrets.DATADOG_APP_ID }},
-    PUBLIC_DATADOG_CLIENT_TOKEN:  ${{ secrets.DATADOG_CLIENT_TOKEN }},
-    PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }},
+    PUBLIC_DATADOG_APP_ID: ${{ secrets.DATADOG_APP_ID }}
+    PUBLIC_DATADOG_CLIENT_TOKEN:  ${{ secrets.DATADOG_CLIENT_TOKEN }}
+    PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }}
 
 jobs:
   cypress-run:
