@@ -15,6 +15,11 @@ services:
         OLLAMA_BASE_URL: '/ollama'
       dockerfile: Dockerfile
     image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
+    args:
+      PUBLIC_DATADOG_APP_ID: ${PUBLIC_DATADOG_APP_ID}
+      PUBLIC_DATADOG_CLIENT_TOKEN: ${PUBLIC_DATADOG_CLIENT_TOKEN}
+      PUBLIC_DATADOG_SERVICE: ${PUBLIC_DATADOG_SERVICE}
+
     container_name: open-webui
     volumes:
       - open-webui:/app/backend/data
