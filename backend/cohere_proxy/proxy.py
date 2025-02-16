@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from open_webui.utils.aws import get_bedrock_client
+from cohere_proxy.utils.aws import bedrock_client
 
 
 load_dotenv()
@@ -16,10 +16,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 model_id = os.getenv("COHERE_EMBED_MODEL_ID", "You forgot to set COHERE_EMBED_MODEL_ID")
-bedrock_client = get_bedrock_client(
-    assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
-    region=os.environ.get("AWS_DEFAULT_REGION", None),
-)
 
 
 @app.post("/embeddings")
