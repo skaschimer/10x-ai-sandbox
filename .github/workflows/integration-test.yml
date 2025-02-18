@@ -14,6 +14,11 @@ jobs:
   cypress-run:
     name: Run Cypress Integration Tests
     runs-on: ubuntu-latest
+    env:
+      PUBLIC_DATADOG_APP_ID: ${{ secrets.DATADOG_APP_ID }}
+      PUBLIC_DATADOG_CLIENT_TOKEN:  ${{ secrets.DATADOG_CLIENT_TOKEN }}
+      PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }}
+
     steps:
       - name: Maximize build space
         uses: AdityaGarg8/remove-unwanted-software@v4.1
@@ -26,16 +31,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build and run Compose Stack
-        env:
-          PUBLIC_DATADOG_APP_ID: ${{ secrets.DATADOG_APP_ID }}
-          PUBLIC_DATADOG_CLIENT_TOKEN:  ${{ secrets.DATADOG_CLIENT_TOKEN }}
-          PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }}
-
         run: |
-          export PUBLIC_DATADOG_APP_ID=$PUBLIC_DATADOG_APP_ID 
-          export PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN 
-          export PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE 
-          docker compose \
+          docker-compose \
             --file docker-compose.yaml \
             --file docker-compose.api.yaml \
             --file docker-compose.a1111-test.yaml \
