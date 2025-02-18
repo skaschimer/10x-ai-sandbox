@@ -32,7 +32,7 @@ jobs:
 
       - name: Build and run Compose Stack
         run: |
-          docker-compose \
+          docker compose \
             --file docker-compose.yaml \
             --file docker-compose.api.yaml \
             --file docker-compose.a1111-test.yaml \
