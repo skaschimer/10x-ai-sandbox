@@ -198,7 +198,8 @@ type Config = {
 		enable_admin_export: boolean;
 		enable_admin_chat_access: boolean;
 		enable_community_sharing: boolean;
-		default_show_changelog: boolean;
+		allow_simultaneous_models: boolean;
+    default_show_changelog: boolean;
 	};
 	oauth: {
 		providers: {

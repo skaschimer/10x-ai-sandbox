@@ -223,11 +223,12 @@
 <!-- <TermsModal bind:show={$showChangelog} /> -->
 
 {#if loaded}
-<a
-	href=#{mainContentId}
-	class="px-4 py-1.5 text-sm rounded-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition font-medium space-x-1 absolute -top-full -left-full focus:top-5 focus:left-5 z-1000">
-	Skip to main content
-</a>
+	<a
+		href="#{mainContentId}"
+		class="px-4 py-1.5 text-sm rounded-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition font-medium space-x-1 absolute -top-full -left-full focus:top-5 focus:left-5 z-1000"
+	>
+		Skip to main content
+	</a>
 {/if}
 <div class="app relative">
 	<div
