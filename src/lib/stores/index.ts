@@ -186,7 +186,6 @@ type Config = {
 	default_locale: string;
 	default_models: string;
 	default_prompt_suggestions: PromptSuggestion[];
-	default_show_changelog: boolean;
 	features: {
 		auth: boolean;
 		auth_trusted_header: boolean;
@@ -199,6 +198,7 @@ type Config = {
 		enable_admin_export: boolean;
 		enable_admin_chat_access: boolean;
 		enable_community_sharing: boolean;
+		default_show_changelog: boolean;
 	};
 	oauth: {
 		providers: {

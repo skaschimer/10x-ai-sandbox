@@ -180,7 +180,7 @@
 				}
 			});
 
-			if ($user.role === 'admin' && ($settings?.showChangelog ?? $config.default_show_changelog ?? true)) {
+			if ($user.role === 'admin' && ($settings?.showChangelog ?? $config?.features.default_show_changelog ?? true)) {
 				showChangelog.set($settings?.version !== $config.version);
 			}
 
