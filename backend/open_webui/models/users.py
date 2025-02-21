@@ -300,5 +300,18 @@ class UsersTable:
         except Exception:
             return None
 
+    def search_users(
+        self, search_text: str, skip: Optional[int] = None, limit: Optional[int] = None
+    ) -> list[UserModel]:
+        with get_db() as db:
+            # TODO: include User.name in the search
+            users = db.query(User).filter(User.email.ilike(f"%{search_text.lower()}%"))
+            if skip:
+                users = users.offset(skip)
+            if limit:
+                users = users.limit(limit)
+            users.order_by(User.created_at.desc())
+            return [UserModel.model_validate(user) for user in users]
+
 
 Users = UsersTable()
