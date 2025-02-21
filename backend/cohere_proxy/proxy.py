@@ -23,7 +23,7 @@ async def proxy_embeddings(request: Request):
     try:
         body = await request.json()
 
-        logger.info(f"Cohere request body: {body}")
+        logger.debug(f"Cohere request body: {body}")
 
         body_input = body.get("input")
         input_type = "search_query" if len(body_input) == 1 else "search_document"
