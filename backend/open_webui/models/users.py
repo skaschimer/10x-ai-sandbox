@@ -4,7 +4,7 @@ from typing import Optional
 from open_webui.internal.db import Base, JSONField, get_db
 from open_webui.models.chats import Chats
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import BigInteger, Column, String, Text
+from sqlalchemy import BigInteger, Column, String, Text, or_
 
 ####################
 # User DB Schema
@@ -304,8 +304,10 @@ class UsersTable:
         self, search_text: str, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> list[UserModel]:
         with get_db() as db:
-            # TODO: include User.name in the search
-            users = db.query(User).filter(User.email.ilike(f"%{search_text.lower()}%"))
+            st = search_text.lower()
+            users = db.query(User).filter(
+                or_(User.email.ilike(f"%{st}%"), User.name.ilike(f"%{st}%"))
+            )
             if skip:
                 users = users.offset(skip)
             if limit:
