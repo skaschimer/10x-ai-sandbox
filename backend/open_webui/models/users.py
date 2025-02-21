@@ -308,11 +308,11 @@ class UsersTable:
             users = db.query(User).filter(
                 or_(User.email.ilike(f"%{st}%"), User.name.ilike(f"%{st}%"))
             )
+            users.order_by(User.created_at.desc())
             if skip:
                 users = users.offset(skip)
             if limit:
                 users = users.limit(limit)
-            users.order_by(User.created_at.desc())
             return [UserModel.model_validate(user) for user in users]
 
 
