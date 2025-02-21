@@ -41,16 +41,17 @@ async def get_users(
 ############################
 # Search Users
 ############################
-# TODO: make search text a query param instead of path
-@router.get("/search/{search_text}", response_model=list[UserModel])
+
+
+@router.get("/search", response_model=list[UserModel])
 async def search_users(
     # TODO: scrub search text
-    search_text: str,
+    q: str,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
     user=Depends(get_admin_user),
 ):
-    return Users.search_users(search_text, skip, limit)
+    return Users.search_users(q, skip, limit)
 
 
 ############################
