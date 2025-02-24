@@ -951,6 +951,7 @@ ENABLE_SET_AS_DEFAULT_MODEL = (
     os.environ.get("ENABLE_SET_AS_DEFAULT_MODEL", "True").lower() == "true"
 )
 
+
 def validate_cors_origins(origins):
     for origin in origins:
         if origin != "*":
