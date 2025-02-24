@@ -940,6 +940,9 @@ ENABLE_MESSAGE_RATING = PersistentConfig(
 ALLOW_SIMULTANEOUS_MODELS = (
     os.environ.get("ALLOW_SIMULTANEOUS_MODELS", "True").lower() == "true"
 )
+DEFAULT_SHOW_VERSION_UPDATE = (
+    os.environ.get("DEFAULT_SHOW_VERSION_UPDATE", "False").lower() == "true"
+)
 
 
 ENABLE_CHAT_CONTROLS = os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
