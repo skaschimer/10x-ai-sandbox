@@ -200,7 +200,7 @@ type Config = {
 		enable_community_sharing: boolean;
 		allow_simultaneous_models: boolean;
 		default_show_changelog: boolean;
-		enable_set_as_default_model: boolean
+		enable_set_as_default_model: boolean;
 	};
 	oauth: {
 		providers: {
