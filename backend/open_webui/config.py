@@ -767,8 +767,7 @@ WEBUI_URL = PersistentConfig(
 )
 
 ENABLE_ONBOARDING_PAGE = (
-    os.environ.get("ENABLE_ONBOARDING_PAGE", "False").lower()
-    == "true"
+    os.environ.get("ENABLE_ONBOARDING_PAGE", "False").lower() == "true"
 )
 
 ENABLE_SIGNUP = PersistentConfig(
