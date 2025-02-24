@@ -942,9 +942,7 @@ ALLOW_SIMULTANEOUS_MODELS = (
 )
 
 
-ENABLE_CHAT_CONTROLS = (
-    os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
-)
+ENABLE_CHAT_CONTROLS = os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
 
 DEFAULT_SHOW_CHANGELOG = (
     os.environ.get("DEFAULT_SHOW_CHANGELOG", "True").lower() == "true"
