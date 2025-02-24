@@ -305,10 +305,11 @@ class UsersTable:
     ) -> list[UserModel]:
         with get_db() as db:
             st = search_text.lower()
-            users = db.query(User).filter(
-                or_(User.email.ilike(f"%{st}%"), User.name.ilike(f"%{st}%"))
+            users = (
+                db.query(User)
+                .filter(or_(User.email.ilike(f"%{st}%"), User.name.ilike(f"%{st}%")))
+                .order_by(User.created_at.desc())
             )
-            users.order_by(User.created_at.desc())
             if skip:
                 users = users.offset(skip)
             if limit:
