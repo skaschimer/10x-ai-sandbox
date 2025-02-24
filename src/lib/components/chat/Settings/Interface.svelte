@@ -211,7 +211,6 @@
 
 		showChangelog = $settings.showChangelog ?? $config?.features.default_show_changelog ?? true;
 
-
 		showEmojiInCall = $settings.showEmojiInCall ?? false;
 		voiceInterruption = $settings.voiceInterruption ?? false;
 

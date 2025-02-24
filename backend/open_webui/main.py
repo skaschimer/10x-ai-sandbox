@@ -217,7 +217,6 @@ from open_webui.config import (
     EVALUATION_ARENA_MODELS,
     DEFAULT_SHOW_VERSION_UPDATE,
     DEFAULT_SHOW_CHANGELOG,
-
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -988,7 +987,6 @@ async def get_app_config(request: Request):
             "enable_signup": app.state.config.ENABLE_SIGNUP,
             "enable_login_form": app.state.config.ENABLE_LOGIN_FORM,
             "enable_websocket": ENABLE_WEBSOCKET_SUPPORT,
-            "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
             **(
                 {
                     "enable_channels": app.state.config.ENABLE_CHANNELS,
@@ -1002,6 +1000,7 @@ async def get_app_config(request: Request):
                     "enable_admin_export": ENABLE_ADMIN_EXPORT,
                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
                     "default_show_changelog": DEFAULT_SHOW_CHANGELOG,
+                    "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
                 }
                 if user is not None
                 else {}
