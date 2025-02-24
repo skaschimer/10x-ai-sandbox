@@ -1,42 +1,27 @@
+# import datetime
 import json
 import os
 from typing import Generator, Iterator, List, Optional, Union
 
 import requests
 from pydantic import BaseModel
-from utils.pipelines.aws import get_bedrock_client
+from utils.pipelines.aws import bedrock_client
 
 
 class Pipeline:
     class Valves(BaseModel):
-        AWS_ACCESS_KEY_ID: Optional[str]
-        AWS_SECRET_ACCESS_KEY: Optional[str]
-        AWS_DEFAULT_REGION: Optional[str]
-        BEDROCK_ENDPOINT_URL: Optional[str]
-        BEDROCK_ASSUME_ROLE: Optional[str]
+        AWS_REGION: Optional[str]
+        BEDROCK_CLAUDE_HAIKU_ARN: Optional[str]
 
     def __init__(self):
         self.name = "Claude Haiku 3.5"
         self.valves = self.Valves(
             **{
-                "AWS_ACCESS_KEY_ID": os.getenv(
-                    "AWS_ACCESS_KEY_ID", "your-aws-access-key-id-here"
-                ),
-                "AWS_SECRET_ACCESS_KEY": os.getenv(
-                    "AWS_SECRET_ACCESS_KEY", "your-aws-secret-access-key-here"
-                ),
-                "AWS_DEFAULT_REGION": os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
-                "BEDROCK_ENDPOINT_URL": os.getenv(
-                    "BEDROCK_ENDPOINT_URL",
-                    "https://bedrock.us-east-1.amazonaws.com",
-                ),
-                "BEDROCK_ASSUME_ROLE": os.getenv("BEDROCK_ASSUME_ROLE", None),
+                "AWS_REGION": os.getenv("AWS_REGION", "us-east-1"),
+                "BEDROCK_CLAUDE_HAIKU_ARN": os.getenv("BEDROCK_CLAUDE_HAIKU_ARN", None),
             }
         )
-        self.bedrock_client = get_bedrock_client(
-            assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
-            region=os.environ.get("AWS_DEFAULT_REGION", None),
-        )
+        self.bedrock_client = bedrock_client
 
     async def on_startup(self):
         print(f"on_startup:{__name__}")
@@ -49,14 +34,8 @@ class Pipeline:
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        # print(f"pipe:{__name__}")
 
-        # print(messages)
-        # print(user_message)
-
-        # allowed_roles = {"user", "assistant"}
-
-        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+        model_id = self.valves.BEDROCK_CLAUDE_HAIKU_ARN
 
         if "messages" in body:
             # remove messages with system role and insert content into body

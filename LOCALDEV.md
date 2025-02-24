@@ -42,6 +42,10 @@
 
 5. **Install deps, build and run**:
 
+   - It is recommended to run against the stock pgvector postgres container, which can be run like so:
+
+   `docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 pgvector/pgvector:pg15`
+
    - Make sure you've got the .env file set up, then install, build and run with hot reloading:
 
    ```bash

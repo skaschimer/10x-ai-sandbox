@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from open_webui.utils.aws import get_bedrock_client
+from cohere_proxy.utils.aws import bedrock_client
 
 
 load_dotenv()
@@ -16,10 +16,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 model_id = os.getenv("COHERE_EMBED_MODEL_ID", "You forgot to set COHERE_EMBED_MODEL_ID")
-bedrock_client = get_bedrock_client(
-    assumed_role=os.environ.get("BEDROCK_ASSUME_ROLE", None),
-    region=os.environ.get("AWS_DEFAULT_REGION", None),
-)
 
 
 @app.post("/embeddings")
@@ -27,22 +23,28 @@ async def proxy_embeddings(request: Request):
     try:
         body = await request.json()
 
+        logger.debug(f"Cohere request body: {body}")
+
         body_input = body.get("input")
+        input_type = "search_query" if len(body_input) == 1 else "search_document"
 
         tokens = 0
         for input in body_input:
             words = input.split(" ")
-            tokens += len(words) / 0.75 # we can get accurate token count from tiktoken
+            tokens += len(words) / 0.75  # we can get accurate token count from tiktoken
 
         body = json.dumps(
             {
                 "texts": body_input,
-                "input_type": "search_document",  # You can change this to 'search_query', 'classification', or 'clustering' based on your use case
+                "input_type": input_type,  # You can change this to 'search_query', 'classification', or 'clustering' based on your use case  # noqa E501
             }
         )
 
         response = bedrock_client.invoke_model(
-            body=body, modelId=model_id, accept="application/json", contentType="application/json"
+            body=body,
+            modelId=model_id,
+            accept="application/json",
+            contentType="application/json",
         )
 
         response_body = json.loads(response.get("body").read())

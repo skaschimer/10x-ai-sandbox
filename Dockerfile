@@ -16,6 +16,14 @@ RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.pem npm c
 COPY . .
 ENV APP_BUILD_HASH=dev-build
 ENV NODE_OPTIONS=--max-old-space-size=4096
+ARG PUBLIC_DATADOG_APP_ID
+ARG PUBLIC_DATADOG_CLIENT_TOKEN
+ARG PUBLIC_DATADOG_SERVICE
+
+ENV PUBLIC_DATADOG_APP_ID=${PUBLIC_DATADOG_APP_I}
+ENV PUBLIC_DATADOG_CLIENT_TOKEN=${PUBLIC_DATADOG_CLIENT_TOKEN}
+ENV PUBLIC_DATADOG_SERVICE=${PUBLIC_DATADOG_SERVICE}
+
 RUN npm run build
 
 # ##############################################################################
@@ -95,6 +103,12 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages \
     /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
+RUN uv pip uninstall --system posthog && \
+    uv cache clean && \
+    rm -rf root/.cache/pip/* && \
+    rm -rf root/.cache/uv/* && \
+    uv pip install --upgrade --system posthog==3.11.0 && \ 
+    rm -rf root/.cache/*
 # # Copy any caches or model downloads you want at runtime
 # COPY --from=builder /root/.cache /root/.cache
 
