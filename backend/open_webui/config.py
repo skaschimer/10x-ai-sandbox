@@ -756,6 +756,9 @@ WEBUI_URL = PersistentConfig(
     "WEBUI_URL", "webui.url", os.environ.get("WEBUI_URL", "http://localhost:3000")
 )
 
+ENABLE_ONBOARDING_PAGE = (
+    os.environ.get("ENABLE_ONBOARDING_PAGE", "False").lower() == "true"
+)
 
 ENABLE_SIGNUP = PersistentConfig(
     "ENABLE_SIGNUP",
@@ -942,9 +945,7 @@ DEFAULT_SHOW_CHANGELOG = (
     os.environ.get("DEFAULT_SHOW_CHANGELOG", "True").lower() == "true"
 )
 
-ENABLE_CHAT_CONTROLS = (
-    os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
-)
+ENABLE_CHAT_CONTROLS = os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
 
 ENABLE_SET_AS_DEFAULT_MODEL = (
     os.environ.get("ENABLE_SET_AS_DEFAULT_MODEL", "True").lower() == "true"
