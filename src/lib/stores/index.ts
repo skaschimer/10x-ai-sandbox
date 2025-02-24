@@ -199,6 +199,7 @@ type Config = {
 		enable_admin_chat_access: boolean;
 		enable_community_sharing: boolean;
 		allow_simultaneous_models: boolean;
+		enable_set_as_default_model: boolean
 	};
 	oauth: {
 		providers: {
