@@ -135,7 +135,8 @@
 	<div class="flex gap-1">
 		<div class=" flex w-full space-x-2">
 			<div class="flex flex-1">
-				<form class="flex"
+				<form
+					class="flex"
 					on:submit={() => {
 						submitSearchHandler();
 					}}
