@@ -1002,6 +1002,7 @@ async def get_app_config(request: Request):
                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
                     "default_show_changelog": DEFAULT_SHOW_CHANGELOG,
                     "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
+                    "enable_admin_feedbacks": ENABLE_ADMIN_FEEDBACKS,
                 }
                 if user is not None
                 else {}
@@ -1030,7 +1031,6 @@ async def get_app_config(request: Request):
                     "max_count": app.state.config.FILE_MAX_COUNT,
                 },
                 "permissions": {**app.state.config.USER_PERMISSIONS},
-                "enable_admin_feedbacks": ENABLE_ADMIN_FEEDBACKS,
             }
             if user is not None
             else {}

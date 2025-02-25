@@ -952,7 +952,7 @@ DEFAULT_SHOW_CHANGELOG = (
 )
 
 ENABLE_ADMIN_FEEDBACKS = (
-    os.environ.get("ENABLE_ADMIN_FEEDBACKS", "False").lower() == "true"
+    os.environ.get("ENABLE_ADMIN_FEEDBACKS", "True").lower() == "true"
 )
 
 
