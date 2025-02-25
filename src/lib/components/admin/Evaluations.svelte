@@ -13,7 +13,7 @@
 
 	let loaded = false;
 	let feedbacks = [];
-	let enable_admin_feedbacks = $config?.enable_admin_feedbacks || false;
+	let enable_admin_feedbacks = $config?.features?.enable_admin_feedbacks || false;
 
 	onMount(async () => {
 		if (enable_admin_feedbacks) {
