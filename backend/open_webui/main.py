@@ -217,6 +217,7 @@ from open_webui.config import (
     EVALUATION_ARENA_MODELS,
     DEFAULT_SHOW_VERSION_UPDATE,
     DEFAULT_SHOW_CHANGELOG,
+    ENABLE_ACTIVE_USERS_COUNT,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -1001,6 +1002,7 @@ async def get_app_config(request: Request):
                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
                     "default_show_changelog": DEFAULT_SHOW_CHANGELOG,
                     "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
+                    "enable_active_users_count": ENABLE_ACTIVE_USERS_COUNT,
                 }
                 if user is not None
                 else {}
