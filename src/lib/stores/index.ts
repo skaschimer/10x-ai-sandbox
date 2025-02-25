@@ -202,6 +202,7 @@ type Config = {
 		enable_chat_controls: boolean;
 		default_show_changelog: boolean;
 		enable_active_users_count: boolean;
+		enable_admin_feedbacks: boolean;
 	};
 	oauth: {
 		providers: {

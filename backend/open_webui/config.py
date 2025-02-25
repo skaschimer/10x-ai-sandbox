@@ -955,6 +955,10 @@ ENABLE_ACTIVE_USERS_COUNT = (
     os.environ.get("ENABLE_ACTIVE_USERS_COUNT", "False").lower() == "true"
 )
 
+ENABLE_ADMIN_FEEDBACKS = (
+    os.environ.get("ENABLE_ADMIN_FEEDBACKS", "True").lower() == "true"
+)
+
 
 def validate_cors_origins(origins):
     for origin in origins:
