@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
 from pydantic import BaseModel
 from sqlalchemy import text
+import redis
 
 from typing import Optional
 from aiocache import cached
@@ -282,6 +283,7 @@ from open_webui.env import (
     BYPASS_MODEL_ACCESS_CONTROL,
     RESET_CONFIG_ON_START,
     OFFLINE_MODE,
+    WEBSOCKET_REDIS_URL,
 )
 
 
@@ -1174,12 +1176,12 @@ async def healthcheck():
     db_is_healthy = True
 
     # get pipelines health
-    response = requests.get("http://localhost:9099/health")
+    response = requests.get("http://localhost:9099/models")
     if response.status_code == 200:
         pipeline_is_healthy = True
 
     # check redis health with REDIS_URL
-    redis_client = redis.StrictRedis.from_url(os.getenv("WEBSOCKET_REDIS_URL"))
+    redis_client = redis.StrictRedis.from_url(WEBSOCKET_REDIS_URL)
     pong = redis_client.ping()
     redis_is_healthy = pong == True
 
@@ -1193,6 +1195,13 @@ async def healthcheck():
     )
 
     if not healthy:
+        log.warning(
+            f"Readiness check at: {int(time.time())}\n"
+            + f"pipeline_is_healthy: {pipeline_is_healthy}\n"
+            + f"cohere_is_healthy: {cohere_is_healthy}\n"
+            + f"db_is_healthy: {db_is_healthy}\n"
+            + f"redis_is_healthy: {redis_is_healthy}\n"
+        )
         raise HTTPException(status_code=500, detail="Health check failed")
 
     return {"status": True}

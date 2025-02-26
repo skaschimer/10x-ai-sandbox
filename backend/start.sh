@@ -3,19 +3,22 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
-# runs on 9100
-# ./azure_proxy/start.sh &
-
 # Function to check if a port is in use
 is_port_in_use() {
   lsof -i :"$1" >/dev/null
 }
 
-# Check if port 9100 is in use
+# # Check if port 9100 is in use
+# if is_port_in_use 9100; then
+#   echo "POD [$HOSTNAME] - Port 9100 is already in use. Skipping cohere proxy start." >&2
+# else
+#   ./azure_proxy/start.sh &
+# fi
+
+# Check if port 9101 is in use
 if is_port_in_use 9101; then
-  echo "POD [$HOSTNAME] - Port 9100 is already in use. Skipping cohere proxy start." >&2
+  echo "POD [$HOSTNAME] - Port 9101 is already in use. Skipping cohere proxy start." >&2
 else
-  # run on 9100
   ./cohere_proxy/start.sh &
 fi
 
@@ -23,7 +26,6 @@ fi
 if is_port_in_use 9099; then
   echo "POD [$HOSTNAME] - Port 9099 is already in use. Skipping open webui pipelines server start." >&2
 else
-  # runs on 9099
   ./open-webui-pipelines/start.sh &
 fi
 
