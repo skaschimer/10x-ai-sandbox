@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
 from pydantic import BaseModel
 from sqlalchemy import text
+import redis
 
 from typing import Optional
 from aiocache import cached
@@ -284,6 +285,7 @@ from open_webui.env import (
     BYPASS_MODEL_ACCESS_CONTROL,
     RESET_CONFIG_ON_START,
     OFFLINE_MODE,
+    WEBSOCKET_REDIS_URL,
 )
 
 
@@ -1168,6 +1170,44 @@ async def get_opensearch_xml():
 
 @app.get("/health")
 async def healthcheck():
+    pipeline_is_healthy = False
+    cohere_is_healthy = False
+    db_is_healthy = False
+    redis_is_healthy = False
+
+    # get db health
+    Session.execute(text("SELECT 1;")).all()
+    db_is_healthy = True
+
+    # get pipelines health
+    response = requests.get("http://localhost:9099/models")
+    if response.status_code == 200:
+        pipeline_is_healthy = True
+
+    # check redis health with REDIS_URL
+    redis_client = redis.StrictRedis.from_url(WEBSOCKET_REDIS_URL)
+    pong = redis_client.ping()
+    redis_is_healthy = pong == True
+
+    # get cohere proxy health
+    response = requests.get("http://localhost:9101/health")
+    if response.status_code == 200:
+        cohere_is_healthy = True
+
+    healthy = (
+        pipeline_is_healthy and cohere_is_healthy and db_is_healthy and redis_is_healthy
+    )
+
+    if not healthy:
+        log.warning(
+            f"Readiness check at: {int(time.time())}\n"
+            + f"pipeline_is_healthy: {pipeline_is_healthy}\n"
+            + f"cohere_is_healthy: {cohere_is_healthy}\n"
+            + f"db_is_healthy: {db_is_healthy}\n"
+            + f"redis_is_healthy: {redis_is_healthy}\n"
+        )
+        raise HTTPException(status_code=500, detail="Health check failed")
+
     return {"status": True}
 
 
