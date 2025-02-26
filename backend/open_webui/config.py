@@ -960,7 +960,7 @@ ENABLE_ADMIN_FEEDBACKS = (
 )
 
 ENABLE_RECORD_VOICE_AND_CALL = (
-    os.environ.get("ENABLE_RECORD_VOICE_AND_CALL", "Flase").lower() == "true"
+    os.environ.get("ENABLE_RECORD_VOICE_AND_CALL", "False").lower() == "true"
 )
 
 
