@@ -219,6 +219,7 @@ from open_webui.config import (
     DEFAULT_SHOW_CHANGELOG,
     ENABLE_ACTIVE_USERS_COUNT,
     ENABLE_ADMIN_FEEDBACKS,
+    ENABLE_RECORD_VOICE_AND_CALL,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -1005,6 +1006,7 @@ async def get_app_config(request: Request):
                     "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
                     "enable_active_users_count": ENABLE_ACTIVE_USERS_COUNT,
                     "enable_admin_feedbacks": ENABLE_ADMIN_FEEDBACKS,
+                    "enable_record_voice_and_call": ENABLE_RECORD_VOICE_AND_CALL,
                 }
                 if user is not None
                 else {}
