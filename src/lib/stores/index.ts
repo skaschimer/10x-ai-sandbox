@@ -203,6 +203,7 @@ type Config = {
 		default_show_changelog: boolean;
 		enable_active_users_count: boolean;
 		enable_admin_feedbacks: boolean;
+		enable_more_inputs: boolean;
 	};
 	oauth: {
 		providers: {
