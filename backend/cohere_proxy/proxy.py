@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from cohere_proxy.utils.aws import bedrock_client
+from utils.aws import bedrock_client
 
 
 load_dotenv()
