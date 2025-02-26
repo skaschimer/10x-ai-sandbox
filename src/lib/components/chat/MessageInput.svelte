@@ -39,7 +39,6 @@
 	import { error, text } from '@sveltejs/kit';
 	import Image from '../common/Image.svelte';
 
-
 	const i18n = getContext('i18n');
 
 	export let transparentBackground = false;
@@ -1076,7 +1075,7 @@
 									{/if}
 
 									<div class="self-end mb-1.5 flex space-x-1 mr-1">
-										{#if (!history?.currentId || history.messages[history.currentId]?.done == true) && $config?.features?.enable_record_voice_and_call }
+										{#if (!history?.currentId || history.messages[history.currentId]?.done == true) && $config?.features?.enable_record_voice_and_call}
 											<Tooltip content={$i18n.t('Record voice')}>
 												<button
 													id="voice-input-button"
