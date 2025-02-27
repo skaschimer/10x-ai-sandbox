@@ -1933,7 +1933,7 @@
 							</div>
 						</div>
 
-						<div class=" pb-[1rem]">
+						<div class=" pb-[2rem]">
 							<MessageInput
 								{history}
 								{selectedModels}
