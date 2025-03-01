@@ -18,4 +18,5 @@ echo "No secrets detected in staged files! 🎉"
 
 npm install
 npm run format
+npm run format:backend
 npm run i18n:parse
