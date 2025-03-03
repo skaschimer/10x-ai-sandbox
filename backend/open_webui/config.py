@@ -965,6 +965,7 @@ ENABLE_RECORD_VOICE_AND_CALL = (
 )
 ENABLE_DISCLAIMER = os.environ.get("ENABLE_DISCLAIMER", "True").lower() == "true"
 
+ENABLE_DELETE_BUTTON = os.environ.get("ENABLE_DELETE_BUTTON", "False").lower() == "true"
 
 def validate_cors_origins(origins):
     for origin in origins:

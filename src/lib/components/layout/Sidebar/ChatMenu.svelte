@@ -23,7 +23,7 @@
 		getChatPinnedStatusById,
 		toggleChatPinnedStatusById
 	} from '$lib/apis/chats';
-	import { chats } from '$lib/stores';
+	import { config } from '$lib/stores';
 	import { createMessagesList } from '$lib/utils';
 	import { downloadChatAsPDF } from '$lib/apis/utils';
 	import Download from '$lib/components/icons/Download.svelte';
@@ -235,15 +235,17 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
-			<DropdownMenu.Item
-				class="flex  gap-2  items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
-				on:click={() => {
-					deleteHandler();
-				}}
-			>
-				<GarbageBin strokeWidth="2" />
-				<div class="flex items-center">{$i18n.t('Delete')}</div>
-			</DropdownMenu.Item>
+			{#if $config?.features?.enable_delete_button}
+				<DropdownMenu.Item
+					class="flex  gap-2  items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+					on:click={() => {
+						deleteHandler();
+					}}
+				>
+					<GarbageBin strokeWidth="2" />
+					<div class="flex items-center">{$i18n.t('Delete')}</div>
+				</DropdownMenu.Item>
+			{/if}
 
 			<hr class="border-gray-50 dark:border-gray-850 my-0.5" />
 
