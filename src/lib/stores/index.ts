@@ -207,7 +207,8 @@ type Config = {
 		default_show_version_update: boolean;
 		enable_record_voice_and_call: boolean;
 		enable_disclaimer: boolean;
-		enable_sidebar_search_and_new_folder: boolean;
+		enable_sidebar_search: boolean;
+		enable_sidebar_create_folder: boolean;
 		enable_floating_buttons: boolean;
 	};
 	oauth: {

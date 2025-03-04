@@ -967,8 +967,12 @@ ENABLE_RECORD_VOICE_AND_CALL = (
 ENABLE_DISCLAIMER = os.environ.get("ENABLE_DISCLAIMER", "True").lower() == "true"
 
 
-ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER = (
-    os.environ.get("ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER", "False").lower() == "true"
+ENABLE_SIDEBAR_SEARCH = (
+    os.environ.get("ENABLE_SIDEBAR_SEARCH", "False").lower() == "true"
+)
+
+ENABLE_SIDEBAR_CREATE_FOLDER = (
+    os.environ.get("ENABLE_SIDEBAR_CREATE_FOLDER", "False").lower() == "true"
 )
 
 ENABLE_FLOATING_BUTTONS = (

@@ -554,13 +554,14 @@
 			{#if $temporaryChatEnabled}
 				<div class="absolute z-40 w-full h-full flex justify-center"></div>
 			{/if}
-			{#if $config?.features?.enable_sidebar_search_and_new_folder}
+			{#if $config?.features?.enable_sidebar_search}
 				<SearchInput
 					bind:value={search}
 					on:input={searchDebounceHandler}
 					placeholder={$i18n.t('Search')}
 				/>
-
+			{/if}
+			{#if $config?.features?.enable_sidebar_create_folder}
 				<div class="absolute z-40 right-3.5 top-1">
 					<Tooltip content={$i18n.t('New folder')}>
 						<button
