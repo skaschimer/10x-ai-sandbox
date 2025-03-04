@@ -208,6 +208,7 @@ type Config = {
 		enable_record_voice_and_call: boolean;
 		enable_disclaimer: boolean;
 		enable_sidebar_search_and_new_folder: boolean;
+		enable_floating_buttons: boolean;
 	};
 	oauth: {
 		providers: {

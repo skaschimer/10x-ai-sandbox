@@ -963,11 +963,15 @@ ENABLE_ADMIN_FEEDBACKS = (
 ENABLE_RECORD_VOICE_AND_CALL = (
     os.environ.get("ENABLE_RECORD_VOICE_AND_CALL", "False").lower() == "true"
 )
+
 ENABLE_DISCLAIMER = os.environ.get("ENABLE_DISCLAIMER", "True").lower() == "true"
+
 
 ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER = (
     os.environ.get("ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER", "False").lower() == "true"
-)
+
+ENABLE_FLOATING_BUTTONS = (
+    os.environ.get("ENABLE_FLOATING_BUTTONS", "False").lower() == "true"
 
 
 def validate_cors_origins(origins):

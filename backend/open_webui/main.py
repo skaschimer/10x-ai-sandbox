@@ -224,6 +224,7 @@ from open_webui.config import (
     ENABLE_MORE_INPUTS,
     ENABLE_DISCLAIMER,
     ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER,
+    ENABLE_FLOATING_BUTTONS,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -1015,6 +1016,7 @@ async def get_app_config(request: Request):
                     "enable_more_inputs": ENABLE_MORE_INPUTS,
                     "enable_disclaimer": ENABLE_DISCLAIMER,
                     "enable_sidebar_search_and_new_folder": ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER,
+                    "enable_floating_buttons": ENABLE_FLOATING_BUTTONS,
                 }
                 if user is not None
                 else {}
