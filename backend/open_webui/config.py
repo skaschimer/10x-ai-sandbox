@@ -965,6 +965,10 @@ ENABLE_RECORD_VOICE_AND_CALL = (
 )
 ENABLE_DISCLAIMER = os.environ.get("ENABLE_DISCLAIMER", "True").lower() == "true"
 
+ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER = (
+    os.environ.get("ENABLE_SIDEBAR_SEARCH_AND_NEW_FOLDER", "False").lower() == "true"
+)
+
 
 def validate_cors_origins(origins):
     for origin in origins:
