@@ -554,25 +554,27 @@
 			{#if $temporaryChatEnabled}
 				<div class="absolute z-40 w-full h-full flex justify-center"></div>
 			{/if}
-
-			<SearchInput
-				bind:value={search}
-				on:input={searchDebounceHandler}
-				placeholder={$i18n.t('Search')}
-			/>
-
-			<div class="absolute z-40 right-3.5 top-1">
-				<Tooltip content={$i18n.t('New folder')}>
-					<button
-						class="p-1 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-950 dark:hover:bg-gray-900 text-gray-500 dark:text-gray-500 transition"
-						on:click={() => {
-							createFolder();
-						}}
-					>
-						<Plus className=" size-3" strokeWidth="2.5" />
-					</button>
-				</Tooltip>
-			</div>
+			{#if $config?.features?.enable_sidebar_search}
+				<SearchInput
+					bind:value={search}
+					on:input={searchDebounceHandler}
+					placeholder={$i18n.t('Search')}
+				/>
+			{/if}
+			{#if $config?.features?.enable_sidebar_create_folder}
+				<div class="absolute z-40 right-3.5 top-1">
+					<Tooltip content={$i18n.t('New folder')}>
+						<button
+							class="p-1 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-950 dark:hover:bg-gray-900 text-gray-500 dark:text-gray-500 transition"
+							on:click={() => {
+								createFolder();
+							}}
+						>
+							<Plus className=" size-3" strokeWidth="2.5" />
+						</button>
+					</Tooltip>
+				</div>
+			{/if}
 		</div>
 
 		<div
