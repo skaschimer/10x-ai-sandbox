@@ -207,6 +207,7 @@ type Config = {
 		default_show_version_update: boolean;
 		enable_record_voice_and_call: boolean;
 		enable_disclaimer: boolean;
+		enable_floating_buttons: boolean;
 		enable_delete_button: boolean;
 	};
 	oauth: {

@@ -223,6 +223,7 @@ from open_webui.config import (
     ENABLE_RECORD_VOICE_AND_CALL,
     ENABLE_MORE_INPUTS,
     ENABLE_DISCLAIMER,
+    ENABLE_FLOATING_BUTTONS,
     ENABLE_DELETE_BUTTON,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
@@ -1014,6 +1015,7 @@ async def get_app_config(request: Request):
                     "enable_record_voice_and_call": ENABLE_RECORD_VOICE_AND_CALL,
                     "enable_more_inputs": ENABLE_MORE_INPUTS,
                     "enable_disclaimer": ENABLE_DISCLAIMER,
+                    "enable_floating_buttons": ENABLE_FLOATING_BUTTONS,
                     "enable_delete_button": ENABLE_DELETE_BUTTON,
                 }
                 if user is not None

@@ -4,7 +4,7 @@
 	const dispatch = createEventDispatcher();
 
 	import Markdown from './Markdown.svelte';
-	import { chatId, mobile, showArtifacts, showControls, showOverview } from '$lib/stores';
+	import { chatId, mobile, showArtifacts, showControls, showOverview, config } from '$lib/stores';
 	import FloatingButtons from '../ContentRenderer/FloatingButtons.svelte';
 	import { createMessagesList } from '$lib/utils';
 
@@ -159,7 +159,7 @@
 	/>
 </div>
 
-{#if floatingButtons && model}
+{#if $config?.features.enable_floating_buttons && floatingButtons && model}
 	<FloatingButtons
 		bind:this={floatingButtonsElement}
 		{id}
