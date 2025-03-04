@@ -223,6 +223,8 @@ from open_webui.config import (
     ENABLE_RECORD_VOICE_AND_CALL,
     ENABLE_MORE_INPUTS,
     ENABLE_DISCLAIMER,
+    ENABLE_SIDEBAR_SEARCH,
+    ENABLE_SIDEBAR_CREATE_FOLDER,
     ENABLE_FLOATING_BUTTONS,
     ENABLE_DELETE_BUTTON,
     # WebUI (OAuth)
@@ -1015,6 +1017,8 @@ async def get_app_config(request: Request):
                     "enable_record_voice_and_call": ENABLE_RECORD_VOICE_AND_CALL,
                     "enable_more_inputs": ENABLE_MORE_INPUTS,
                     "enable_disclaimer": ENABLE_DISCLAIMER,
+                    "enable_sidebar_search": ENABLE_SIDEBAR_SEARCH,
+                    "enable_sidebar_create_folder": ENABLE_SIDEBAR_CREATE_FOLDER,
                     "enable_floating_buttons": ENABLE_FLOATING_BUTTONS,
                     "enable_delete_button": ENABLE_DELETE_BUTTON,
                 }
