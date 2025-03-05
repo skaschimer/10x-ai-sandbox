@@ -27,7 +27,7 @@
 >
 	{#each prompts as prompt, promptIdx}
 		<button
-			class="flex flex-col flex-1 shrink-0 w-full justify-between px-3 py-2 rounded-xl bg-transparent"
+			class="flex flex-col flex-1 shrink-0 w-full justify-between px-1 py-2 rounded-xl bg-transparent"
 			on:click={() => {
 				dispatch('select', prompt.content);
 			}}
