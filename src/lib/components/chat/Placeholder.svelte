@@ -138,7 +138,7 @@
 				{/if}
 
 				<div class="text-xl lg:text-3xl sm:text-2xl line-clamp-1" in:fade={{ duration: 100 }}>
-					{$i18n.t('How can I help you today,{{name}}?', { name: $user.name })}
+					{$i18n.t('How can I help you today?')}
 				</div>
 			</div>
 
