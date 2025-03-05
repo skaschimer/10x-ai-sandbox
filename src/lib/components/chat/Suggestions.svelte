@@ -27,7 +27,7 @@
 >
 	{#each prompts as prompt, promptIdx}
 		<button
-			class="flex flex-col flex-1 shrink-0 w-full justify-between px-3 py-2 rounded-xl bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition group"
+			class="flex flex-col flex-1 shrink-0 w-full justify-between px-3 py-2 rounded-xl bg-transparent"
 			on:click={() => {
 				dispatch('select', prompt.content);
 			}}
@@ -35,7 +35,7 @@
 			<div>
 				{#if prompt.title && prompt.title[0] !== ''}
 					<div
-						class="px-3 py-1 border border-gray-400 text-sm font-medium items-center text-gray-400 dark:text-gray-600 bg-white font-semibold rounded-full"
+						class="px-3 py-1 border border-gray-400 text-sm font-medium items-center text-gray-400 dark:text-gray-600 bg-white font-semibold rounded-full hover:text-gray-800 hover:border-gray-800"
 					>
 						{prompt.title[0]}
 						{prompt.title[1]}

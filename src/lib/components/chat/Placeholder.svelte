@@ -100,7 +100,7 @@
 	{/if}
 
 	<div
-		class="w-full text-3xl text-gray-800 dark:text-gray-100 font-medium text-center flex items-center gap-4 font-primary"
+		class="w-full text-gray-800 dark:text-gray-100 font-medium text-center flex items-center gap-4 font-primary"
 	>
 		<div class="w-full flex flex-col justify-center items-center">
 			<div class="flex flex-row justify-center gap-3 sm:gap-3.5 w-fit px-5">
@@ -137,7 +137,7 @@
 					</div>
 				{/if}
 
-				<div class=" text-3xl sm:text-xl line-clamp-1" in:fade={{ duration: 100 }}>
+				<div class="text-xl lg:text-3xl sm:text-2xl line-clamp-1" in:fade={{ duration: 100 }}>
 					{$i18n.t('How can I help you today,{{name}}?', { name: $user.name })}
 				</div>
 			</div>
@@ -209,7 +209,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="mx-auto max-w-2xl font-primary" in:fade={{ duration: 200, delay: 200 }}>
+	<div class="mx-auto max-w-3xl font-primary px-8" in:fade={{ duration: 200, delay: 200 }}>
 		<div class="mx-1">
 			<Suggestions
 				suggestionPrompts={models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
