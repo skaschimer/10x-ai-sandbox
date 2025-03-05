@@ -981,6 +981,14 @@ ENABLE_FLOATING_BUTTONS = (
 
 ENABLE_DELETE_BUTTON = os.environ.get("ENABLE_DELETE_BUTTON", "False").lower() == "true"
 
+ENABLE_SIDEBAR_USER_PROFILE = (
+    os.environ.get("ENABLE_SIDEBAR_USER_PROFILE", "False").lower() == "true"
+)
+
+ENABLE_MESSAGE_INPUT_LOGO = (
+    os.environ.get("ENABLE_MESSAGE_INPUT_LOGO", "False").lower() == "true"
+)
+
 
 def validate_cors_origins(origins):
     for origin in origins:

@@ -104,43 +104,41 @@
 	>
 		<div class="w-full flex flex-col justify-center items-center">
 			<div class="flex flex-row justify-center gap-3 sm:gap-3.5 w-fit px-5">
-				<div class="flex flex-shrink-0 justify-center">
-					<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
-						{#each models as model, modelIdx}
-							<Tooltip
-								content={(models[modelIdx]?.info?.meta?.tags ?? [])
-									.map((tag) => tag.name.toUpperCase())
-									.join(', ')}
-								placement="top"
-							>
-								<button
-									on:click={() => {
-										selectedModelIdx = modelIdx;
-									}}
-									disabled={!models.length < 2}
+				{#if $config?.features?.enable_message_input_logo}
+					<div class="flex flex-shrink-0 justify-center">
+						<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
+							{#each models as model, modelIdx}
+								<Tooltip
+									content={(models[modelIdx]?.info?.meta?.tags ?? [])
+										.map((tag) => tag.name.toUpperCase())
+										.join(', ')}
+									placement="top"
 								>
-									<img
-										crossorigin="anonymous"
-										src={model?.info?.meta?.profile_image_url ??
-											($i18n.language === 'dg-DG'
-												? `/doge.png`
-												: `${WEBUI_BASE_URL}/static/gsai.png`)}
-										class=" w-16 sm:w-20 h-fit"
-										alt="GSAI"
-										draggable="false"
-									/>
-								</button>
-							</Tooltip>
-						{/each}
+									<button
+										on:click={() => {
+											selectedModelIdx = modelIdx;
+										}}
+										disabled={!models.length < 2}
+									>
+										<img
+											crossorigin="anonymous"
+											src={model?.info?.meta?.profile_image_url ??
+												($i18n.language === 'dg-DG'
+													? `/doge.png`
+													: `${WEBUI_BASE_URL}/static/gsai.png`)}
+											class=" w-16 sm:w-20 h-fit"
+											alt="GSAI"
+											draggable="false"
+										/>
+									</button>
+								</Tooltip>
+							{/each}
+						</div>
 					</div>
-				</div>
+				{/if}
 
-				<div class=" text-3xl sm:text-4xl line-clamp-1" in:fade={{ duration: 100 }}>
-					{#if models[selectedModelIdx]?.name}
-						{models[selectedModelIdx]?.name}
-					{:else}
-						{$i18n.t('Hello, {{name}}', { name: $user.name })}
-					{/if}
+				<div class=" text-3xl sm:text-xl line-clamp-1" in:fade={{ duration: 100 }}>
+					{$i18n.t('How can I help you today,{{name}}?', { name: $user.name })}
 				</div>
 			</div>
 
@@ -200,7 +198,7 @@
 					{transparentBackground}
 					{stopResponse}
 					{createMessagePair}
-					placeholder={$i18n.t('How can I help you today?')}
+					placeholder={$i18n.t('Send a message')}
 					on:upload={(e) => {
 						dispatch('upload', e.detail);
 					}}
@@ -212,7 +210,7 @@
 		</div>
 	</div>
 	<div class="mx-auto max-w-2xl font-primary" in:fade={{ duration: 200, delay: 200 }}>
-		<div class="mx-5">
+		<div class="mx-1">
 			<Suggestions
 				suggestionPrompts={models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
 					$config?.default_prompt_suggestions ??
