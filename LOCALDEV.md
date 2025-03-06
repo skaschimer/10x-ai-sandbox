@@ -90,10 +90,10 @@ Development and production deployments are running on FCS. FCS maintains its own
 - From the root of the `gsai-core-chat` repo run
 
   ```bash
-  ./pullpublic.sh
+  ./pullpublic.sh main
   ```
 
-  This will output the result of some git commands ending in the creation of a new git branch in your local repository. If succesful, it will report something like the following indicating the creating of a new feature branch:
+  to create a new pranch from the public main branch. This will output the result of some git commands ending in the creation of a new git branch in your local repository. If succesful, it will report something like the following indicating the creating of a new feature branch:
 
   ```
   Your branch is up to date with 'origin/development'.
