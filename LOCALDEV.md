@@ -73,34 +73,36 @@
 - Sometimes there are server processes that don't shut down completely and prevent you from running the app successfully on subsequent sessions. Clean these up with these commands:
   `lsof -ti:9100 | xargs kill -9` and `lsof -ti:9099 | xargs kill -9`
 
-## Deploying to FCS 
-Development and prouduction deployments are running on FCS. FCS maintains its own Github repo that mirrors the public repo. To deploy new code FCS:
+## Deploying to FCS
+
+Development and production deployments are running on FCS. FCS maintains its own Github private repo that mirrors the public repo. To deploy new code FCS:
 
 1. **Ensure you have access to FCS**
-  
-- You will need to ask someone on the team for access
 
-2. **Clone the code from the private FCS reposititory**
+- You will need to ask someone on the team for access.
 
--  You will need to run the script from this repo, which will build a new new branch with code from the public repo
+2. **Clone the code from the private FCS repository**
+
+- From a computer that can access FCS clone the `gsai-core-chat` repo. You will need to run the script from this repo, which will build a new new branch with code from the public repo
 
 3. **Execute pullpublic.sh**
 
-- From the root of the FCS repo run
+- From the root of the `gsai-core-chat` repo run
 
-   ```bash
-   ./pullpublic.sh
-   ```
+  ```bash
+  ./pullpublic.sh
+  ```
 
-   This will output the result of some git commands ending in the creation of a new git branch in your local repository, which it will report with something like:
+  This will output the result of some git commands ending in the creation of a new git branch in your local repository. If succesful, it will report something like the following indicating the creating of a new feature branch:
 
-   ```
-   Your branch is up to date with 'origin/development'.
-   HEAD is now at 2f30a7c99 Merge pull request #54 from mcaas-gsai/feature/trigger-build
-   Switched to a new branch 'feature/main-1741271146'
-   bdc6b4be9c9b3b02437dda4981e417b87f39f42e	refs/heads/main
-   HEAD is now at bdc6b4be9 Merge pull request #318 from GSA-TTS/user/issue272-homepage
-   ```
+  ```
+  Your branch is up to date with 'origin/development'.
+  HEAD is now at 2f30a7c99 Merge pull request #54 from mcaas-gsai/feature/trigger-build
+  Switched to a new branch 'feature/main-1741271146'
+  bdc6b4be9c9b3b02437dda4981e417b87f39f42e	refs/heads/main
+  HEAD is now at bdc6b4be9 Merge pull request #318 from GSA-TTS/user/issue272-homepage
+  ```
+
 4. **Push this branch and make PR**
 
 - Push this like any other branch to the private FCS repo and make a pull request into development.
