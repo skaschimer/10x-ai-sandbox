@@ -56,7 +56,7 @@
    npx husky init && \
    cp pre-commit .husky/pre-commit && \
    npm run build && \
-   ./backend/start.sh
+   ./start.sh
    ```
 
    - The first user to sign up to a new installation should get the admin role. You can also predefine user roles in the .env file. Github auth checks that email domain is in ['gsa.gov'], but you can easily modify it at `backend/apps/webui/routers/auths.py:233`. Eventually we'll need to make github for local dev only for compliance reasons.
