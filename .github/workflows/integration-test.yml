@@ -157,11 +157,11 @@ jobs:
           cd backend
           uvicorn open_webui.main:app --port "8081" --forwarded-allow-ips '*' &
           UVICORN_PID=$!
-          # Wait up to 20 seconds for the server to start
-          for i in {1..20}; do
+          # Wait up to 30 seconds for the server to start
+          for i in {1..30}; do
               curl -s http://localhost:8081/api/config > /dev/null && break
               sleep 1
-              if [ $i -eq 20 ]; then
+              if [ $i -eq 30 ]; then
                   echo "Server failed to start"
                   kill -9 $UVICORN_PID
                   exit 1
