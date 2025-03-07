@@ -8,6 +8,7 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.webui_secret_key
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

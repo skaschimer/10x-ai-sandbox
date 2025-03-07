@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
 from pydantic import BaseModel
 from sqlalchemy import text
+import redis
 
 from typing import Optional
 from aiocache import cached
@@ -216,7 +217,17 @@ from open_webui.config import (
     DEFAULT_ARENA_MODEL,
     MODEL_ORDER_LIST,
     EVALUATION_ARENA_MODELS,
+    DEFAULT_SHOW_VERSION_UPDATE,
     DEFAULT_SHOW_CHANGELOG,
+    ENABLE_ACTIVE_USERS_COUNT,
+    ENABLE_ADMIN_FEEDBACKS,
+    ENABLE_RECORD_VOICE_AND_CALL,
+    ENABLE_MORE_INPUTS,
+    ENABLE_DISCLAIMER,
+    ENABLE_SIDEBAR_SEARCH,
+    ENABLE_SIDEBAR_CREATE_FOLDER,
+    ENABLE_FLOATING_BUTTONS,
+    ENABLE_DELETE_BUTTON,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -282,6 +293,7 @@ from open_webui.env import (
     BYPASS_MODEL_ACCESS_CONTROL,
     RESET_CONFIG_ON_START,
     OFFLINE_MODE,
+    WEBSOCKET_REDIS_URL,
 )
 
 
@@ -1001,6 +1013,16 @@ async def get_app_config(request: Request):
                     "enable_admin_export": ENABLE_ADMIN_EXPORT,
                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
                     "default_show_changelog": DEFAULT_SHOW_CHANGELOG,
+                    "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
+                    "enable_active_users_count": ENABLE_ACTIVE_USERS_COUNT,
+                    "enable_admin_feedbacks": ENABLE_ADMIN_FEEDBACKS,
+                    "enable_record_voice_and_call": ENABLE_RECORD_VOICE_AND_CALL,
+                    "enable_more_inputs": ENABLE_MORE_INPUTS,
+                    "enable_disclaimer": ENABLE_DISCLAIMER,
+                    "enable_sidebar_search": ENABLE_SIDEBAR_SEARCH,
+                    "enable_sidebar_create_folder": ENABLE_SIDEBAR_CREATE_FOLDER,
+                    "enable_floating_buttons": ENABLE_FLOATING_BUTTONS,
+                    "enable_delete_button": ENABLE_DELETE_BUTTON,
                 }
                 if user is not None
                 else {}
@@ -1164,6 +1186,44 @@ async def get_opensearch_xml():
 
 @app.get("/health")
 async def healthcheck():
+    pipeline_is_healthy = False
+    cohere_is_healthy = False
+    db_is_healthy = False
+    redis_is_healthy = False
+
+    # get db health
+    Session.execute(text("SELECT 1;")).all()
+    db_is_healthy = True
+
+    # get pipelines health
+    response = requests.get("http://localhost:9099/models")
+    if response.status_code == 200:
+        pipeline_is_healthy = True
+
+    # check redis health with REDIS_URL
+    redis_client = redis.StrictRedis.from_url(WEBSOCKET_REDIS_URL)
+    pong = redis_client.ping()
+    redis_is_healthy = pong == True
+
+    # get cohere proxy health
+    response = requests.get("http://localhost:9101/health")
+    if response.status_code == 200:
+        cohere_is_healthy = True
+
+    healthy = (
+        pipeline_is_healthy and cohere_is_healthy and db_is_healthy and redis_is_healthy
+    )
+
+    if not healthy:
+        log.warning(
+            f"Readiness check at: {int(time.time())}\n"
+            + f"pipeline_is_healthy: {pipeline_is_healthy}\n"
+            + f"cohere_is_healthy: {cohere_is_healthy}\n"
+            + f"db_is_healthy: {db_is_healthy}\n"
+            + f"redis_is_healthy: {redis_is_healthy}\n"
+        )
+        raise HTTPException(status_code=500, detail="Health check failed")
+
     return {"status": True}
 
 

@@ -940,16 +940,50 @@ ENABLE_MESSAGE_RATING = PersistentConfig(
 ALLOW_SIMULTANEOUS_MODELS = (
     os.environ.get("ALLOW_SIMULTANEOUS_MODELS", "True").lower() == "true"
 )
+DEFAULT_SHOW_VERSION_UPDATE = (
+    os.environ.get("DEFAULT_SHOW_VERSION_UPDATE", "False").lower() == "true"
+)
 
 DEFAULT_SHOW_CHANGELOG = (
     os.environ.get("DEFAULT_SHOW_CHANGELOG", "True").lower() == "true"
 )
+
+ENABLE_MORE_INPUTS = os.environ.get("ENABLE_MORE_INPUTS", "False").lower() == "true"
 
 ENABLE_CHAT_CONTROLS = os.environ.get("ENABLE_CHAT_CONTROLS", "True").lower() == "true"
 
 ENABLE_SET_AS_DEFAULT_MODEL = (
     os.environ.get("ENABLE_SET_AS_DEFAULT_MODEL", "True").lower() == "true"
 )
+
+ENABLE_ACTIVE_USERS_COUNT = (
+    os.environ.get("ENABLE_ACTIVE_USERS_COUNT", "False").lower() == "true"
+)
+
+ENABLE_ADMIN_FEEDBACKS = (
+    os.environ.get("ENABLE_ADMIN_FEEDBACKS", "True").lower() == "true"
+)
+
+ENABLE_RECORD_VOICE_AND_CALL = (
+    os.environ.get("ENABLE_RECORD_VOICE_AND_CALL", "False").lower() == "true"
+)
+
+ENABLE_DISCLAIMER = os.environ.get("ENABLE_DISCLAIMER", "True").lower() == "true"
+
+
+ENABLE_SIDEBAR_SEARCH = (
+    os.environ.get("ENABLE_SIDEBAR_SEARCH", "False").lower() == "true"
+)
+
+ENABLE_SIDEBAR_CREATE_FOLDER = (
+    os.environ.get("ENABLE_SIDEBAR_CREATE_FOLDER", "False").lower() == "true"
+)
+
+ENABLE_FLOATING_BUTTONS = (
+    os.environ.get("ENABLE_FLOATING_BUTTONS", "False").lower() == "true"
+)
+
+ENABLE_DELETE_BUTTON = os.environ.get("ENABLE_DELETE_BUTTON", "False").lower() == "true"
 
 
 def validate_cors_origins(origins):
@@ -1216,7 +1250,7 @@ Responses from models: {{responses}}"""
 # Vector Database
 ####################################
 
-VECTOR_DB = os.environ.get("VECTOR_DB", "chroma")
+VECTOR_DB = os.environ.get("VECTOR_DB", "pgvector")
 
 # Chroma
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"

@@ -3,6 +3,7 @@
 	import { toast } from 'svelte-sonner';
 	import mermaid from 'mermaid';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
+	import { datadogLogs } from '@datadog/browser-logs';
 
 	import { getContext, onDestroy, onMount, tick } from 'svelte';
 	const i18n: Writable<i18nType> = getContext('i18n');
@@ -129,6 +130,9 @@
 	let files = [];
 	let params = {};
 
+	let completion_request_initiated: number = Date.now();
+	let time_to_first_token: number | null = null;
+
 	$: if (chatIdProp) {
 		(async () => {
 			console.log(chatIdProp);
@@ -223,7 +227,7 @@
 	};
 
 	const chatEventHandler = async (event, cb) => {
-		console.log(event);
+		// console.debug(event);
 
 		if (event.chat_id === $chatId) {
 			await tick();
@@ -755,7 +759,7 @@
 			const chatContent = chat.chat;
 
 			if (chatContent) {
-				console.log(chatContent);
+				console.debug(chatContent);
 
 				selectedModels =
 					(chatContent?.models ?? undefined) !== undefined
@@ -815,6 +819,15 @@
 	};
 
 	const chatCompletedHandler = async (chatId, modelId, responseMessageId, messages) => {
+		// SR announcement
+		document.getElementById('svelte-announcer').textContent = 'response generated';
+
+		// Refocus to last message
+		document
+			.getElementById(`message-${responseMessageId}-content`)
+			?.querySelector('#response-content-container')
+			?.focus();
+
 		const res = await chatCompleted(localStorage.token, {
 			model: modelId,
 			messages: messages.map((m) => ({
@@ -948,7 +961,7 @@
 				childrenIds: [responseMessageId],
 				role: 'user',
 				content: userPrompt ? userPrompt : `[PROMPT] ${userMessageId}`,
-				timestamp: Math.floor(Date.now() / 1000)
+				timestamp: Date.now()
 			};
 
 			const responseMessage = {
@@ -962,7 +975,7 @@
 				model: modelId,
 				modelName: model.name ?? model.id,
 				modelIdx: 0,
-				timestamp: Math.floor(Date.now() / 1000)
+				timestamp: Date.now()
 			};
 
 			if (parentMessage) {
@@ -1001,7 +1014,7 @@
 					id: messageId,
 					parentId: currentParentId,
 					childrenIds: [],
-					timestamp: Math.floor(Date.now() / 1000),
+					timestamp: Date.now(),
 					...message
 				};
 
@@ -1022,7 +1035,7 @@
 					model: model.id,
 					modelName: model.name ?? model.id,
 					modelIdx: 0,
-					timestamp: Math.floor(Date.now() / 1000),
+					timestamp: Date.now(),
 					...message
 				};
 
@@ -1063,15 +1076,34 @@
 		}
 
 		if (choices) {
+			let chunk_received_time = Date.now();
 			if (choices[0]?.message?.content) {
 				// Non-stream response
+				if (!time_to_first_token) {
+					time_to_first_token = chunk_received_time - completion_request_initiated;
+					console.debug(`Time to first token: ${time_to_first_token}`, {
+						time_to_first_token: time_to_first_token
+					});
+					datadogLogs.logger.info(`Time to first token: ${time_to_first_token}`, {
+						time_to_first_token: time_to_first_token
+					});
+				}
 				message.content += choices[0]?.message?.content;
 			} else {
 				// Stream response
 				let value = choices[0]?.delta?.content ?? '';
 				if (message.content == '' && value == '\n') {
-					console.log('Empty response');
+					console.debug('Empty response');
 				} else {
+					if (!time_to_first_token) {
+						time_to_first_token = chunk_received_time - completion_request_initiated;
+						console.debug(`Time to first token: ${time_to_first_token}`, {
+							time_to_first_token: time_to_first_token
+						});
+						datadogLogs.logger.info(`Time to first token: ${time_to_first_token}`, {
+							time_to_first_token: time_to_first_token
+						});
+					}
 					message.content += value;
 
 					if (navigator.vibrate && ($settings?.hapticFeedback ?? false)) {
@@ -1191,7 +1223,7 @@
 			await chatCompletedHandler(chatId, message.model, message.id, createMessagesList(message.id));
 		}
 
-		console.log(data);
+		// console.debug(data);
 		if (autoScroll) {
 			scrollToBottom();
 		}
@@ -1202,7 +1234,9 @@
 	//////////////////////////
 
 	const submitPrompt = async (userPrompt, { _raw = false } = {}) => {
-		console.log('submitPrompt', userPrompt, $chatId);
+		console.debug('submitPrompt', userPrompt, $chatId);
+		// SR announcement
+		document.getElementById('svelte-announcer').textContent = 'response is loading';
 
 		const messages = createMessagesList(history.currentId);
 		const _selectedModels = selectedModels.map((modelId) =>
@@ -1281,7 +1315,7 @@
 			role: 'user',
 			content: userPrompt,
 			files: _files.length > 0 ? _files : undefined,
-			timestamp: Math.floor(Date.now() / 1000), // Unix epoch
+			timestamp: Date.now(), // Unix epoch
 			models: selectedModels
 		};
 
@@ -1346,7 +1380,7 @@
 					modelName: model.name ?? model.id,
 					modelIdx: modelIdx ? modelIdx : _modelIdx,
 					userContext: null,
-					timestamp: Math.floor(Date.now() / 1000) // Unix epoch
+					timestamp: Date.now() // Unix epoch
 				};
 
 				// Add message to history and Set currentId to messageId
@@ -1412,7 +1446,7 @@
 									}, '');
 								}
 
-								console.log(userContext);
+								console.debug(userContext);
 							}
 						}
 					}
@@ -1511,7 +1545,9 @@
 							content: message?.merged?.content ?? message.content
 						})
 			}));
-
+		// get timestamp
+		completion_request_initiated = Date.now();
+		time_to_first_token = null;
 		const res = await generateOpenAIChatCompletion(
 			localStorage.token,
 			{
@@ -1575,7 +1611,7 @@
 			return null;
 		});
 
-		console.log(res);
+		// console.log(res);
 
 		if (res) {
 			taskId = res.task_id;
@@ -1933,7 +1969,7 @@
 							</div>
 						</div>
 
-						<div class=" pb-[1rem]">
+						<div class=" pb-[2rem]">
 							<MessageInput
 								{history}
 								{selectedModels}
@@ -1975,12 +2011,6 @@
 									}
 								}}
 							/>
-
-							<div
-								class="absolute bottom-1.5 text-xs text-gray-500 text-center line-clamp-1 right-14 left-3"
-							>
-								<!-- {$i18n.t('LLMs can make mistakes. Verify important information.')} -->
-							</div>
 						</div>
 					{:else}
 						<div class="overflow-auto w-full h-full flex items-center">
@@ -2016,6 +2046,13 @@
 									}
 								}}
 							/>
+						</div>
+					{/if}
+					{#if $config?.features?.enable_disclaimer}
+						<div
+							class="absolute bottom-1.5 text-xs text-gray-500 text-center line-clamp-1 right-14 left-3"
+						>
+							{$i18n.t('GSA Chat can make mistakes. Review all responses for accuracy.')}
 						</div>
 					{/if}
 				</svelte:element>
