@@ -125,7 +125,7 @@ DEFAULT_CONFIG = {
                     "Summarize the meeting notes",
                     "",
                 ],
-                "content": "Summerize the meeting notes: [Meeting contents], summarize the key points, decisions, and action items from the meeting notes concisely.",
+                "content": "Summarize the meeting notes: [Meeting contents], summarize the key points, decisions, and action items from the meeting notes concisely.",
             },
         ],
     },
