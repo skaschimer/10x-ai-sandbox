@@ -32,7 +32,7 @@ The project team is working on publishing an easy-to-consume containerized versi
 
 ## Local Installation
 
-Developers: detailed installation instructions are available in the [DEVLOCAL.md](./DEVLOCAL.md) file.
+Developers: detailed installation instructions are available in the [LOCALDEV.md](./LOCALDEV.md) file.
 
 ## Acknowledgments
 
