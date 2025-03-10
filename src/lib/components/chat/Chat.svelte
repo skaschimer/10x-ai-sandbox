@@ -3,6 +3,7 @@
 	import { toast } from 'svelte-sonner';
 	import mermaid from 'mermaid';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
+	import { datadogLogs } from '@datadog/browser-logs';
 
 	import { getContext, onDestroy, onMount, tick } from 'svelte';
 	const i18n: Writable<i18nType> = getContext('i18n');
@@ -128,6 +129,9 @@
 	let chatFiles = [];
 	let files = [];
 	let params = {};
+
+	let completion_request_initiated: number = Date.now();
+	let time_to_first_token: number | null = null;
 
 	$: if (chatIdProp) {
 		(async () => {
@@ -957,7 +961,7 @@
 				childrenIds: [responseMessageId],
 				role: 'user',
 				content: userPrompt ? userPrompt : `[PROMPT] ${userMessageId}`,
-				timestamp: Math.floor(Date.now() / 1000)
+				timestamp: Date.now()
 			};
 
 			const responseMessage = {
@@ -971,7 +975,7 @@
 				model: modelId,
 				modelName: model.name ?? model.id,
 				modelIdx: 0,
-				timestamp: Math.floor(Date.now() / 1000)
+				timestamp: Date.now()
 			};
 
 			if (parentMessage) {
@@ -1010,7 +1014,7 @@
 					id: messageId,
 					parentId: currentParentId,
 					childrenIds: [],
-					timestamp: Math.floor(Date.now() / 1000),
+					timestamp: Date.now(),
 					...message
 				};
 
@@ -1031,7 +1035,7 @@
 					model: model.id,
 					modelName: model.name ?? model.id,
 					modelIdx: 0,
-					timestamp: Math.floor(Date.now() / 1000),
+					timestamp: Date.now(),
 					...message
 				};
 
@@ -1072,8 +1076,18 @@
 		}
 
 		if (choices) {
+			let chunk_received_time = Date.now();
 			if (choices[0]?.message?.content) {
 				// Non-stream response
+				if (!time_to_first_token) {
+					time_to_first_token = chunk_received_time - completion_request_initiated;
+					console.debug(`Time to first token: ${time_to_first_token}`, {
+						time_to_first_token: time_to_first_token
+					});
+					datadogLogs.logger.info(`Time to first token: ${time_to_first_token}`, {
+						time_to_first_token: time_to_first_token
+					});
+				}
 				message.content += choices[0]?.message?.content;
 			} else {
 				// Stream response
@@ -1081,6 +1095,15 @@
 				if (message.content == '' && value == '\n') {
 					console.debug('Empty response');
 				} else {
+					if (!time_to_first_token) {
+						time_to_first_token = chunk_received_time - completion_request_initiated;
+						console.debug(`Time to first token: ${time_to_first_token}`, {
+							time_to_first_token: time_to_first_token
+						});
+						datadogLogs.logger.info(`Time to first token: ${time_to_first_token}`, {
+							time_to_first_token: time_to_first_token
+						});
+					}
 					message.content += value;
 
 					if (navigator.vibrate && ($settings?.hapticFeedback ?? false)) {
@@ -1292,7 +1315,7 @@
 			role: 'user',
 			content: userPrompt,
 			files: _files.length > 0 ? _files : undefined,
-			timestamp: Math.floor(Date.now() / 1000), // Unix epoch
+			timestamp: Date.now(), // Unix epoch
 			models: selectedModels
 		};
 
@@ -1357,7 +1380,7 @@
 					modelName: model.name ?? model.id,
 					modelIdx: modelIdx ? modelIdx : _modelIdx,
 					userContext: null,
-					timestamp: Math.floor(Date.now() / 1000) // Unix epoch
+					timestamp: Date.now() // Unix epoch
 				};
 
 				// Add message to history and Set currentId to messageId
@@ -1522,7 +1545,9 @@
 							content: message?.merged?.content ?? message.content
 						})
 			}));
-
+		// get timestamp
+		completion_request_initiated = Date.now();
+		time_to_first_token = null;
 		const res = await generateOpenAIChatCompletion(
 			localStorage.token,
 			{
