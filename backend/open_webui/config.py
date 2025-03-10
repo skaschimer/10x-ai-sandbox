@@ -111,21 +111,21 @@ DEFAULT_CONFIG = {
                     "Help me with the FAR",
                     "",
                 ],
-                "content": "Help me with the FAR: [FAR], provide a concise overview, including its purpose, key principles, and impacts on federal procurement.",
+                "content": "Help me understand the Federal Acquisition Regulations; give me an overview of the FAR Parts and how they're used",
             },
             {
                 "title": [
-                    "Generate ideas for a memo",
+                    "Generate ideas for a report",
                     "",
                 ],
-                "content": "Generate ideas for a memo: Brainstorm key points, structure, and tone for an effective memo on the given topic.",
+                "content": "Generate ideas for a report about historical preservation, specifically focused on federal buildings",
             },
             {
                 "title": [
                     "Summarize the meeting notes",
                     "",
                 ],
-                "content": "Summarize the meeting notes: [Meeting contents], summarize the key points, decisions, and action items from the meeting notes concisely.",
+                "content": "Summarize meeting notes and pull out key points and next steps.",
             },
         ],
     },
