@@ -49,7 +49,6 @@
 	onMount(async () => {
 		taskConfig = await getTaskConfig(localStorage.token);
 
-		// promptSuggestions = $config?.default_prompt_suggestions;
 		promptSuggestions = taskConfig.DEFAULT_PROMPT_SUGGESTIONS;
 		banners = await getBanners(localStorage.token);
 	});
