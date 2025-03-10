@@ -45,7 +45,7 @@
 	});
 
 	let focusTrap;
-	
+
 	$: if (show && modalElement) {
 		document.body.appendChild(modalElement);
 		window.addEventListener('keydown', handleKeyDown);
