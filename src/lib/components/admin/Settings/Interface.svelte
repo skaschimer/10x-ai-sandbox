@@ -30,7 +30,8 @@
 		ENABLE_TAGS_GENERATION: true,
 		ENABLE_SEARCH_QUERY_GENERATION: true,
 		ENABLE_RETRIEVAL_QUERY_GENERATION: true,
-		QUERY_GENERATION_PROMPT_TEMPLATE: ''
+		QUERY_GENERATION_PROMPT_TEMPLATE: '',
+		DEFAULT_PROMPT_SUGGESTIONS: []
 	};
 
 	let promptSuggestions = [];
@@ -48,7 +49,7 @@
 	onMount(async () => {
 		taskConfig = await getTaskConfig(localStorage.token);
 
-		promptSuggestions = $config?.default_prompt_suggestions;
+		promptSuggestions = taskConfig.DEFAULT_PROMPT_SUGGESTIONS;
 		banners = await getBanners(localStorage.token);
 	});
 
