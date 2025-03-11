@@ -82,8 +82,4 @@ else
   echo "PIPELINES_URLS not specified. Skipping pipelines download and installation."
 fi
 
-if [ "${DEV:-false}" ]; then
-  $SCRIPT_DIR/dev.sh
-else
 uvicorn main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
-fi

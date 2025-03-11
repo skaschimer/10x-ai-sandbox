@@ -2,9 +2,4 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
-if [ "${DEV:-false}" ]; then
-    $SCRIPT_DIR/dev.sh
-else
-    uvicorn proxy:app --host 0.0.0.0 --port 9101 --forwarded-allow-ips '*'
-fi
-
+uvicorn proxy:app --host 0.0.0.0 --port 9101 --forwarded-allow-ips '*'
