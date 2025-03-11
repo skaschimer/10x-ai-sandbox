@@ -515,6 +515,8 @@
 	$: if (show) {
 		init();
 	}
+
+	let headingId = 'managa-ollama-heading';
 </script>
 
 <ModelDeleteConfirmDialog
@@ -524,15 +526,15 @@
 	}}
 />
 
-<Modal size="sm" bind:show>
+<Modal size="sm" {headingId} bind:show>
 	<div>
 		<div class=" flex justify-between dark:text-gray-100 px-5 pt-4 pb-2">
-			<div
+			<h2
 				class="flex w-full justify-between items-center text-lg font-medium self-center font-primary"
 			>
-				<div class=" flex-shrink-0">
+				<span class=" flex-shrink-0">
 					{$i18n.t('Manage Ollama')}
-				</div>
+				</span>
 
 				<div>
 					<Tooltip content="Update All Models" placement="top">
@@ -547,6 +549,8 @@
 								viewBox="0 0 16 16"
 								fill="currentColor"
 								class="w-4 h-4"
+								role="img"
+								aria-label="update all models"
 							>
 								<path
 									d="M7 1a.75.75 0 0 1 .75.75V6h-1.5V1.75A.75.75 0 0 1 7 1ZM6.25 6v2.94L5.03 7.72a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l2.5-2.5a.75.75 0 1 0-1.06-1.06L7.75 8.94V6H10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.25Z"
@@ -558,24 +562,7 @@
 						</button>
 					</Tooltip>
 				</div>
-			</div>
-			<button
-				class="self-center"
-				on:click={() => {
-					show = false;
-				}}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					class="w-5 h-5"
-				>
-					<path
-						d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
-					/>
-				</svg>
-			</button>
+			</h2>
 		</div>
 
 		<div class="flex flex-col md:flex-row w-full px-5 pb-4 md:space-x-4 dark:text-gray-200">

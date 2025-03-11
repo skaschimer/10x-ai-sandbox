@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 
+	export let id = '';
 	export let value = '';
 	export let placeholder = '';
 	export let className =
@@ -31,8 +32,8 @@
 	}
 </script>
 
-<div
-	contenteditable="true"
+<textarea
+	{id}
 	bind:this={textareaElement}
 	class="{className} whitespace-pre-wrap relative {value
 		? !value.trim()
