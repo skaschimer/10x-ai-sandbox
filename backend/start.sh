@@ -11,4 +11,4 @@ if [ -z "$WEBUI_SECRET_KEY" ]; then
   WEBUI_SECRET_KEY=$(sed -n 's/^WEBUI_SECRET_KEY=//p' ../.env)
 fi
 
-WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" exec uvicorn open_webui.main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
+WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" exec uvicorn open_webui.main:app --host "$HOST" --port "$PORT"     --forwarded-allow-ips '*'

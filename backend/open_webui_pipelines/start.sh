@@ -5,55 +5,6 @@ HOST="${HOST:-0.0.0.0}"
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 
-# Default value for PIPELINES_DIR
-# PIPELINES_DIR=${PIPELINES_DIR:-./pipelines}
-
-# PIPELINES_REQUIREMENTS_PATH=$SCRIPT_DIR/requirements.txt
-
-# # Function to install requirements if requirements.txt is provided
-# install_requirements() {
-#   if [[ -f "$1" ]]; then
-#     echo "requirements.txt found at $1. Installing requirements..."
-#     pip3 install -r "$1"
-#   else
-#     echo "requirements.txt not found at $1. Skipping installation of requirements."
-#   fi
-# }
-
-# # Check if the PIPELINES_REQUIREMENTS_PATH environment variable is set and non-empty
-# if [[ -n "$PIPELINES_REQUIREMENTS_PATH" ]]; then
-#   # Install requirements from the specified requirements.txt
-#   install_requirements "$PIPELINES_REQUIREMENTS_PATH"
-# else
-#   echo "PIPELINES_REQUIREMENTS_PATH not specified. Skipping installation of requirements."
-# fi
-
-PIPELINES_DIR=$SCRIPT_DIR/pipelines
-
-# Function to reset pipelines
-reset_pipelines_dir() {
-  if [ "$RESET_PIPELINES_DIR" = true ]; then
-    echo "Resetting pipelines directory: $PIPELINES_DIR"
-
-    # Check if the directory exists
-    if [ -d "$PIPELINES_DIR" ]; then
-      # Remove all contents of the directory
-      rm -rf "${PIPELINES_DIR:?}"/*
-      echo "All contents in $PIPELINES_DIR have been removed."
-
-      # Optionally recreate the directory if needed
-      mkdir -p "$PIPELINES_DIR"
-      echo "$PIPELINES_DIR has been recreated."
-    else
-      echo "Directory $PIPELINES_DIR does not exist. No action taken."
-    fi
-  else
-    echo "RESET_PIPELINES_DIR is not set to true. No action taken."
-  fi
-}
-
-# Example usage of the function
-reset_pipelines_dir
 
 # Function to download the pipeline files
 download_pipelines() {
@@ -131,5 +82,4 @@ else
   echo "PIPELINES_URLS not specified. Skipping pipelines download and installation."
 fi
 
-# Start the server
 uvicorn main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
