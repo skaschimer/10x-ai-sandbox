@@ -35,10 +35,9 @@
 			<div>
 				{#if prompt.title && prompt.title[0] !== ''}
 					<div
-						class="px-2 py-2 border border-gray-400 text-sm font-medium items-center text-gray-400 dark:text-gray-600 bg-white font-semibold rounded-full hover:text-gray-800 hover:border-gray-800"
+						class="px-2 py-2 border border-gray-400 text-sm font-medium items-center text-gray-400 dark:text-gray-600 bg-transparent font-semibold rounded-full hover:text-gray-800 hover:border-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-gray-100 dark:hover:text-gray-100"
 					>
 						{prompt.title[0]}
-						{prompt.title[1]}
 					</div>
 				{:else}
 					<div

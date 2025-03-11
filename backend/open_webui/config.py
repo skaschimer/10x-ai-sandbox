@@ -109,23 +109,20 @@ DEFAULT_CONFIG = {
             {
                 "title": [
                     "Help me with the FAR",
-                    "",
                 ],
                 "content": "Help me understand the Federal Acquisition Regulations; give me an overview of the FAR Parts and how they're used",
             },
             {
                 "title": [
                     "Generate ideas for a report",
-                    "",
                 ],
                 "content": "Generate ideas for a report about historical preservation, specifically focused on federal buildings",
             },
             {
                 "title": [
                     "Summarize the meeting notes",
-                    "",
                 ],
-                "content": "Summarize meeting notes and pull out key points and next steps.",
+                "content": "Summarize meeting notes and pull out key points and next steps. Remember to avoid putting personally identifiable information into the chat.",
             },
         ],
     },

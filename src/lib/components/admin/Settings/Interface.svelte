@@ -371,14 +371,7 @@
 											placeholder={$i18n.t('Title (e.g. Tell me a fun fact)')}
 											bind:value={prompt.title[0]}
 										/>
-
-										<input
-											class="px-3 py-1.5 text-xs w-full bg-transparent outline-none border-r border-gray-100 dark:border-gray-800"
-											placeholder={$i18n.t('Subtitle (e.g. about the Roman Empire)')}
-											bind:value={prompt.title[1]}
-										/>
 									</div>
-
 									<textarea
 										class="px-3 py-1.5 text-xs w-full bg-transparent outline-none border-r border-gray-100 dark:border-gray-800 resize-none"
 										placeholder={$i18n.t('Prompt (e.g. Tell me a fun fact about the Roman Empire)')}
