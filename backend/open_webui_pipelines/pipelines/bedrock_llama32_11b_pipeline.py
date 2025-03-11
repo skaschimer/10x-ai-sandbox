@@ -2,9 +2,9 @@ import json
 import os
 from typing import Generator, Iterator, List, Optional, Union
 
-import requests
 from pydantic import BaseModel
 from utils.pipelines.aws import bedrock_client
+from botocore.exceptions import BotoCoreError
 
 
 def format_llama_prompt(body):
@@ -75,38 +75,56 @@ class Pipeline:
 
         model_id = self.valves.BEDROCK_LLAMA3211B_ARN
 
+        generic_error_msg = f"## Oops! 🤖💔\n\n ### GSA Chat is having some trouble.\n\nPlease try another model _or_ wait a minute and try again."  # noqa E501
+        rate_limit_error_msg = f"## Oops! 🤖💔\n\n ### Looks like GSA Chat has hit a service limit.\n\nPlease try another model _or_ wait a minute and try again."  # noqa E501
+
         try:
             r = self.bedrock_client.invoke_model_with_response_stream(
                 body=request,
                 modelId=model_id,
             )
 
-        except requests.exceptions.HTTPError as e:
-            if r.status_code == 400:
-                print(f"400 Bad Request received: {r.text}")
-            else:
-                print(f"HTTP Error: {e} Response: {r.text}")
-            return f"Error with r: {e} ({r.text}) for body:\n{body}\nand filtered_body:\n{filtered_body}"
-        except requests.exceptions.HTTPError as e:
-            if r.status_code == 400:
-                print(f"400 Bad Request received: {r.text}")
-            else:
-                print(f"HTTP Error: {e} Response: {r.text}")
-            return f"Error with r: {e} ({r.text}) for body:\n{body}\nand filtered_body:\n{filtered_body}"
-        except Exception as e:
-            print(
-                f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
-            )
-            return f"Error without r: {e} for body:\n{body}\nand filtered_body:\n{filtered_body}"
-
-        try:
             for event in r["body"]:
                 chunk = json.loads(event["chunk"]["bytes"])
                 if "generation" in chunk:
                     yield chunk["generation"]
 
+        except self.bedrock_client.exceptions.AccessDeniedException as e:
+            print("Access Denied Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ResourceNotFoundException as e:
+            print("Resource Not Found Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ThrottlingException as e:
+            print("Throttling Exception:", e)
+            yield rate_limit_error_msg
+        except self.bedrock_client.exceptions.ModelTimeoutException as e:
+            print("Model Timeout Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.InternalServerException as e:
+            print("Internal Server Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ServiceUnavailableException as e:
+            print("Service Unavailable Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ModelStreamErrorException as e:
+            print("Model Stream Error Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ValidationException as e:
+            print("Validation Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ModelNotReadyException as e:
+            print("Model Not Ready Exception:", e)
+            yield generic_error_msg
+        except self.bedrock_client.exceptions.ServiceQuotaExceededException as e:
+            print(f"Service Quota Exceeded Exception: {e}")
+            yield rate_limit_error_msg
+        except self.bedrock_client.exceptions.ModelErrorException as e:
+            print("Model Error Exception:", e)
+            yield generic_error_msg
+        except BotoCoreError as e:
+            print(f"AWS BotoCoreError: {e}")
+            yield generic_error_msg
         except Exception as e:
-            if r:
-                print(f"Error iterating r: {e} for r:\n{r}")
-            print(f"Error iterating r: {e} for filtered_body:\n{filtered_body}")
-            return f"Error iterating r: {e} for filtered_body:\n{filtered_body}"
+            print(f"General Error: {e}")
+            yield generic_error_msg
