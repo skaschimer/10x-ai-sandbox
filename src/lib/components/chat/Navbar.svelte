@@ -74,6 +74,7 @@
 				{#if !$mobile}
 					<Tooltip content={$i18n.t('New Chat')}>
 						<button
+							id="new-chat-button"
 							class="ml-2 mr-4 {$showSidebar ? 'md:hidden' : ''}"
 							aria-label="New Chat"
 							on:click={() => {
