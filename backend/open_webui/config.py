@@ -920,7 +920,7 @@ DEFAULT_SHOW_VERSION_UPDATE = (
 )
 
 DEFAULT_SHOW_CHANGELOG = (
-    os.environ.get("DEFAULT_SHOW_CHANGELOG", "True").lower() == "true"
+    os.environ.get("DEFAULT_SHOW_CHANGELOG", "False").lower() == "true"
 )
 
 ENABLE_MORE_INPUTS = os.environ.get("ENABLE_MORE_INPUTS", "False").lower() == "true"
