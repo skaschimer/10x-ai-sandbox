@@ -122,7 +122,7 @@
 	let headingId = 'add-cnxn-heading';
 </script>
 
-<Modal size="sm" {headingID} bind:show>
+<Modal size="sm" {headingId} bind:show>
 	<div>
 		<div class=" flex justify-between dark:text-gray-100 px-5 pt-4 pb-2">
 			<h2 class=" text-lg font-medium self-center font-primary" id={headingId}>

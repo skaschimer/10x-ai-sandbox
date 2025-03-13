@@ -518,11 +518,11 @@ if frontend_favicon.exists():
 else:
     logging.warning(f"Frontend favicon not found at {frontend_favicon}")
 
-frontend_splash = FRONTEND_BUILD_DIR / "static" / "splash.png"
+frontend_splash = FRONTEND_BUILD_DIR / "static" / "gsa-logo.svg"
 
 if frontend_splash.exists():
     try:
-        shutil.copyfile(frontend_splash, STATIC_DIR / "splash.png")
+        shutil.copyfile(frontend_splash, STATIC_DIR / "gsa-logo.svg")
     except Exception as e:
         logging.error(f"An error occurred: {e}")
 else:
@@ -571,7 +571,7 @@ if CUSTOM_NAME:
 
                 r = requests.get(url, stream=True)
                 if r.status_code == 200:
-                    with open(f"{STATIC_DIR}/splash.png", "wb") as f:
+                    with open(f"{STATIC_DIR}/gsa-logo.svg", "wb") as f:
                         r.raw.decode_content = True
                         shutil.copyfileobj(r.raw, f)
 
