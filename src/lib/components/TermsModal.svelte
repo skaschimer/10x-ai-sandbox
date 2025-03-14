@@ -23,7 +23,7 @@
 
 <Modal bind:show allowEasyDismiss={false} {headingId} closeButton={false}>
 	<div class="px-5 pt-4">
-		<h2 id={headingId} class="text-xl text-[#00538E] font-semibold">
+		<h2 id={headingId} class="text-xl text-[#00538E] dark:text-white font-semibold">
 			Welcome{$user?.name ? ` ${$user.name}` : ''}!
 			<span class="sr-only"
 				>Please review and accept the terms and conditions before proceeding.</span
