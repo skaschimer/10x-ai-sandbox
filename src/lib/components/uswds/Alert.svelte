@@ -1,6 +1,4 @@
 <script lang="ts">
-	import '@uswds/uswds/css/uswds.css';
-
 	// USWDS official variants
 	export let type: 'info' | 'warning' | 'success' | 'error' | 'emergency';
 	export let heading = '';
@@ -30,7 +28,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	.noborder {
 		border-left: none;
 	}

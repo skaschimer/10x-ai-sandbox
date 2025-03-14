@@ -1,6 +1,4 @@
 <script lang="ts">
-	import '@uswds/uswds/css/uswds.css';
-
 	export let logo = '';
 	export let domain = '';
 	export let agency = 'U.S. government';

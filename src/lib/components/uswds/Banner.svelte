@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '@uswds/uswds/css/uswds.css';
 	import usFlagSmall from '@uswds/uswds/img/us_flag_small.png';
 	import iconDotGov from '@uswds/uswds/img/icon-dot-gov.svg';
 	import iconHttps from '@uswds/uswds/img/icon-https.svg';
@@ -98,12 +97,12 @@
 	</div>
 </section>
 
-<style type="postcss">
+<style>
 	.centered {
-		@apply justify-center;
+		justify-content: center;
 	}
 
 	.usa-banner__lock-image {
-		@apply inline; /* fix lock icon spacing */
+		display: inline; /* fix lock icon spacing */
 	}
 </style>

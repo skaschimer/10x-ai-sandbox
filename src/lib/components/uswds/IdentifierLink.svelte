@@ -1,6 +1,4 @@
 <script lang="ts">
-	import '@uswds/uswds/css/uswds.css';
-
 	export let text: string;
 	export let href: string;
 </script>
