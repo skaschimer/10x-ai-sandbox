@@ -507,7 +507,7 @@
 				</div>
 
 				<div>
-					<NewChatIcon className=" size-5" strokeWidth="2" />
+					<NewChatIcon strokeWidth="2" />
 				</div>
 			</a>
 		</div>
