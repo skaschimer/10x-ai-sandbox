@@ -2,6 +2,7 @@
 import json
 import os
 from typing import Generator, Iterator, List, Optional, Union
+import time
 
 from pydantic import BaseModel
 from utils.pipelines.aws import bedrock_client
@@ -114,6 +115,9 @@ class Pipeline:
         generic_error_msg = f"## Oops! 🤖💔\n\n ### GSA Chat is having some trouble.\n\nPlease try another model _or_ wait a minute and try again."  # noqa E501
         rate_limit_error_msg = f"## Oops! 🤖💔\n\n ### Looks like GSA Chat has hit a service limit.\n\nPlease try another model _or_ wait a minute and try again."  # noqa E501
 
+        ttft = None
+        request_init_time = time.time()
+
         try:
             r = self.bedrock_client.invoke_model_with_response_stream(
                 body=json.dumps(filtered_body), modelId=model_id
@@ -122,7 +126,17 @@ class Pipeline:
             for event in r["body"]:
                 chunk = json.loads(event["chunk"]["bytes"])
                 if chunk["type"] == "content_block_delta":
-                    yield chunk["delta"].get("text", "")
+                    tokens = chunk["delta"].get("text", "")
+                    yield tokens
+                    if ttft is None and tokens:
+                        ttft = time.time() - request_init_time
+                        ttft_log = {
+                            "pipeline_ttft": ttft * 1000,
+                            "pipeline_model_id": model_id,
+                            "pipeline_first_tokens": tokens,
+                        }
+                        json_ttft_log = json.dumps(ttft_log)
+                        print("Haiku 3.5 Pipeline TTFT:", json_ttft_log)
 
         except self.bedrock_client.exceptions.AccessDeniedException as e:
             print("Access Denied Exception:", e)

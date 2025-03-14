@@ -81,7 +81,7 @@
 								initNewChat();
 							}}
 						>
-							<NewChatIcon className="size-5" strokeWidth="2" />
+							<NewChatIcon strokeWidth="2" />
 						</button>
 					</Tooltip>
 				{/if}
@@ -177,7 +177,7 @@
 								aria-label="New Chat"
 							>
 								<div class=" m-auto self-center">
-									<NewChatIcon className=" size-5" strokeWidth="2" />
+									<NewChatIcon strokeWidth="2" />
 								</div>
 							</button>
 						</Tooltip>
