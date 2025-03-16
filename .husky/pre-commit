@@ -1,3 +1,4 @@
+#!/bin/bash
 git rm -r --cached build/ >/dev/null 2>&1 || true
 
 echo "Scanning commit... 30-60s 💅🥱⏳"
