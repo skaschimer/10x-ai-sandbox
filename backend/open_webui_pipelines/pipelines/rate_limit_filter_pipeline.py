@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import sys
 from typing import List, Optional
 from urllib.parse import urlparse
 import asyncio
@@ -12,10 +13,13 @@ import logging
 from utils.pipelines.custom_exceptions import RateLimitException
 
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger("RateLimitFilter")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 DEFAULT_REQUEST_LIMITS = {
@@ -67,8 +71,6 @@ class Pipeline:
             logger.info("Using default request limits")
             request_limits = json.dumps(DEFAULT_REQUEST_LIMITS)
 
-        logger.info(f"Configured request limits json string: {request_limits}")
-
         self.request_limits_dict = json.loads(request_limits)
         logger.info(f"Configured request limits dict: {self.request_limits_dict}")
 
@@ -92,6 +94,7 @@ class Pipeline:
         logger.debug(f"Valves configured with pipelines: {self.valves.pipelines}")
 
         parsed_url = urlparse(redis_url)
+
         logger.info(
             f"Connecting to Redis at {parsed_url.hostname}:{parsed_url.port if parsed_url.port else 6379}"
         )
@@ -99,33 +102,81 @@ class Pipeline:
             logger.error("Invalid RATE_LIMIT_REDIS_URL: missing hostname")
             raise ValueError("Invalid RATE_LIMIT_REDIS_URL: missing hostname")
         try:
+            verify_ssl = os.getenv("DEV", "false").lower() == "false"
+            logger.info("Redis SSL verification: " + str(verify_ssl))
             self.redis_client = redis.Redis(
                 host=parsed_url.hostname,
                 port=parsed_url.port if parsed_url.port else 6379,
-                db=int(parsed_url.path[1:]) if parsed_url.path else 0,
+                db=0,
                 password=parsed_url.password,
                 decode_responses=True,
+                socket_timeout=1.0,  # Add timeout
+                socket_connect_timeout=1.0,  # Add connection timeout
+                ssl=verify_ssl,  # Enable SSL/TLS
+                ssl_cert_reqs=None,  # Skip certificate validation, or use 'required' for validation
             )
+
+            # Test Redis connection with simple get/set operations
+            test_key = "connection_test_key"
+            test_value = "connection_test_value"
+
+            # Test set operation
+            set_result = self.redis_client.set(
+                test_key, test_value, ex=60
+            )  # Set with 60 second expiration
+            if not set_result:
+                logger.warning("Redis SET test failed")
+
+            # Test get operation
+            get_result = self.redis_client.get(test_key)
+            if get_result != test_value:
+                logger.warning(
+                    f"Redis GET test failed. Expected '{test_value}', got '{get_result}'"
+                )
+            else:
+                logger.info(
+                    "Redis connection test successful: SET/GET operations working"
+                )
+
+            # Clean up test key
+            self.redis_client.delete(test_key)
+
             logger.info("Successfully connected to Redis")
+        except redis.exceptions.TimeoutError as e:
+            logger.error(
+                f"Redis timed out when checking simple get set operation: {str(e)}"
+            )
+            raise ConnectionError(f"Initial Redis connection timed out: {str(e)}")
         except Exception as e:
             logger.error(f"Failed to connect to Redis: {str(e)}")
             raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
+
+    async def on_startup(self):
+        print(f"on_startup:{__name__}")
+        pass
+
+    async def on_shutdown(self):
+        print(f"on_shutdown:{__name__}")
+        pass
 
     def get_global_redis_key(self, model_id: str):
         """Generate Redis keys for global rate limits."""
         now = int(time.time())
         key = f"global:{model_id}:rate:minute:{now // 60}"
+        logger.debug(f"get_global_redis_key: {key}")
         return key
 
     def get_user_redis_key(self, user_id: str, model_id: str):
         """Generate Redis keys for user rate limits."""
         now = int(time.time())
         key = f"user:{user_id}:{model_id}:rate:minute:{now // 60}"
+        logger.debug(f"get_user_redis_key: {key}")
         return key
 
     def get_user_last_blocked_redis_key(self, user_id: str, model_id: str):
         """Generate Redis keys for user rate limits."""
         key = f"user:{user_id}:{model_id}:last_blocked"
+        logger.debug(f"get_user_last_blocked_redis_key: {key}")
         return key
 
     def get_rate_limit_info(self, user_id: str, model_id: str):
@@ -200,13 +251,28 @@ class Pipeline:
         return False, None, None
 
     def is_rate_limited(self, user_id: str, model_id: str) -> bool:
+        logger.debug(f"Checking rate limits for user: {user_id}, model: {model_id}")
         if model_id not in self.models:
             logger.warning(f"Model {model_id} not found in request limits")
             return False, None
 
+        logger.debug(
+            f"Model {model_id} found, checking rate limits for user: {user_id}"
+        )
         user_last_blocked_key = self.get_user_last_blocked_redis_key(user_id, model_id)
-        user_last_blocked_time = self.redis_client.get(user_last_blocked_key)
-        logger.debug(f"User {user_id} last blocked time: {user_last_blocked_time}")
+
+        try:
+            user_last_blocked_time = self.redis_client.get(user_last_blocked_key)
+            logger.debug(f"User {user_id} last blocked time: {user_last_blocked_time}")
+        except redis.exceptions.TimeoutError as e:
+            logger.error(
+                f"Redis operation timed out when checking last blocked time: {str(e)}"
+            )
+            # Return a default/safe value instead of failing
+            return False, None, None
+        except Exception as e:
+            logger.error(f"Redis error when checking last blocked time: {str(e)}")
+            return False, None, None
 
         if (
             user_last_blocked_time
@@ -217,6 +283,7 @@ class Pipeline:
             )
             return self.set_last_blocked_time(user_id, model_id)
 
+        logger.debug(f"Proceeding without blocking user {user_id} for model {model_id}")
         return False, None, None
 
     async def log_request(self, user_id: str, model_id: str):
@@ -242,10 +309,18 @@ class Pipeline:
         _, _, _ = self.set_last_blocked_time(user_id, model_id)
 
     async def inlet(self, body: dict, user: Optional[dict] = None) -> dict:
-        logger.debug(f"Processing inlet request with body: {body}")
+
+        logger.debug(f"Processing inlet request with body: {body} and user: {user}")
         user_id = user.get("id", "default_user") if user else "default_user"
         model_id = body["model"]
 
+        if model_id == "bedrock_claude_sonnet35_v2_pipeline":
+            logger.debug(f"Skipping rate limit check for model {model_id}")
+            return body
+
+        logger.debug(
+            f"Processing inlet request with User ID: {user_id}, Model ID: {model_id}"
+        )
         limited, msg, last_period_start_time = self.is_rate_limited(user_id, model_id)
         if limited:
             logger.error(f"Rate limit check failed with msg: {msg}")
