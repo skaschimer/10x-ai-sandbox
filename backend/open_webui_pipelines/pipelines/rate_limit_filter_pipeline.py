@@ -314,10 +314,6 @@ class Pipeline:
         user_id = user.get("id", "default_user") if user else "default_user"
         model_id = body["model"]
 
-        if model_id == "bedrock_claude_sonnet35_v2_pipeline":
-            logger.debug(f"Skipping rate limit check for model {model_id}")
-            return body
-
         logger.debug(
             f"Processing inlet request with User ID: {user_id}, Model ID: {model_id}"
         )
