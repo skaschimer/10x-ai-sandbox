@@ -6,6 +6,16 @@ import time
 from pydantic import BaseModel
 from utils.pipelines.aws import bedrock_client
 from botocore.exceptions import BotoCoreError
+import logging
+import sys
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class Pipeline:
@@ -24,11 +34,11 @@ class Pipeline:
         self.bedrock_client = bedrock_client
 
     async def on_startup(self):
-        print(f"on_startup:{__name__}")
+        logger.info(f"on_startup:{__name__}")
         pass
 
     async def on_shutdown(self):
-        print(f"on_shutdown:{__name__}")
+        logger.info(f"on_shutdown:{__name__}")
         pass
 
     def pipe(
@@ -81,7 +91,7 @@ class Pipeline:
             )
         filtered_body = {k: v for k, v in body.items() if k in allowed_params}
         if len(body) != len(filtered_body):
-            print(
+            logger.info(
                 f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
             )
 
@@ -128,49 +138,50 @@ class Pipeline:
                     if ttft is None and tokens:
                         ttft = time.time() - request_init_time
                         ttft_log = {
+                            "pipeline_ttft_name": self.name,
                             "pipeline_ttft": ttft * 1000,
-                            "pipeline_model_id": model_id,
-                            "pipeline_first_tokens": tokens,
+                            "pipeline_ttft_model_id": model_id,
+                            "pipeline_ttft_first_tokens": tokens,
                         }
                         json_ttft_log = json.dumps(ttft_log)
-                        print("Sonnet 3.5 v2 Pipeline TTFT:", json_ttft_log)
+                        logger.info(json_ttft_log)
 
         except self.bedrock_client.exceptions.AccessDeniedException as e:
-            print("Access Denied Exception:", e)
+            logger.error("Access Denied Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ResourceNotFoundException as e:
-            print("Resource Not Found Exception:", e)
+            logger.error("Resource Not Found Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ThrottlingException as e:
-            print("Throttling Exception:", e)
+            logger.error("Throttling Exception:", e)
             yield rate_limit_error_msg
         except self.bedrock_client.exceptions.ModelTimeoutException as e:
-            print("Model Timeout Exception:", e)
+            logger.error("Model Timeout Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.InternalServerException as e:
-            print("Internal Server Exception:", e)
+            logger.error("Internal Server Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ServiceUnavailableException as e:
-            print("Service Unavailable Exception:", e)
+            logger.error("Service Unavailable Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ModelStreamErrorException as e:
-            print("Model Stream Error Exception:", e)
+            logger.error("Model Stream Error Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ValidationException as e:
-            print("Validation Exception:", e)
+            logger.error("Validation Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ModelNotReadyException as e:
-            print("Model Not Ready Exception:", e)
+            logger.error("Model Not Ready Exception:", e)
             yield generic_error_msg
         except self.bedrock_client.exceptions.ServiceQuotaExceededException as e:
-            print(f"Service Quota Exceeded Exception: {e}")
+            logger.error(f"Service Quota Exceeded Exception: {e}")
             yield rate_limit_error_msg
         except self.bedrock_client.exceptions.ModelErrorException as e:
-            print("Model Error Exception:", e)
+            logger.error("Model Error Exception:", e)
             yield generic_error_msg
         except BotoCoreError as e:
-            print(f"AWS BotoCoreError: {e}")
+            logger.error(f"AWS BotoCoreError: {e}")
             yield generic_error_msg
         except Exception as e:
-            print(f"General Error: {e}")
+            logger.error(f"General Error: {e}")
             yield generic_error_msg
