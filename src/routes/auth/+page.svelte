@@ -143,6 +143,19 @@
 
 <div class="w-full max-h-[100dvh] text-white">
 	{#if loaded}
+		<div class="fixed m-10 z-50">
+			<div class="flex space-x-2">
+				<div class=" self-center">
+					<img
+						crossorigin="anonymous"
+						src="{WEBUI_BASE_URL}/static/favicon.png"
+						class=" w-6 rounded-sm"
+						alt="G.S.A. Chat"
+					/>
+				</div>
+			</div>
+		</div>
+
 		<div
 			class="bg-transparent min-h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
 		>
