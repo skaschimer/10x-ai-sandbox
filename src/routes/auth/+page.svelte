@@ -130,7 +130,7 @@
 	<title>
 		{`${$WEBUI_NAME}`}
 	</title>
-	<link rel="stylesheet" href="/static/uswds/css/uswds.css" />
+	<link rel="stylesheet" href="/static/uswds/css/uswds.min.css" />
 </svelte:head>
 
 <OnBoarding
