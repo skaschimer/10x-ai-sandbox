@@ -143,14 +143,14 @@
 <div class="w-full text-white">
 	{#if loaded}
 		<div
-			class="bg-transparent h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
+			class="bg-transparent dark:bg-gray-900 h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
 		>
 			<div class="w-screen">
 				<Banner />
 
-				<div class="bg-[#e7f6f8] flex justify-center">
+				<div class="bg-[#e7f6f8] dark:bg-black flex justify-center">
 					<div class="flex flex-row gap-2 items-stretch px-4 py-3">
-						<img src={infoIcon} alt="" class="h-6 w-6" />
+						<img src={infoIcon} alt="" class="h-6 w-6 dark:invert" />
 						<p class="text-md">
 							<strong>This tool is still in BETA.</strong> We are continuously updating functionality
 							and collecting feedback.

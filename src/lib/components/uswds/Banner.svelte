@@ -27,12 +27,12 @@
 				aria-controls="gov-banner-default"
 				on:click={toggleBanner}
 			>
-				<span class="text-blue-800 underline">Here’s how you know</span>
+				<span class="text-blue-800 dark:text-blue-400 underline">Here’s how you know</span>
 				<img
 					src={bannerExpanded ? expandLess : expandMore}
 					alt=""
 					aria-hidden="true"
-					class="h-[13px]"
+					class="h-[13px] dark:invert"
 				/>
 			</button>
 		</div>
@@ -58,7 +58,7 @@
 							width="11"
 							height="11"
 							viewBox="0 0 52 64"
-							class="inline"
+							class="inline dark:invert"
 							role="img"
 							aria-labelledby="banner-lock-description-default"
 							focusable="false"
