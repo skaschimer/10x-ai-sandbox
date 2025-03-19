@@ -30,6 +30,7 @@
 	>
 		<Tooltip content={$i18n.t('Help')} placement="top">
 			<button
+				aria-label="help"
 				class="text-gray-600 dark:text-gray-300 bg-gray-300/20 flex items-center justify-center text-[0.7rem] rounded-full"
 			>
 				<QuestionMarkCircle className="size-5" />
