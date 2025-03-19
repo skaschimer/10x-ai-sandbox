@@ -1,4 +1,101 @@
 import { WEBUI_API_BASE_URL, WEBUI_BASE_URL } from '$lib/constants';
+import { goto } from '$app/navigation';
+
+interface ApiRequestOptions extends RequestInit {
+	skipAuth?: boolean;
+}
+class ApiClient {
+	private baseUrl: string;
+
+	constructor(baseUrl: string) {
+		this.baseUrl = baseUrl;
+	}
+
+	private async refreshToken() {
+		try {
+			const response = await fetch(`${this.baseUrl}/refresh`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to refresh token');
+			}
+
+			const { jwt } = await response.json();
+
+			localStorage.token = jwt;
+
+			return jwt;
+		} catch (error) {
+			localStorage.token = null;
+			goto('/login');
+			throw error;
+		}
+	}
+
+	async request(url: string, token?: string, options: ApiRequestOptions = {}) {
+		const { skipAuth, ...fetchOptions } = options;
+
+		const headers = new Headers(fetchOptions.headers);
+
+		if (!skipAuth) {
+			if (token) {
+				headers.set('Authorization', `Bearer ${token}`);
+			}
+		}
+
+		const finalOptions = {
+			...fetchOptions,
+			headers
+		};
+
+		try {
+			let response = await fetch(`${this.baseUrl}${url}`, finalOptions);
+
+			if (response.status === 401) {
+				const newToken = await this.refreshToken();
+
+				headers.set('Authorization', `Bearer ${newToken}`);
+
+				response = await fetch(`${this.baseUrl}${url}`, {
+					...finalOptions,
+					headers
+				});
+			}
+
+			if (!response.ok) {
+				const errorBody = await response.json();
+				throw errorBody;
+			}
+
+			return await response.json();
+		} catch (error) {
+			console.error('API Request Error:', error);
+			goto('/login');
+			throw error;
+		}
+	}
+
+	// Convenience methods
+	get(url: string, token?: string, options: ApiRequestOptions = {}) {
+		return this.request(url, token, { ...options, method: 'GET' });
+	}
+
+	post(url: string, body: any, token?: string, options: ApiRequestOptions = {}) {
+		return this.request(url, token, {
+			...options,
+			method: 'POST',
+			body: JSON.stringify(body),
+			headers: {
+				'Content-Type': 'application/json',
+				...options.headers
+			}
+		});
+	}
+}
 
 export const getModels = async (token: string = '', base: boolean = false) => {
 	let error = null;

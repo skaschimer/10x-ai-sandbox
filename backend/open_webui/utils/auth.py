@@ -9,6 +9,7 @@ from open_webui.models.users import Users
 
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.env import WEBUI_SECRET_KEY
+from open_webui.utils.misc import parse_duration
 
 from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -167,3 +168,33 @@ def get_admin_user(user=Depends(get_current_user)):
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
     return user
+
+
+def refresh_token(request: Request):
+    token = request.cookies.get("refresh_token")
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
+        )
+    try:
+        payload = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        # returning the same thing for this as below, but want to keep the distinction clear for now.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.INVALID_TOKEN
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.INVALID_TOKEN
+        )
+    expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
+
+    token = create_token(
+        data={"id": payload['id']},
+        expires_delta=expires_delta,
+    )
+
+    return {"jwt": token}

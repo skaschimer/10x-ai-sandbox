@@ -620,6 +620,7 @@ async def filter_outlet(pipeline_id: str, form_data: FilterForm):
 async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
     messages = [message.model_dump() for message in form_data.messages]
     user_message = get_last_user_message(messages)
+    print("here!")
 
     if (
         form_data.model not in app.state.PIPELINES
