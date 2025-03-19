@@ -6,54 +6,30 @@
 	export let showUsaGovSection = true;
 </script>
 
-<div class="usa-identifier">
-	<section
-		class="usa-identifier__section usa-identifier__section--masthead"
-		aria-label="Agency identifier,"
-	>
-		<div class="usa-identifier__container">
+<div class="flex flex-row justify-center px-2 bg-[#1b1b1b] text-white">
+	<div class="flex flex-col my-8 space-y-8">
+		<section class="flex flex-col sm:flex-row gap-4 sm:items-end" aria-label="Agency identifier,">
 			{#if logo}
-				<div class="usa-identifier__logos">
-					<a href={agencyLink} class="usa-identifier__logo"
-						><img
-							class="usa-identifier__logo-img"
-							src={logo}
-							alt="&lt;Parent agency&gt; logo"
-							role="img"
-						/></a
-					>
-				</div>
+				<a href={agencyLink}><img class="h-12 w-12" src={logo} alt="{agency} logo" /></a>
 			{/if}
-			<section class="usa-identifier__identity" aria-label="Agency description,">
-				{#if domain}<p class="usa-identifier__identity-domain">{domain}</p>{/if}
-				<p class="usa-identifier__identity-disclaimer">
+			<section aria-label="Agency description,">
+				{#if domain}<p class="text-[#a9aeb1]">{domain}</p>{/if}
+				<p class="font-bold">
 					<span aria-hidden="true">An </span>official website of the
 					<a href={agencyLink}>{agency}</a>
 				</p>
 			</section>
-		</div>
-	</section>
-	<nav
-		class="usa-identifier__section usa-identifier__section--required-links"
-		aria-label="Important links,"
-	>
-		<div class="usa-identifier__container">
-			<ul class="usa-identifier__required-links-list">
+		</section>
+		<nav class="" aria-label="Important links,">
+			<ul class="flex flex-col sm:grid sm:grid-cols-4 gap-6">
 				<slot />
 			</ul>
-		</div>
-	</nav>
-	{#if showUsaGovSection}
-		<section
-			class="usa-identifier__section usa-identifier__section--usagov"
-			aria-label="U.S. government information and services,"
-		>
-			<div class="usa-identifier__container">
-				<div class="usa-identifier__usagov-description">
-					Looking for U.S. government information and services?
-				</div>
-				<a href="https://www.usa.gov/" class="usa-link">Visit USA.gov</a>
-			</div>
-		</section>
-	{/if}
+		</nav>
+		{#if showUsaGovSection}
+			<section aria-label="U.S. government information and services,">
+				<div class="inline-block">Looking for U.S. government information and services?</div>
+				<a href="https://www.usa.gov/" class="font-bold underline">Visit USA.gov</a>
+			</section>
+		{/if}
+	</div>
 </div>

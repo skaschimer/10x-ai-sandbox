@@ -3,6 +3,6 @@
 	export let href: string;
 </script>
 
-<li class="usa-identifier__required-links-item">
-	<a {href} class="usa-identifier__required-link usa-link">{text}</a>
+<li>
+	<a {href} class="text-[#a9aeb1] underline">{text}</a>
 </li>

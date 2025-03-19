@@ -16,9 +16,9 @@
 	import Spinner from '$lib/components/common/Spinner.svelte';
 	import OnBoarding from '$lib/components/OnBoarding.svelte';
 	import Banner from '$lib/components/uswds/Banner.svelte';
-	import Alert from '$lib/components/uswds/Alert.svelte';
 	import Identifier from '$lib/components/uswds/Identifier.svelte';
 	import IdentifierLink from '$lib/components/uswds/IdentifierLink.svelte';
+	import infoIcon from '$lib/assets/uswds/info.svg';
 
 	const i18n = getContext('i18n');
 
@@ -130,7 +130,6 @@
 	<title>
 		{`${$WEBUI_NAME}`}
 	</title>
-	<link rel="stylesheet" href="/static/uswds/css/uswds.min.css" />
 </svelte:head>
 
 <OnBoarding
@@ -141,22 +140,27 @@
 	}}
 />
 
-<div class="w-full max-h-[100dvh] text-white">
+<div class="w-full text-white">
 	{#if loaded}
 		<div
-			class="bg-transparent min-h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
+			class="bg-transparent h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
 		>
 			<div class="w-screen">
-				<Banner centered />
+				<Banner />
 
-				<Alert type="info" slim border={false} centered margins={false}>
-					<strong>This tool is still in BETA.</strong> We are continuously updating functionality and
-					collecting feedback.
-				</Alert>
+				<div class="bg-[#e7f6f8] flex justify-center">
+					<div class="flex flex-row gap-2 items-stretch px-4 py-3">
+						<img src={infoIcon} alt="" class="h-6 w-6" />
+						<p class="text-md">
+							<strong>This tool is still in BETA.</strong> We are continuously updating functionality
+							and collecting feedback.
+						</p>
+					</div>
+				</div>
 			</div>
 
 			<div class="flex flex-row justify-center">
-				<div class="w-full sm:max-w-md px-10 min-h-full flex flex-col text-center">
+				<div class="w-full sm:max-w-md px-10 py-10 flex flex-col text-center">
 					{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
 						<div class=" my-auto pb-10 w-full">
 							<div
@@ -480,3 +484,9 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	:global(html) {
+		overflow-y: auto !important;
+	}
+</style>
