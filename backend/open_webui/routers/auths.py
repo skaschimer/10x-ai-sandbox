@@ -489,11 +489,9 @@ async def signout(request: Request, response: Response):
                                 )
                                 response.delete_cookie("token")
                                 response.delete_cookie("refresh_token")
-                                print(
-                                    "about to responsd redirect to:",
-                                    f"{logout_url}?id_token_hint={oauth_id_token}",
-                                )
-                                print("response object:", response)
+                                # since this is being called by fetch on the front end
+                                # the browser probably won't honor the redirect since
+                                # it is to a different domain
                                 return response
                         else:
                             raise HTTPException(
