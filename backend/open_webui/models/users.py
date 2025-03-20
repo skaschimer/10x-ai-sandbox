@@ -123,7 +123,6 @@ class UsersTable:
                 return None
 
     def get_user_by_id(self, id: str) -> Optional[UserModel]:
-        print("getting user")
         try:
             with get_db() as db:
                 user = db.query(User).filter_by(id=id).first()

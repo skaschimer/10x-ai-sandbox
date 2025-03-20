@@ -489,7 +489,7 @@ async def signout(request: Request, response: Response):
                                 )
                                 response.delete_cookie("token")
                                 response.delete_cookie("refresh_token")
-                                # since this is being called by fetch on the front end
+                                # TODO: since this is being called by fetch on the front end
                                 # the browser probably won't honor the redirect since
                                 # it is to a different domain
                                 return response
