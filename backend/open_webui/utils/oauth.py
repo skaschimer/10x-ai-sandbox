@@ -348,19 +348,19 @@ class OAuthManager:
                 default_permissions=request.app.state.config.USER_PERMISSIONS,
             )
 
-        # Set the cookie token
+        # Set a cookie with the JWT token
         response.set_cookie(
             key="token",
             value=jwt_token,
-            httponly=True,  # Ensures the cookie is not accessible via JavaScript
+            httponly=True,
             samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
             secure=WEBUI_SESSION_COOKIE_SECURE,
         )
-        # Set the cookie token
+        # Set a cookie with a refresh token
         response.set_cookie(
             key="refresh_token",
             value=jwt_refresh_token,
-            httponly=True,  # Ensures the cookie is not accessible via JavaScript
+            httponly=True,
             samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
             secure=WEBUI_SESSION_COOKIE_SECURE,
         )
@@ -374,8 +374,10 @@ class OAuthManager:
                 samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
                 secure=WEBUI_SESSION_COOKIE_SECURE,
             )
-        # Redirect back to the frontend with the JWT token
-        redirect_url = f"{request.base_url}auth#token={jwt_token}"
+        # Redirect back to the frontend
+        # api calls should now work since the token
+        # is available in the cookie
+        redirect_url = request.base_url
         return RedirectResponse(url=redirect_url, headers=response.headers)
 
 

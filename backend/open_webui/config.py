@@ -267,7 +267,7 @@ JWT_EXPIRES_IN = PersistentConfig(
 JWT_REFRESH_EXPIRES_IN = PersistentConfig(
     "JWT_REFRESH_EXPIRES_IN",
     "auth.jwt_refresh_expiry",
-    os.environ.get("JWT_REFRESH_EXPIRES_IN", "-1")
+    os.environ.get("JWT_REFRESH_EXPIRES_IN", "-1"),
 )
 
 ####################################

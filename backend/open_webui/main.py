@@ -1151,12 +1151,8 @@ async def oauth_callback(provider: str, request: Request, response: Response):
 
 
 @app.get("/oauth/refresh_token")
-async def refresh_jwt_token(
-    request: Request,
-    refresh_token=Depends(refresh_token)
-):
+async def refresh_jwt_token(request: Request, refresh_token=Depends(refresh_token)):
     return refresh_token
-
 
 
 @app.get("/manifest.json")
