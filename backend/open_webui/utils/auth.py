@@ -131,9 +131,7 @@ def get_current_user(
         claim = {"id": data["id"]}
         expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
         new_token = create_token(claim, expires_delta)
-        response.set_cookie(
-            key="token", value=new_token, httponly=True, max_age=3600 * 12
-        )
+        response.set_cookie(key="token", value=new_token, httponly=True)
 
     except Exception:
         # Only generate a new token when the old one is valid, but expired.
