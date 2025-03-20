@@ -88,7 +88,9 @@ class Pipeline:
         logger.info(f"Pipeline type: {self.type}, name: {self.name}")
 
         self.valves = self.Valves(
-            pipelines=["*"],
+            pipelines=[
+                "bedrock_claude_haiku35_pipeline,bedrock_claude_sonnet35_v2_pipeline, bedrock_claude_sonnet37_pipeline,bedrock_claude_haiku35_pipeline_mock,bedrock_llama32_11b_pipeline"  # noqa E501
+            ],
             request_limits_json=request_limits,
         )
         logger.debug(f"Valves configured with pipelines: {self.valves.pipelines}")
