@@ -134,7 +134,7 @@ def get_current_user(
     try:
         data = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        refresh_jwt(Response)
+        data = refresh_jwt(request, response)
     except Exception:
         # Only generate a new token when the old one is valid, but expired.
         # Any other failure should not be allowed
