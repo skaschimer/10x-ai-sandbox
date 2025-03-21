@@ -51,11 +51,7 @@ def create_token(data: dict, expires_delta: Union[timedelta, None] = None) -> st
 
 
 def decode_token(token: str) -> Optional[dict]:
-    try:
-        decoded = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
-        return decoded
-    except Exception:
-        return None
+    return jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
 
 
 def extract_token_from_auth_header(auth_header: str):
@@ -73,6 +69,28 @@ def get_http_authorization_cred(auth_header: str):
         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
     except Exception:
         raise ValueError(ERROR_MESSAGES.INVALID_TOKEN)
+
+
+def refresh_jwt(request: Request, response: Response):
+    """
+    Checks the refresh token from the request cookie. If it's not expired, get data
+    and set a fresh jwt on the cookie and return the data.
+    """
+    refresh_token = request.cookies.get("refresh_token")
+    if refresh_token is None:
+        raise HTTPException(status_code=403, detail=ERROR_MESSAGES.UNAUTHORIZED)
+    try:
+        data = jwt.decode(refresh_token, SESSION_SECRET, algorithms=[ALGORITHM])
+    except Exception:
+        # an invalid or expired refresh cookie leaves us no
+        # choice by to send 401.
+        raise HTTPException(status_code=401, detail=ERROR_MESSAGES.INVALID_TOKEN)
+
+    claim = {"id": data["id"]}
+    expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
+    new_token = create_token(claim, expires_delta)
+    response.set_cookie(key="token", value=new_token, httponly=True)
+    return data
 
 
 def get_current_user(
@@ -116,23 +134,7 @@ def get_current_user(
     try:
         data = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        # Handle expired token by generating a new one
-        # storing it in the response cookie
-        refresh_token = request.cookies.get("refresh_token")
-        if refresh_token is None:
-            raise HTTPException(status_code=403, detail=ERROR_MESSAGES.UNAUTHORIZED)
-        try:
-            data = jwt.decode(refresh_token, SESSION_SECRET, algorithms=[ALGORITHM])
-        except Exception:
-            # an invalid or expired refresh cookie leaves us no
-            # choice by to send 401.
-            raise HTTPException(status_code=401, detail=ERROR_MESSAGES.INVALID_TOKEN)
-
-        claim = {"id": data["id"]}
-        expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
-        new_token = create_token(claim, expires_delta)
-        response.set_cookie(key="token", value=new_token, httponly=True)
-
+        refresh_jwt(Response)
     except Exception:
         # Only generate a new token when the old one is valid, but expired.
         # Any other failure should not be allowed
@@ -188,33 +190,3 @@ def get_admin_user(user=Depends(get_current_user)):
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
     return user
-
-
-def refresh_token(request: Request):
-    token = request.cookies.get("refresh_token")
-    if token is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
-        )
-    try:
-        payload = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        # returning the same thing for this as below, but want to keep the distinction clear for now.
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ERROR_MESSAGES.INVALID_TOKEN,
-        )
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ERROR_MESSAGES.INVALID_TOKEN,
-        )
-    expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
-
-    token = create_token(
-        data={"id": payload["id"]},
-        expires_delta=expires_delta,
-    )
-
-    return {"jwt": token}

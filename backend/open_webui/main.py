@@ -14,6 +14,7 @@ from urllib.parse import urlencode, parse_qs, urlparse
 from pydantic import BaseModel
 from sqlalchemy import text
 import redis
+import jwt
 
 from typing import Optional
 from aiocache import cached
@@ -317,7 +318,7 @@ from open_webui.utils.auth import (
     decode_token,
     get_admin_user,
     get_verified_user,
-    refresh_token,
+    refresh_jwt,
 )
 from open_webui.utils.oauth import oauth_manager
 from open_webui.utils.security_headers import SecurityHeadersMiddleware
@@ -965,12 +966,14 @@ async def list_tasks_endpoint(user=Depends(get_verified_user)):
 
 
 @app.get("/api/config")
-async def get_app_config(request: Request):
+async def get_app_config(request: Request, response: Response):
     user = None
     if "token" in request.cookies:
         token = request.cookies.get("token")
         try:
             data = decode_token(token)
+        except jwt.ExpiredSignatureError:
+            data = refresh_jwt(request, response)
         except Exception as e:
             log.debug(e)
             raise HTTPException(
@@ -1148,11 +1151,6 @@ async def oauth_login(provider: str, request: Request):
 @app.get("/oauth/{provider}/callback")
 async def oauth_callback(provider: str, request: Request, response: Response):
     return await oauth_manager.handle_callback(provider, request, response)
-
-
-@app.get("/oauth/refresh_token")
-async def refresh_jwt_token(request: Request, refresh_token=Depends(refresh_token)):
-    return refresh_token
 
 
 @app.get("/manifest.json")
