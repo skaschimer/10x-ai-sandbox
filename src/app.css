@@ -13,6 +13,7 @@
 	font-family: 'Archivo';
 	src: url('/assets/fonts/Archivo-Variable.ttf');
 	font-display: swap;
+	font-weight: 100 900;
 }
 
 @font-face {
