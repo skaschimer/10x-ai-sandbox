@@ -145,7 +145,7 @@
 		<div
 			class="bg-transparent dark:bg-gray-900 h-screen w-full flex flex-col justify-between font-primary z-50 text-black dark:text-white"
 		>
-			<div class="w-screen">
+			<div class="w-full">
 				<Banner />
 
 				<div class="bg-[#e7f6f8] dark:bg-black flex justify-center">
