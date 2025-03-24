@@ -31,6 +31,10 @@ html {
 	word-break: break-word;
 }
 
+body {
+	font-synthesis: none;
+}
+
 code {
 	/* white-space-collapse: preserve !important; */
 	overflow-x: auto;
