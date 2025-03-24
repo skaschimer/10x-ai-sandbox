@@ -289,7 +289,7 @@
 			{/if}
 
 			<div class="px-3 my-2 max-h-64 overflow-y-auto scrollbar-hidden group">
-				<div class="font-semibold my-1 text-sm">Available models</div>
+				<h3 class="font-semibold my-1 text-sm">Available models</h3>
 				{#each filteredItems as item, index}
 					<button
 						class="flex w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 outline-none transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer data-[highlighted]:bg-muted {index ===
