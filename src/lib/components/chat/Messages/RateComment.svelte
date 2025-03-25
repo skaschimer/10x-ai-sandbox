@@ -159,7 +159,9 @@
 		</div>
 
 		<div class="mt-2">
-			<div class="text-sm mt-1.5 font-medium py-2" id="lbl-comment">{$i18n.t('Provide any specific details')}</div>
+			<div class="text-sm mt-1.5 font-medium py-2" id="lbl-comment">
+				{$i18n.t('Provide any specific details')}
+			</div>
 			<textarea
 				bind:value={comment}
 				class="w-full text-sm px-3 py-2 bg-transparent resize-none rounded-xl border border-gray-400 dark:border-gray-600"
