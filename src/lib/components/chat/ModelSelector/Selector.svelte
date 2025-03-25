@@ -350,29 +350,6 @@
 														>
 															{item.label}
 														</Tooltip>
-														{#if item.model.owned_by === 'openai'}
-															<Tooltip content={`${'External'}`}>
-																<div class="ml-1">
-																	<svg
-																		xmlns="http://www.w3.org/2000/svg"
-																		viewBox="0 0 16 16"
-																		fill="currentColor"
-																		class="size-3"
-																	>
-																		<path
-																			fill-rule="evenodd"
-																			d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
-																			clip-rule="evenodd"
-																		/>
-																		<path
-																			fill-rule="evenodd"
-																			d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
-																			clip-rule="evenodd"
-																		/>
-																	</svg>
-																</div>
-															</Tooltip>
-														{/if}
 														{#if item.model?.info?.meta?.description}
 															<Tooltip
 																content={`${marked.parse(
@@ -430,27 +407,6 @@
 											</div>
 										</div>
 									</div>
-									{#if item.model.owned_by === 'ollama' && (item.model.ollama?.details?.parameter_size ?? '') !== ''}
-										<div class="flex ml-1 items-center translate-y-[0.5px]">
-											<Tooltip
-												content={`${
-													item.model.ollama?.details?.quantization_level
-														? item.model.ollama?.details?.quantization_level + ' '
-														: ''
-												}${
-													item.model.ollama?.size
-														? `(${(item.model.ollama?.size / 1024 ** 3).toFixed(1)}GB)`
-														: ''
-												}`}
-												className="self-end"
-											>
-												<span
-													class=" text-xs font-medium text-gray-600 dark:text-gray-400 line-clamp-1"
-													>{item.model.ollama?.details?.parameter_size ?? ''}</span
-												>
-											</Tooltip>
-										</div>
-									{/if}
 								</div>
 							</div>
 						</div>
