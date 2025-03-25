@@ -170,23 +170,22 @@
 			/>
 		</div>
 
-		<div class="mt-2 gap-1.5 flex justify-between">
-			<div class="flex items-end group">
-				<Tags
-					{tags}
-					on:delete={(e) => {
-						tags = tags.filter(
-							(tag) =>
-								tag.name.replaceAll(' ', '_').toLowerCase() !==
-								e.detail.replaceAll(' ', '_').toLowerCase()
-						);
-					}}
-					on:add={(e) => {
-						tags = [...tags, { name: e.detail }];
-					}}
-				/>
-			</div>
-
+		<div class="flex items-end group">
+			<Tags
+				{tags}
+				on:delete={(e) => {
+					tags = tags.filter(
+						(tag) =>
+							tag.name.replaceAll(' ', '_').toLowerCase() !==
+							e.detail.replaceAll(' ', '_').toLowerCase()
+					);
+				}}
+				on:add={(e) => {
+					tags = [...tags, { name: e.detail }];
+				}}
+			/>
+		</div>
+		<div class="mt-3 flex justify-end">
 			<button
 				class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full"
 				on:click={() => {
