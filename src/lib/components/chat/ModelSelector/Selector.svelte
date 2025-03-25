@@ -350,32 +350,6 @@
 														>
 															{item.label}
 														</Tooltip>
-														{#if item.model?.info?.meta?.description}
-															<Tooltip
-																content={`${marked.parse(
-																	sanitizeResponseContent(
-																		item.model?.info?.meta?.description
-																	).replaceAll('\n', '<br>')
-																)}`}
-															>
-																<div class="ml-1">
-																	<svg
-																		xmlns="http://www.w3.org/2000/svg"
-																		fill="none"
-																		viewBox="0 0 24 24"
-																		stroke-width="1.5"
-																		stroke="currentColor"
-																		class="w-4 h-4"
-																	>
-																		<path
-																			stroke-linecap="round"
-																			stroke-linejoin="round"
-																			d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-																		/>
-																	</svg>
-																</div>
-															</Tooltip>
-														{/if}
 														{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
 															<div class="ml-1 flex gap-0.5 self-center items-center h-full">
 																{#each item.model?.info?.meta.tags as tag}
