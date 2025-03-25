@@ -42,9 +42,9 @@
 		: 'placeholder'}"
 	style="field-sizing: content; -moz-user-select: text !important;"
 	on:input={() => {
-		const text = textareaElement.innerText;
+		const text = textareaElement.value;
 		if (text === '\n') {
-			value = '';
+			textareaElement.value = '';
 			return;
 		}
 
