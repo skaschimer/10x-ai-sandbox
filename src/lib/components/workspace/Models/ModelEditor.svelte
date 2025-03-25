@@ -44,6 +44,7 @@
 
 	let id = '';
 	let name = '';
+	let description = '';
 
 	$: if (!edit) {
 		if (name) {
@@ -154,6 +155,10 @@
 			}
 		});
 
+		if (info.meta.description !== null) {
+			info.meta.description = description;
+		}
+
 		await onSubmit(info);
 
 		loading = false;
@@ -191,6 +196,8 @@
 					model.base_model_id = null;
 				}
 			}
+
+			description = model?.meta?.description;
 
 			params = { ...params, ...model?.params };
 			params.stop = params?.stop
@@ -498,8 +505,7 @@
 							<Textarea
 								className=" text-sm w-full bg-transparent outline-none resize-none overflow-y-hidden "
 								placeholder={$i18n.t('Add a short description about what this model does')}
-								rows={3}
-								bind:value={info.meta.description}
+								bind:value={description}
 							/>
 						{/if}
 					</div>
