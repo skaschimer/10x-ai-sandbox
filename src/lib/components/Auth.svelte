@@ -35,7 +35,6 @@
 	const setSessionUser = async (sessionUser) => {
 		if (sessionUser) {
 			console.log(sessionUser);
-			toast.success($i18n.t(`You're now logged in.`));
 			if (sessionUser.token) {
 				localStorage.token = sessionUser.token;
 			}
@@ -90,7 +89,6 @@
 		// with a jwt by this point. So we can all
 		// getSession and the backend will find it.
 		const sessionUser = await getSessionUser().catch((error) => {
-			//toast.error(error);
 			return null;
 		});
 
