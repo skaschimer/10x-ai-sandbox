@@ -58,11 +58,11 @@
    npx husky init && \
    cp pre-commit .husky/pre-commit && \
    npm run build && \
-   ./start.sh
+   ./dev.sh
    ```
 
    - The first user to sign up to a new installation should get the admin role. You can also predefine user roles in the .env file. Github auth checks that email domain is in ['gsa.gov'], but you can easily modify it at `backend/apps/webui/routers/auths.py:233`. Eventually we'll need to make github for local dev only for compliance reasons.
-   - After the first install, you can just run `./backend/start.sh`. First app startup will take a minute even after it says `Uvicorn running on http://0.0.0.0:8080`, once you see the ascii art, all of the features should be available. You may see a 500 the first time and need to refresh. You can run a front end dev server that hot reloads via `npm run dev` but connecting it to the backend and getting auth redirects with live servers working is unresolved due to the frontend and back running on different ports. We probably need to mock auth locally.
+   - After the first install, you can just run `./dev.sh`. First app startup will take a minute even after it says `Uvicorn running on http://0.0.0.0:8080`, once you see the ascii art, all of the features should be available. You may see a 500 the first time and need to refresh. You can run a front end dev server that hot reloads via `npm run dev` but connecting it to the backend and getting auth redirects with live servers working is unresolved due to the frontend and back running on different ports. We probably need to mock auth locally.
    - ollama is not required for the app to run, but it is assumed, you can ignore the 500s if its not running. If you want to use it, you can install it with `brew install ollama`. You can then run `ollama serve` to start the server. You can then add a model to ollama with `ollama run mistral`.
 
 6. **Set up pipelines to access models via API**:
@@ -70,10 +70,42 @@
    - Once you're in, you should see the four default models available in the chat. If not, check that the pipelines server is running on 9099 and in the UI click on your user in the lower left > Admin Panel > Settings > Connections > OpenAI API section. Set the API URL to [<http://localhost:9099](http://localhost:9099>) and the API key to 0p3n-w3bu! and hit refresh to see if it connects to the pipeline server.
    - After completing these steps, the models specified in the pipeline settings should be available in the drop down at the upper left when you create a new conversation.
 
-7. **Clean up running servers/services if needed**:
+7. **Testing stateless deployment with docker swarm**:
 
-   - Sometimes there are server processes that don't shut down completely and prevent you from running the app successfully on subsequent sessions. Clean these up with these commands:
-     `lsof -ti:9100 | xargs kill -9` and `lsof -ti:9099 | xargs kill -9`
+   - We can use docker swarm with the base docker-compose.yaml to spin up a cluster of replicas.
+
+   - Build the app container from the base `Dockerfile`:
+
+   ```bash
+   docker build --progress=plain -t gsai-container -f Dockerfile .
+   ```
+
+   - Initialize a node:
+
+   ```bash
+   docker swarm init
+   ```
+
+   - Deploy the stack. Make sure to deploy with app `replicas: 1` in the `docker-compose.yaml` the first time to avoid parallel migration conflicts in your fresh db:
+
+   ```bash
+   docker stack deploy --detach=false -c docker-compose.yaml gsai-cluster
+   # NOTE: the command will exit successfully after 'verify: Service ... converged' at which point, the app should be accessible at http://localhost:8080
+   ```
+
+   - To take down the container stack:
+
+   ```bash
+   docker stack rm gsai-cluster # takes 10-20 seconds to clean up
+   ```
+
+   - To take down the node:
+
+   ```bash
+   docker swarm leave --force
+   ```
+
+   - _NOTE_: a reasonable development cycle might look like pointing your IDE at the app volume (devcontainer style) and redeploying the stack after modifying the app volume. It might be a little tricky to share the volume properly, so that you can alternately bring up the single container and the swarm to test single or parallel behavior.
 
 8. **Install autogen for commit and pr messages**:
 

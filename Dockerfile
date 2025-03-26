@@ -4,6 +4,7 @@
 # ##############################################################################
 FROM node:22.14.0-alpine3.21 AS build-frontend
 
+COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
 COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
 # RUN apt-get update && \
 #     apt-get install -y ca-certificates && \
@@ -36,51 +37,23 @@ RUN npm run build
 # ##############################################################################
 # ###               2) PYTHON DEPENDENCIES BUILDER STAGE                     ###
 # ##############################################################################
-FROM jimmoffetgsa/gsai:bookworm-builder-011525 AS builder
+FROM jimmoffetgsa/gsai:jammy-builder-32325 AS builder
 
-# ##############################################################################
-# ###               3) FINAL RUNTIME IMAGE                                   ###
-# ##############################################################################
-FROM python:3.11-slim-bookworm AS final
-
+# COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
 # COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
 # RUN apt-get update && \
-#     apt-get install -y ca-certificates curl dnsutils htop less net-tools procps vim && \
+#     apt-get install -y ca-certificates && \
 #     update-ca-certificates
 
-# # 2) Add the Debian testing (or unstable) repo to sources.list
-# RUN echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list
-
-# # 3) Pin the zlib1g package so that only it (and its dependencies) can come from testing
-# RUN echo "Package: zlib1g\nPin: release a=testing\nPin-Priority: 900\n\nPackage: *\nPin: release a=testing\nPin-Priority: 100" \
-#     > /etc/apt/preferences.d/zlib1g
-
-# # 4) Now install zlib1g from testing
-# RUN apt-get update \
-#     && apt-get install -y --no-install-recommends zlib1g \
-#     && rm -rf /var/lib/apt/lists/*
-
-# # (Optional) Remove the testing source line if you don't want to keep it
-# RUN sed -i '/testing main/d' /etc/apt/sources.list \
-#     && rm -f /etc/apt/preferences.d/zlib1g
-
-# ARG DEBIAN_FRONTEND=noninteractive
-# ENV TZ=America/New_York
-
-# (Optional) Install pip for Python 3.11:
-# RUN python3.11 -m ensurepip --upgrade
-
-## We re-declare our ARGs/ENVs as needed
 ARG USE_CUDA=false
 ARG USE_OLLAMA=false
-ARG USE_CUDA_VER
-ARG USE_EMBEDDING_MODEL
-ARG USE_RERANKING_MODEL
+ARG USE_CUDA_VER=cu121
+ARG USE_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+ARG USE_RERANKING_MODEL=""
+ARG TIKTOKEN_ENCODING_NAME="cl100k_base"
 ARG UID=0
 ARG GID=0
-ARG BUILD_HASH=dev-build
 
-# Minimal runtime environment variables
 ENV ENV=prod \
     PORT=8080 \
     USE_OLLAMA_DOCKER=${USE_OLLAMA} \
@@ -88,34 +61,68 @@ ENV ENV=prod \
     USE_CUDA_DOCKER_VER=${USE_CUDA_VER} \
     USE_EMBEDDING_MODEL_DOCKER=${USE_EMBEDDING_MODEL} \
     USE_RERANKING_MODEL_DOCKER=${USE_RERANKING_MODEL} \
-    HOME=/root \
-    RAG_EMBEDDING_ENGINE=openai \
-    WEBUI_BUILD_VERSION=${BUILD_HASH} \
-    DOCKER=true
+    OLLAMA_BASE_URL="/ollama" \
+    OPENAI_API_BASE_URL="" \
+    OPENAI_API_KEY="" \
+    WEBUI_SECRET_KEY="" \
+    SCARF_NO_ANALYTICS=true \
+    DO_NOT_TRACK=true \
+    ANONYMIZED_TELEMETRY=false \
+    WHISPER_MODEL="base" \
+    WHISPER_MODEL_DIR="/app/backend/data/cache/whisper/models" \
+    RAG_EMBEDDING_MODEL="$USE_EMBEDDING_MODEL_DOCKER" \
+    RAG_RERANKING_MODEL="$USE_RERANKING_MODEL_DOCKER" \
+    SENTENCE_TRANSFORMERS_HOME="/app/backend/data/cache/embedding/models" \
+    TIKTOKEN_ENCODING_NAME="$TIKTOKEN_ENCODING_NAME" \
+    TIKTOKEN_CACHE_DIR="/app/backend/data/cache/tiktoken" \
+    HF_HOME="/app/backend/data/cache/embedding/models" \
+    HOME=/root
 
-WORKDIR /app
 
-# (Optional) If you run as non-root
-RUN if [ $UID -ne 0 ]; then \
-    if [ $GID -ne 0 ]; then \
-    addgroup --gid $GID app; \
-    fi; \
-    adduser --uid $UID --gid $GID --home $HOME --disabled-password --no-create-home app; \
-    fi
+COPY ./backend/requirements.txt ./requirements.txt
+RUN uv pip uninstall --system setuptools && \
+    uv pip install --upgrade --system setuptools==70.0.0
+RUN uv pip install --system -r requirements.txt --no-cache-dir
+
+RUN uv pip install --upgrade --system pillow==10.3.0
+RUN uv pip install --upgrade --system posthog==3.11.0
+RUN uv pip install --upgrade --system starlette==0.40.0
+RUN uv pip uninstall --system flask
+RUN uv pip uninstall --system Jinja2
+RUN uv pip uninstall --system python-jose
+RUN uv pip uninstall --system ecdsa
+
+# ----------------------------------------------------
+# 3. (Optional) Pre-download / cache large models
+#    so they’re already present in the builder layer.
+# ----------------------------------------------------
+
+# RUN python -c "import os; \
+#     from sentence_transformers import SentenceTransformer; \
+#     SentenceTransformer(os.environ['RAG_EMBEDDING_MODEL'], device='cpu')" && \
+# RUN python -c "import os; \
+#     from faster_whisper import WhisperModel; \
+#     WhisperModel(os.environ['WHISPER_MODEL'], device='cpu', compute_type='int8', download_root=os.environ['WHISPER_MODEL_DIR'])" 
+# python -c "import os; import tiktoken; tiktoken.get_encoding(os.environ['TIKTOKEN_ENCODING_NAME'])"
+
+# ##############################################################################
+# ###               3) FINAL RUNTIME IMAGE                                   ###
+# ##############################################################################
+FROM jimmoffetgsa/gsai:jammy-final-32325 AS final
 
 # ----------------------------------------------------
 # 1. Copy only what we need from builder
 # ----------------------------------------------------
-COPY --from=builder /usr/local/lib/python3.11/site-packages \
-    /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
 
-RUN uv pip uninstall --system posthog && \
-    uv cache clean && \
-    rm -rf root/.cache/pip/* && \
-    rm -rf root/.cache/uv/* && \
-    uv pip install --upgrade --system posthog==3.11.0 && \ 
-    rm -rf root/.cache/*
+ARG UID=0
+ARG GID=0
+
+COPY --from=builder /usr/local/lib/python3.11/dist-packages \
+    /usr/local/lib/python3.11/dist-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+# COPY --from=builder /app/backend/data/cache/whisper/models /app/backend/data/cache/whisper/models
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python
+
 # # Copy any caches or model downloads you want at runtime
 # COPY --from=builder /root/.cache /root/.cache
 
@@ -139,12 +146,11 @@ COPY --chown=$UID:$GID ./start.sh /app/start.sh
 # Ensure the user owns the /app directory
 RUN chown -R $UID:$GID /app
 
-EXPOSE 8080
+# EXPOSE 8081
 
 ## Healthcheck
 HEALTHCHECK CMD curl --silent --fail http://localhost:${PORT:-8080}/health \
     | jq -ne 'input.status == true' || exit 1
-
 
 USER $UID:$GID
 

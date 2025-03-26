@@ -3,8 +3,11 @@ import subprocess
 import json
 import sys
 import os
+import dotenv
 
 from backend.open_webui_pipelines.utils.pipelines.aws import bedrock_client
+
+dotenv.load_dotenv()
 
 
 def get_latest_commit():
@@ -95,7 +98,7 @@ def get_pr_description():
     }
 
     print("Sending diff to the model for interpretation...\n")
-    model_id = os.getenv("BEDROCK_CLAUDE_ARN", None)
+    model_id = os.getenv("BEDROCK_CLAUDE_SONNET_35_ARN", None)
     r = bedrock_client.invoke_model_with_response_stream(
         body=json.dumps(filtered_body), modelId=model_id
     )
@@ -226,7 +229,7 @@ def generate_commit_message():
     }
 
     print("Sending diff to the model for interpretation...\n")
-    model_id = os.getenv("BEDROCK_CLAUDE_ARN", None)
+    model_id = os.getenv("BEDROCK_CLAUDE_SONNET_35_ARN", None)
     r = bedrock_client.invoke_model_with_response_stream(
         body=json.dumps(filtered_body), modelId=model_id
     )
@@ -250,23 +253,13 @@ def create_commit():
     print(commit_message)
     result = subprocess.run(
         ["git", "commit", "-m", commit_message],
-        capture_output=True,
         text=True,
     )
     if result.returncode != 0:
-        try:
-            print(
-                f"Error creating commit:\n{result.stderr}",
-                file=sys.stderr,
-            )
-        except Exception as e:
-            print(
-                f"Error {e} creating commit:\n{result}",
-                file=sys.stderr,
-            )
-        finally:
-            sys.exit(1)
+        print("Error creating commit.", file=sys.stderr)
+        sys.exit(1)
     print("\n✨ Commit created successfully! ✨\n")
+    print(f"Commit message: {commit_message}\n")
 
 
 def push_commit():
