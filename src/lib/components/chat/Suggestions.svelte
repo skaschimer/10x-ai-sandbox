@@ -16,10 +16,10 @@
 </script>
 
 {#if prompts.length > 0}
-	<div class="mb-1 flex gap-1 text-sm font-medium items-center text-gray-400 dark:text-gray-600">
+	<h2 class="mb-1 flex gap-1 text-sm font-medium items-center text-gray-600 dark:text-gray-400">
 		<Bolt />
 		{$i18n.t('Suggested prompts to get you started')}
-	</div>
+	</h2>
 {/if}
 
 <div
@@ -35,7 +35,7 @@
 			<div>
 				{#if prompt.title && prompt.title[0] !== ''}
 					<div
-						class="px-2 py-2 border border-gray-400 text-sm items-center text-gray-400 dark:text-gray-600 bg-transparent rounded-full hover:text-gray-800 hover:border-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-gray-100 dark:hover:text-gray-100"
+						class="px-2 py-2 border border-gray-400 text-sm items-center text-gray-400 dark:text-gray-600 bg-transparent rounded-full hover:text-gray-800 hover:border-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-gray-100 dark:hover:text-gray-100 truncate text-overflow:ellipsis"
 					>
 						{prompt.title[0]}
 					</div>
@@ -45,7 +45,7 @@
 					>
 						{prompt.content}
 					</div>
-					<div class="text-xs text-gray-500 font-normal line-clamp-1">Prompt</div>
+					<div class="text-xs text-gray-600 font-normal line-clamp-1">Prompt</div>
 				{/if}
 			</div>
 		</button>

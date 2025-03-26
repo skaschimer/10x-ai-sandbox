@@ -232,6 +232,8 @@ from open_webui.config import (
     ENABLE_DELETE_BUTTON,
     ENABLE_MESSAGE_INPUT_LOGO,
     ENABLE_SIDEBAR_USER_PROFILE,
+    ENABLE_PROMPT_SUGGESTIONS,
+    ENABLE_USER_SETTINGS_MENU,
     # WebUI (OAuth)
     ENABLE_OAUTH_ROLE_MANAGEMENT,
     OAUTH_ROLES_CLAIM,
@@ -1034,6 +1036,8 @@ async def get_app_config(request: Request, response: Response):
                     "enable_delete_button": ENABLE_DELETE_BUTTON,
                     "enable_sidebar_user_profile": ENABLE_SIDEBAR_USER_PROFILE,
                     "enable_message_input_logo": ENABLE_MESSAGE_INPUT_LOGO,
+                    "enable_prompt_suggestions": ENABLE_PROMPT_SUGGESTIONS,
+                    "enable_user_settings_menu": ENABLE_USER_SETTINGS_MENU,
                 }
                 if user is not None
                 else {}
@@ -1214,7 +1218,7 @@ async def healthcheck():
     # check redis health with REDIS_URL
     redis_client = redis.StrictRedis.from_url(WEBSOCKET_REDIS_URL)
     pong = redis_client.ping()
-    redis_is_healthy = pong == True
+    redis_is_healthy = pong is True
 
     # get cohere proxy health
     response = requests.get("http://localhost:9101/health")

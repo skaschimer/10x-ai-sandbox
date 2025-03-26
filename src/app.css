@@ -1,3 +1,8 @@
+:root {
+	--gsa-blue: #005087;
+	--gsa-blue-hover: #4d84aa;
+}
+
 @font-face {
 	font-family: 'Inter';
 	src: url('/assets/fonts/Inter-Variable.ttf');
@@ -8,6 +13,7 @@
 	font-family: 'Archivo';
 	src: url('/assets/fonts/Archivo-Variable.ttf');
 	font-display: swap;
+	font-weight: 100 900;
 }
 
 @font-face {
@@ -213,7 +219,7 @@ input[type='number'] {
 .ProseMirror p.is-editor-empty:first-child::before {
 	content: attr(data-placeholder);
 	float: left;
-	color: #adb5bd;
+	color: #898989;
 	pointer-events: none;
 
 	@apply line-clamp-1 absolute;
@@ -302,4 +308,15 @@ input[type='number'] {
 
 .hljs-strong {
 	font-weight: 700;
+}
+
+/* GSA custom colors */
+
+.bg-gsa-blue {
+	background-color: var(--gsa-blue);
+}
+
+.bg-gsa-blue:focus,
+.bg-gsa-blue:hover {
+	background-color: var(--gsa-blue-hover);
 }

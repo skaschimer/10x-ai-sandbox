@@ -974,6 +974,14 @@ ENABLE_MESSAGE_INPUT_LOGO = (
     os.environ.get("ENABLE_MESSAGE_INPUT_LOGO", "False").lower() == "true"
 )
 
+ENABLE_PROMPT_SUGGESTIONS = (
+    os.environ.get("ENABLE_PROMPT_SUGGESTIONS", "True").lower() == "true"
+)
+
+ENABLE_USER_SETTINGS_MENU = (
+    os.environ.get("ENABLE_USER_SETTINGS_MENU", "True").lower() == "true"
+)
+
 
 def validate_cors_origins(origins):
     for origin in origins:

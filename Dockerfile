@@ -1,13 +1,13 @@
-# syntax=docker/dockerfile:1
+## syntax=docker/dockerfile:1
 # ##############################################################################
 # ###               1) FRONTEND BUILD (Node)                                 ###
 # ##############################################################################
-FROM node:22-bookworm-slim AS build-frontend
+FROM node:22.14.0-alpine3.21 AS build-frontend
 
 COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
+# RUN apt-get update && \
+#     apt-get install -y ca-certificates && \
+#     update-ca-certificates
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -43,26 +43,26 @@ FROM jimmoffetgsa/gsai:bookworm-builder-011525 AS builder
 # ##############################################################################
 FROM python:3.11-slim-bookworm AS final
 
-COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
+# COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
+# RUN apt-get update && \
+#     apt-get install -y ca-certificates curl dnsutils htop less net-tools procps vim && \
+#     update-ca-certificates
 
-# 2) Add the Debian testing (or unstable) repo to sources.list
-RUN echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list
+# # 2) Add the Debian testing (or unstable) repo to sources.list
+# RUN echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list
 
-# 3) Pin the zlib1g package so that only it (and its dependencies) can come from testing
-RUN echo "Package: zlib1g\nPin: release a=testing\nPin-Priority: 900\n\nPackage: *\nPin: release a=testing\nPin-Priority: 100" \
-    > /etc/apt/preferences.d/zlib1g
+# # 3) Pin the zlib1g package so that only it (and its dependencies) can come from testing
+# RUN echo "Package: zlib1g\nPin: release a=testing\nPin-Priority: 900\n\nPackage: *\nPin: release a=testing\nPin-Priority: 100" \
+#     > /etc/apt/preferences.d/zlib1g
 
-# 4) Now install zlib1g from testing
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends zlib1g \
-    && rm -rf /var/lib/apt/lists/*
+# # 4) Now install zlib1g from testing
+# RUN apt-get update \
+#     && apt-get install -y --no-install-recommends zlib1g \
+#     && rm -rf /var/lib/apt/lists/*
 
-# (Optional) Remove the testing source line if you don't want to keep it
-RUN sed -i '/testing main/d' /etc/apt/sources.list \
-    && rm -f /etc/apt/preferences.d/zlib1g
+# # (Optional) Remove the testing source line if you don't want to keep it
+# RUN sed -i '/testing main/d' /etc/apt/sources.list \
+#     && rm -f /etc/apt/preferences.d/zlib1g
 
 # ARG DEBIAN_FRONTEND=noninteractive
 # ENV TZ=America/New_York
@@ -70,7 +70,7 @@ RUN sed -i '/testing main/d' /etc/apt/sources.list \
 # (Optional) Install pip for Python 3.11:
 # RUN python3.11 -m ensurepip --upgrade
 
-# We re-declare our ARGs/ENVs as needed
+## We re-declare our ARGs/ENVs as needed
 ARG USE_CUDA=false
 ARG USE_OLLAMA=false
 ARG USE_CUDA_VER
@@ -141,7 +141,7 @@ RUN chown -R $UID:$GID /app
 
 EXPOSE 8080
 
-# Healthcheck
+## Healthcheck
 HEALTHCHECK CMD curl --silent --fail http://localhost:${PORT:-8080}/health \
     | jq -ne 'input.status == true' || exit 1
 

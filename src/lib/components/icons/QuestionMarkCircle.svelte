@@ -10,6 +10,8 @@
 	stroke-width={strokeWidth}
 	stroke="currentColor"
 	class={className}
+	role="img"
+	aria-hidden="true"
 >
 	<path
 		stroke-linecap="round"

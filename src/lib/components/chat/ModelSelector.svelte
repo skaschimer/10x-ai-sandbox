@@ -39,7 +39,9 @@
 				<div class="mr-1 max-w-full">
 					<Selector
 						id={`${selectedModelIdx}`}
-						placeholder={$i18n.t('Select a model')}
+						placeholder={($models.find((m) => m.id === selectedModel)?.name || 'no model') +
+							' is selected. ' +
+							$i18n.t('Select a model')}
 						items={$models.map((model) => ({
 							value: model.id,
 							label: model.name,
@@ -113,7 +115,7 @@
 </div>
 
 {#if showSetDefault && $config?.features?.enable_set_as_default_model}
-	<div class=" absolute text-left mt-[1px] ml-1 text-[0.7rem] text-gray-500 font-primary">
+	<div class=" absolute text-left mt-[1px] ml-1 text-[0.7rem] text-gray-600 font-primary">
 		<button on:click={saveDefaultModel}> {$i18n.t('Set as default')}</button>
 	</div>
 {/if}

@@ -73,7 +73,7 @@
 			})();
 		</script>
 
-		<title>Open WebUI</title>
+		<title>GSA Chat</title>
 
 		%sveltekit.head%
 	</head>
@@ -103,6 +103,7 @@
 					border-radius: 5px;
 				"
 				src="/static/gsa-logo.svg"
+				alt="GSA Chat"
 			/>
 
 			<div
@@ -125,6 +126,7 @@
 					style="width: auto; height: 13rem"
 					src="/static/gsa-logo.svg"
 					class="animate-pulse-fast"
+					alt="GSA Chat is loading"
 				/>
 
 				<div style="position: relative; width: 24rem; margin-top: 0.5rem">
@@ -163,7 +165,8 @@
 
 <style type="text/css" nonce="">
 	html {
-		overflow-y: hidden !important;
+		overflow-y: hidden;
+		width: auto;
 	}
 
 	#splash-screen {
