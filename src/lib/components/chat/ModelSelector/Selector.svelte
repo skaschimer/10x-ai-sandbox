@@ -12,7 +12,14 @@
 
 	import { deleteModel, getOllamaVersion, pullModel } from '$lib/apis/ollama';
 
-	import { user, MODEL_DOWNLOAD_POOL, models, mobile, temporaryChatEnabled } from '$lib/stores';
+	import {
+		user,
+		MODEL_DOWNLOAD_POOL,
+		models,
+		mobile,
+		temporaryChatEnabled,
+		config
+	} from '$lib/stores';
 	import { toast } from 'svelte-sonner';
 	import { capitalizeFirstLetter, sanitizeResponseContent, splitStream } from '$lib/utils';
 	import { getModels } from '$lib/apis';
@@ -28,7 +35,7 @@
 	export let id = '';
 	export let value = '';
 	export let placeholder = 'Select a model';
-	export let searchEnabled = true;
+	export let searchEnabled = $config?.features?.enable_model_selector_search ?? false;
 	export let searchPlaceholder = $i18n.t('Search a model');
 
 	export let showTemporaryChatControl = false;
@@ -289,6 +296,7 @@
 			{/if}
 
 			<div class="px-3 my-2 max-h-64 overflow-y-auto scrollbar-hidden group">
+				<h3 class="font-semibold my-1 text-sm">Available models</h3>
 				{#each filteredItems as item, index}
 					<button
 						class="flex w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 outline-none transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer data-[highlighted]:bg-muted {index ===
@@ -320,109 +328,60 @@
 								<div class="flex items-center min-w-fit">
 									<div class="line-clamp-1">
 										<div class="flex items-center min-w-fit">
-											<Tooltip
-												content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
-												placement="top-start"
-											>
-												<img
-													src={item.model?.info?.meta?.profile_image_url ?? '/static/favicon.png'}
-													alt=""
-													class="rounded-full size-5 flex items-center mr-2"
-												/>
-												{item.label}
-											</Tooltip>
-										</div>
-									</div>
-									{#if item.model.owned_by === 'ollama' && (item.model.ollama?.details?.parameter_size ?? '') !== ''}
-										<div class="flex ml-1 items-center translate-y-[0.5px]">
-											<Tooltip
-												content={`${
-													item.model.ollama?.details?.quantization_level
-														? item.model.ollama?.details?.quantization_level + ' '
-														: ''
-												}${
-													item.model.ollama?.size
-														? `(${(item.model.ollama?.size / 1024 ** 3).toFixed(1)}GB)`
-														: ''
-												}`}
-												className="self-end"
-											>
-												<span
-													class=" text-xs font-medium text-gray-600 dark:text-gray-400 line-clamp-1"
-													>{item.model.ollama?.details?.parameter_size ?? ''}</span
-												>
-											</Tooltip>
-										</div>
-									{/if}
-								</div>
-
-								<!-- {JSON.stringify(item.info)} -->
-
-								{#if item.model.owned_by === 'openai'}
-									<Tooltip content={`${'External'}`}>
-										<div class="translate-y-[1px]">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 16 16"
-												fill="currentColor"
-												class="size-3"
-											>
-												<path
-													fill-rule="evenodd"
-													d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
-													clip-rule="evenodd"
-												/>
-												<path
-													fill-rule="evenodd"
-													d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
-													clip-rule="evenodd"
-												/>
-											</svg>
-										</div>
-									</Tooltip>
-								{/if}
-
-								{#if item.model?.info?.meta?.description}
-									<Tooltip
-										content={`${marked.parse(
-											sanitizeResponseContent(item.model?.info?.meta?.description).replaceAll(
-												'\n',
-												'<br>'
-											)
-										)}`}
-									>
-										<div class=" translate-y-[1px]">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="w-4 h-4"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
-												/>
-											</svg>
-										</div>
-									</Tooltip>
-								{/if}
-
-								{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
-									<div class="flex gap-0.5 self-center items-center h-full translate-y-[0.5px]">
-										{#each item.model?.info?.meta.tags as tag}
-											<Tooltip content={tag.name}>
-												<div
-													class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
-												>
-													{tag.name}
+											<div class="flex flex-row gap-1 items-center">
+												<div class="flex-none">
+													<Tooltip
+														content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
+														placement="top-start"
+													>
+														<img
+															src={item.model?.info?.meta?.profile_image_url ??
+																'/static/favicon.png'}
+															alt=""
+															class="rounded-full size-5 flex items-center mr-2"
+														/>
+													</Tooltip>
 												</div>
-											</Tooltip>
-										{/each}
+												<div class="flex flex-col">
+													<div class="flex flex-row items-center">
+														<Tooltip
+															content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
+															placement="top-start"
+														>
+															{item.label}
+														</Tooltip>
+														{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
+															<div class="ml-1 flex gap-0.5 self-center items-center h-full">
+																{#each item.model?.info?.meta.tags as tag}
+																	<Tooltip content={tag.name}>
+																		<div
+																			class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
+																		>
+																			{tag.name}
+																		</div>
+																	</Tooltip>
+																{/each}
+															</div>
+														{/if}
+													</div>
+													<div class="text-xs">
+														{#if item.model?.info?.meta?.description}
+															<Tooltip
+																content={`${marked.parse(
+																	sanitizeResponseContent(
+																		item.model?.info?.meta?.description
+																	).replaceAll('\n', '<br>')
+																)}`}
+															>
+																{item.model?.info?.meta?.description}
+															</Tooltip>
+														{/if}
+													</div>
+												</div>
+											</div>
+										</div>
 									</div>
-								{/if}
+								</div>
 							</div>
 						</div>
 
