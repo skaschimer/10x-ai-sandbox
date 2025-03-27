@@ -976,6 +976,18 @@ ENABLE_USER_SETTINGS_MENU = (
     os.environ.get("ENABLE_USER_SETTINGS_MENU", "True").lower() == "true"
 )
 
+ENABLE_MODEL_SELECTOR_SEARCH = (
+    os.environ.get("ENABLE_MODEL_SELECTOR_SEARCH", "False").lower() == "true"
+)
+
+ENABLE_RESPONSE_PROMPT_EDIT = (
+    os.environ.get("ENABLE_RESPONSE_PROMPT_EDIT", "True").lower() == "true"
+)
+
+ENABLE_RESPONSE_CONTINUE = (
+    os.environ.get("ENABLE_RESPONSE_CONTINUE", "True").lower() == "true"
+)
+
 
 def validate_cors_origins(origins):
     for origin in origins:
