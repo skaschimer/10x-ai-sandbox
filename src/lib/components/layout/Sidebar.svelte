@@ -154,7 +154,7 @@
 	};
 
 	const initChannels = async () => {
-		await channels.set(await getChannels(localStorage.token));
+		await channels.set(await getChannels());
 	};
 
 	const initChatList = async () => {
@@ -407,7 +407,7 @@
 <ChannelModal
 	bind:show={showCreateChannel}
 	onSubmit={async ({ name, access_control }) => {
-		const res = await createNewChannel(localStorage.token, {
+		const res = await createNewChannel({
 			name: name,
 			access_control: access_control
 		}).catch((error) => {
