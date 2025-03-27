@@ -186,7 +186,7 @@
 					})
 				);
 
-				models.set(await getModels(localStorage.token));
+				models.set(await getModels());
 			} else {
 				toast.error($i18n.t('Download canceled'));
 			}

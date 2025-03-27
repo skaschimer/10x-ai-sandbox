@@ -27,7 +27,7 @@
 
 		if (config) {
 			toast.success('Settings saved successfully');
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 		}
 	};
 
@@ -36,7 +36,7 @@
 		config.EVALUATION_ARENA_MODELS = [...config.EVALUATION_ARENA_MODELS];
 
 		await submitHandler();
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	};
 
 	const editModelHandler = async (model, modelIdx) => {
@@ -44,7 +44,7 @@
 		config.EVALUATION_ARENA_MODELS = [...config.EVALUATION_ARENA_MODELS];
 
 		await submitHandler();
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	};
 
 	const deleteModelHandler = async (modelIdx) => {
@@ -53,7 +53,7 @@
 		);
 
 		await submitHandler();
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	};
 
 	onMount(async () => {

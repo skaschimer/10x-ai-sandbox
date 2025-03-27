@@ -47,7 +47,7 @@
 		if (res) {
 			toast.success($i18n.t('Function created successfully'));
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 
 			await goto('/admin/functions');
 		}

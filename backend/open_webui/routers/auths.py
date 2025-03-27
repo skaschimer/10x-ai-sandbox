@@ -334,11 +334,25 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
             else None
         )
 
+        jwt_refresh_token = create_token(
+            data={"id": user.id},
+            expires_delta=parse_duration(
+                request.app.state.config.JWT_REFRESH_EXPIRES_IN
+            ),
+        )
         # Set the cookie token
         response.set_cookie(
             key="token",
             value=token,
             expires=datetime_expires_at,
+            httponly=True,
+            samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
+            secure=WEBUI_SESSION_COOKIE_SECURE,
+        )
+        # Set a cookie with a refresh token
+        response.set_cookie(
+            key="refresh_token",
+            value=jwt_refresh_token,
             httponly=True,
             samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
             secure=WEBUI_SESSION_COOKIE_SECURE,

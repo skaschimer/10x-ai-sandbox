@@ -835,7 +835,7 @@
 			?.querySelector('#response-content-container')
 			?.focus();
 
-		const res = await chatCompleted(localStorage.token, {
+		const res = await chatCompleted({
 			model: modelId,
 			messages: messages.map((m) => ({
 				id: m.id,
@@ -889,7 +889,7 @@
 	const chatActionHandler = async (chatId, actionId, modelId, responseMessageId, event = null) => {
 		const messages = createMessagesList(responseMessageId);
 
-		const res = await chatAction(localStorage.token, actionId, {
+		const res = await chatAction(actionId, {
 			model: modelId,
 			messages: messages.map((m) => ({
 				id: m.id,
@@ -1681,7 +1681,7 @@
 
 	const stopResponse = () => {
 		if (taskId) {
-			const res = stopTask(localStorage.token, taskId).catch((error) => {
+			const res = stopTask(taskId).catch((error) => {
 				return null;
 			});
 
@@ -1779,7 +1779,6 @@
 
 		try {
 			const [res, controller] = await generateMoACompletion(
-				localStorage.token,
 				message.model,
 				history.messages[message.parentId].content,
 				responses

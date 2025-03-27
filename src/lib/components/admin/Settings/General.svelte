@@ -50,7 +50,7 @@
 	};
 
 	const updateHandler = async () => {
-		webhookUrl = await updateWebhookUrl(localStorage.token, webhookUrl);
+		webhookUrl = await updateWebhookUrl(webhookUrl);
 		const res = await updateAdminConfig(localStorage.token, adminConfig);
 		await updateLdapServerHandler();
 
@@ -68,7 +68,7 @@
 			})(),
 
 			(async () => {
-				webhookUrl = await getWebhookUrl(localStorage.token);
+				webhookUrl = await getWebhookUrl();
 			})(),
 			(async () => {
 				LDAP_SERVER = await getLdapServer(localStorage.token);

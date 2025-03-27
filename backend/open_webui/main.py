@@ -321,6 +321,7 @@ from open_webui.utils.auth import (
     get_admin_user,
     get_verified_user,
     refresh_jwt,
+    get_current_user,
 )
 from open_webui.utils.oauth import oauth_manager
 from open_webui.utils.security_headers import SecurityHeadersMiddleware
@@ -970,14 +971,22 @@ async def list_tasks_endpoint(user=Depends(get_verified_user)):
 @app.get("/api/config")
 async def get_app_config(request: Request, response: Response):
     user = None
+    data = None
     if "token" in request.cookies:
         token = request.cookies.get("token")
         try:
             data = decode_token(token)
         except jwt.ExpiredSignatureError:
-            data = refresh_jwt(request, response)
+            try:
+                data = refresh_jwt(request, response)
+            except jwt.ExpiredSignatureError:
+                # if this is expired it's okay
+                # otherwise bubble up
+                pass
         except Exception as e:
+            print("got different exception:", e)
             log.debug(e)
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",

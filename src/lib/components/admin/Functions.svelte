@@ -126,7 +126,7 @@
 			toast.success($i18n.t('Function deleted successfully'));
 
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 		}
 	};
 
@@ -147,7 +147,7 @@
 			}
 
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 		}
 	};
 
@@ -359,7 +359,7 @@
 							bind:state={func.is_active}
 							on:change={async (e) => {
 								toggleFunctionById(localStorage.token, func.id);
-								models.set(await getModels(localStorage.token));
+								models.set(await getModels());
 							}}
 						/>
 					</Tooltip>
@@ -496,7 +496,7 @@
 	id={selectedFunction?.id ?? null}
 	on:save={async () => {
 		await tick();
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	}}
 />
 
@@ -517,7 +517,7 @@
 
 			toast.success($i18n.t('Functions imported successfully'));
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 		};
 
 		reader.readAsText(importFiles[0]);

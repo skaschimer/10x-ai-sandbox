@@ -1,5 +1,6 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 import { getTimeRange } from '$lib/utils';
+import { apiFetch } from '$lib/utils/apiClient';
 
 export const createNewChat = async (token: string, chat: object) => {
 	let error = null;
@@ -73,37 +74,15 @@ export const importChat = async (
 };
 
 export const getChatList = async (token: string = '', page: number | null = null) => {
-	let error = null;
 	const searchParams = new URLSearchParams();
 
 	if (page !== null) {
 		searchParams.append('page', `${page}`);
 	}
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/chats/?${searchParams.toString()}`, {
-		method: 'GET',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			...(token && { authorization: `Bearer ${token}` })
-		}
-	})
-		.then(async (res) => {
-			if (!res.ok) throw await res.json();
-			return res.json();
-		})
-		.then((json) => {
-			return json;
-		})
-		.catch((err) => {
-			error = err;
-			console.log(err);
-			return null;
-		});
-
-	if (error) {
-		throw error;
-	}
+	const res = await apiFetch(`${WEBUI_API_BASE_URL}/chats/?${searchParams.toString()}`, {
+		method: 'GET'
+	});
 
 	return res.map((chat) => ({
 		...chat,
@@ -441,35 +420,7 @@ export const getChatListByTagName = async (token: string = '', tagName: string) 
 };
 
 export const getChatById = async (token: string, id: string) => {
-	let error = null;
-
-	const res = await fetch(`${WEBUI_API_BASE_URL}/chats/${id}`, {
-		method: 'GET',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			...(token && { authorization: `Bearer ${token}` })
-		}
-	})
-		.then(async (res) => {
-			if (!res.ok) throw await res.json();
-			return res.json();
-		})
-		.then((json) => {
-			return json;
-		})
-		.catch((err) => {
-			error = err;
-
-			console.log(err);
-			return null;
-		});
-
-	if (error) {
-		throw error;
-	}
-
-	return res;
+	return await apiFetch(`${WEBUI_API_BASE_URL}/chats/${id}`, { method: 'GET' });
 };
 
 export const getChatByShareId = async (token: string, share_id: string) => {

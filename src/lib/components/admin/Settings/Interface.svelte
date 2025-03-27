@@ -38,7 +38,7 @@
 	let banners: Banner[] = [];
 
 	const updateInterfaceHandler = async () => {
-		taskConfig = await updateTaskConfig(localStorage.token, taskConfig);
+		taskConfig = await updateTaskConfig(taskConfig);
 
 		promptSuggestions = await setDefaultPromptSuggestions(localStorage.token, promptSuggestions);
 		await updateBanners();
@@ -47,7 +47,7 @@
 	};
 
 	onMount(async () => {
-		taskConfig = await getTaskConfig(localStorage.token);
+		taskConfig = await getTaskConfig();
 
 		promptSuggestions = taskConfig.DEFAULT_PROMPT_SUGGESTIONS;
 		banners = await getBanners(localStorage.token);

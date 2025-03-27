@@ -96,7 +96,7 @@
 				settings.set(localStorageSettings);
 			}
 
-			models.set(await getModels(localStorage.token));
+			models.set(await getModels());
 			banners.set(await getBanners(localStorage.token));
 			tools.set(await getTools(localStorage.token));
 

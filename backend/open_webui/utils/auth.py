@@ -81,10 +81,10 @@ def refresh_jwt(request: Request, response: Response):
         raise HTTPException(status_code=403, detail=ERROR_MESSAGES.UNAUTHORIZED)
     try:
         data = jwt.decode(refresh_token, SESSION_SECRET, algorithms=[ALGORITHM])
-    except Exception:
+    except Exception as e:
         # an invalid or expired refresh cookie leaves us no
         # choice by to send 401.
-        raise HTTPException(status_code=401, detail=ERROR_MESSAGES.INVALID_TOKEN)
+        raise e
 
     claim = {"id": data["id"]}
     expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
@@ -134,7 +134,13 @@ def get_current_user(
     try:
         data = jwt.decode(token, SESSION_SECRET, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        data = refresh_jwt(request, response)
+        try:
+            data = refresh_jwt(request, response)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
     except Exception:
         # Only generate a new token when the old one is valid, but expired.
         # Any other failure should not be allowed

@@ -236,7 +236,7 @@
 					})
 				);
 
-				models.set(await getModels(localStorage.token));
+				models.set(await getModels());
 			} else {
 				toast.error($i18n.t('Download canceled'));
 			}
@@ -395,7 +395,7 @@
 		modelTransferring = false;
 		uploadProgress = null;
 
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	};
 
 	const deleteModelHandler = async () => {
@@ -408,7 +408,7 @@
 		}
 
 		deleteModelTag = '';
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 	};
 
 	const cancelModelPullHandler = async (model: string) => {
@@ -494,7 +494,7 @@
 			}
 		}
 
-		models.set(await getModels(localStorage.token));
+		models.set(await getModels());
 
 		createModelLoading = false;
 

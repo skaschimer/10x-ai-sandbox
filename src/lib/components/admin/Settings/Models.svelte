@@ -64,7 +64,7 @@
 
 	const init = async () => {
 		workspaceModels = await getBaseModels(localStorage.token);
-		baseModels = await getModels(localStorage.token, true);
+		baseModels = await getModels(true);
 
 		models = baseModels.map((m) => {
 			const workspaceModel = workspaceModels.find((wm) => wm.id === m.id);
@@ -107,7 +107,7 @@
 			}
 		}
 
-		_models.set(await getModels(localStorage.token));
+		_models.set(await getModels());
 		await init();
 	};
 
@@ -129,7 +129,7 @@
 		}
 
 		await init();
-		_models.set(await getModels(localStorage.token));
+		_models.set(await getModels());
 	};
 
 	onMount(async () => {
@@ -313,7 +313,7 @@
 									}
 								}
 
-								await _models.set(await getModels(localStorage.token));
+								await _models.set(await getModels());
 								init();
 							};
 

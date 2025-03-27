@@ -705,7 +705,6 @@
 													}
 
 													const res = await generateAutoCompletion(
-														localStorage.token,
 														selectedModelIds.at(0),
 														text,
 														history?.currentId
