@@ -4,7 +4,7 @@
 # ##############################################################################
 FROM node:22.14.0-alpine3.21 AS build-frontend
 
-COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
+# COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
 COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
 # RUN apt-get update && \
 #     apt-get install -y ca-certificates && \
@@ -39,45 +39,8 @@ RUN npm run build
 # ##############################################################################
 FROM jimmoffetgsa/gsai:jammy-builder-32325 AS builder
 
-# COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
-# COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-# RUN apt-get update && \
-#     apt-get install -y ca-certificates && \
-#     update-ca-certificates
-
-ARG USE_CUDA=false
-ARG USE_OLLAMA=false
-ARG USE_CUDA_VER=cu121
-ARG USE_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-ARG USE_RERANKING_MODEL=""
-ARG TIKTOKEN_ENCODING_NAME="cl100k_base"
-ARG UID=0
-ARG GID=0
-
 ENV ENV=prod \
-    PORT=8080 \
-    USE_OLLAMA_DOCKER=${USE_OLLAMA} \
-    USE_CUDA_DOCKER=${USE_CUDA} \
-    USE_CUDA_DOCKER_VER=${USE_CUDA_VER} \
-    USE_EMBEDDING_MODEL_DOCKER=${USE_EMBEDDING_MODEL} \
-    USE_RERANKING_MODEL_DOCKER=${USE_RERANKING_MODEL} \
-    OLLAMA_BASE_URL="/ollama" \
-    OPENAI_API_BASE_URL="" \
-    OPENAI_API_KEY="" \
-    WEBUI_SECRET_KEY="" \
-    SCARF_NO_ANALYTICS=true \
-    DO_NOT_TRACK=true \
-    ANONYMIZED_TELEMETRY=false \
-    WHISPER_MODEL="base" \
-    WHISPER_MODEL_DIR="/app/backend/data/cache/whisper/models" \
-    RAG_EMBEDDING_MODEL="$USE_EMBEDDING_MODEL_DOCKER" \
-    RAG_RERANKING_MODEL="$USE_RERANKING_MODEL_DOCKER" \
-    SENTENCE_TRANSFORMERS_HOME="/app/backend/data/cache/embedding/models" \
-    TIKTOKEN_ENCODING_NAME="$TIKTOKEN_ENCODING_NAME" \
-    TIKTOKEN_CACHE_DIR="/app/backend/data/cache/tiktoken" \
-    HF_HOME="/app/backend/data/cache/embedding/models" \
     HOME=/root
-
 
 COPY ./backend/requirements.txt ./requirements.txt
 RUN uv pip uninstall --system setuptools && \
@@ -93,7 +56,7 @@ RUN uv pip uninstall --system python-jose
 RUN uv pip uninstall --system ecdsa
 
 # ----------------------------------------------------
-# 3. (Optional) Pre-download / cache large models
+# (Optional) Pre-download / cache large models
 #    so they’re already present in the builder layer.
 # ----------------------------------------------------
 
@@ -159,6 +122,3 @@ RUN chmod +x /app/start.sh
 
 # local
 CMD ["bash", "-c", "./start.sh && tail -f /dev/null"]
-
-# remote
-# CMD ["nohup", "ddtrace-run", "./start.sh", "&", "sleep", "infinity"]
