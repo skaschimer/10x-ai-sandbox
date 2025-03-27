@@ -115,7 +115,7 @@
 						{:else if rating === 'very_bad'}
 							{$i18n.t('Very Bad')}
 						{:else if rating === 'extremely_bad'}
-							{$i18n.t('Extremly bad')}
+							{$i18n.t('Extremely bad')}
 						{:else}
 							{rating}
 						{/if}
