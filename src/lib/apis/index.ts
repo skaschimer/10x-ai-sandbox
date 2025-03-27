@@ -393,7 +393,7 @@ export const getModelFilterConfig = async () => {
 };
 
 export const updateModelFilterConfig = async (enabled: boolean, models: string[]) => {
-	return await fetch(`${WEBUI_BASE_URL}/api/config/model/filter`, {
+	return await apiFetch(`${WEBUI_BASE_URL}/api/config/model/filter`, {
 		method: 'POST',
 		body: JSON.stringify({
 			enabled: enabled,
