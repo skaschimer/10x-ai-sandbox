@@ -66,7 +66,9 @@ export async function apiFetch<T = unknown>(
 
 	if (response.status === 401 || response.status === 403) {
 		console.log('got unauth response from API, redirecting');
-		window.location.href = '/auth';
+		if (window.location.pathname !== '/auth') {
+			window.location.href = '/auth';
+		}
 
 		// this is mostly to satisfy the return type in the signature
 		throw new ApiError('Not authenticated', 401);
