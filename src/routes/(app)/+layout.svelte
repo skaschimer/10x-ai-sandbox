@@ -97,7 +97,7 @@
 			}
 
 			models.set(await getModels());
-			banners.set(await getBanners(localStorage.token));
+			banners.set(await getBanners());
 			tools.set(await getTools(localStorage.token));
 
 			document.addEventListener('keydown', async function (event) {

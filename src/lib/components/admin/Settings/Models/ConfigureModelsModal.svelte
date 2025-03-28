@@ -34,7 +34,7 @@
 	}
 
 	const init = async () => {
-		config = await getModelsConfig(localStorage.token);
+		config = await getModelsConfig();
 
 		if (config?.DEFAULT_MODELS) {
 			defaultModelIds = (config?.DEFAULT_MODELS).split(',').filter((id) => id);
@@ -57,7 +57,7 @@
 	const submitHandler = async () => {
 		loading = true;
 
-		const res = await setModelsConfig(localStorage.token, {
+		const res = await setModelsConfig({
 			DEFAULT_MODELS: defaultModelIds.join(','),
 			MODEL_ORDER_LIST: modelIds
 		});
