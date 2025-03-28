@@ -26,7 +26,7 @@
 		}
 
 		if (modelInfo) {
-			const res = await createNewModel(localStorage.token, {
+			const res = await createNewModel({
 				...modelInfo,
 				meta: {
 					...modelInfo.meta,

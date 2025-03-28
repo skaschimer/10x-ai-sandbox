@@ -83,7 +83,7 @@
 	message={$i18n.t('This will delete all models including custom models and cannot be undone.')}
 	bind:show={showResetModal}
 	onConfirm={async () => {
-		const res = deleteAllModels(localStorage.token);
+		const res = deleteAllModels();
 		if (res) {
 			toast.success($i18n.t('All models deleted successfully'));
 			initHandler();

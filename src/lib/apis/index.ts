@@ -259,19 +259,27 @@ export const generateAutoCompletion = async (
 	}
 };
 
-export const generateMoACompletion = async (model: string, prompt: string, responses: string[]) => {
+export const generateMoACompletion = async (
+	model: string,
+	prompt: string,
+	responses: string[]
+): Promise<[Response, AbortController]> => {
 	const controller = new AbortController();
 
-	const res = await apiFetch(`${WEBUI_BASE_URL}/api/v1/tasks/moa/completions`, {
-		signal: controller.signal,
-		method: 'POST',
-		body: JSON.stringify({
-			model: model,
-			prompt: prompt,
-			responses: responses,
-			stream: true
-		})
-	});
+	const res = await apiFetch<Response>(
+		`${WEBUI_BASE_URL}/api/v1/tasks/moa/completions`,
+		{
+			signal: controller.signal,
+			method: 'POST',
+			body: JSON.stringify({
+				model: model,
+				prompt: prompt,
+				responses: responses,
+				stream: true
+			})
+		},
+		false
+	);
 
 	return [res, controller];
 };

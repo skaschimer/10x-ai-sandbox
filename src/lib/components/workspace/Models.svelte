@@ -56,7 +56,7 @@
 	let searchValue = '';
 
 	const deleteModelHandler = async (model) => {
-		const res = await deleteModelById(localStorage.token, model.id).catch((e) => {
+		const res = await deleteModelById(model.id).catch((e) => {
 			toast.error(e);
 			return null;
 		});
@@ -120,7 +120,7 @@
 
 		console.log(info);
 
-		const res = await updateModelById(localStorage.token, info.id, info);
+		const res = await updateModelById(info.id, info);
 
 		if (res) {
 			toast.success(
@@ -365,7 +365,7 @@
 									<Switch
 										bind:state={model.is_active}
 										on:change={async (e) => {
-											toggleModelById(localStorage.token, model.id);
+											toggleModelById(model.id);
 											_models.set(await getModels());
 										}}
 									/>
@@ -399,13 +399,11 @@
 							for (const model of savedModels) {
 								if (model?.info ?? false) {
 									if ($_models.find((m) => m.id === model.id)) {
-										await updateModelById(localStorage.token, model.id, model.info).catch(
-											(error) => {
-												return null;
-											}
-										);
+										await updateModelById(model.id, model.info).catch((error) => {
+											return null;
+										});
 									} else {
-										await createNewModel(localStorage.token, model.info).catch((error) => {
+										await createNewModel(model.info).catch((error) => {
 											return null;
 										});
 									}

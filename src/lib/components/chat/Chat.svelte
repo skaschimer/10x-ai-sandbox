@@ -1568,7 +1568,6 @@
 		completion_request_initiated = Date.now();
 		time_to_first_token = null;
 		const res = await generateOpenAIChatCompletion(
-			localStorage.token,
 			{
 				stream: stream,
 				model: model.id,

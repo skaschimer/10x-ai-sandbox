@@ -21,9 +21,10 @@ export class ApiError extends Error {
 }
 
 /**
- * Parse the response as JSON, throw if !response.ok
+ * Parse the response as JSON if json is true (default), throw if !response.ok
+ * Other wise return the raw fetch Response, this is sometimes needed for streams
  */
-async function handleResponse<T>(response: Response): Promise<T> {
+async function handleResponse<T>(response: Response, json: boolean = true): Promise<T> {
 	if (!response.ok) {
 		let errorBody: unknown;
 		try {
@@ -34,7 +35,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 		const message = (errorBody as any)?.detail ?? `Request failed with status ${response.status}`;
 		throw new ApiError(message, response.status, errorBody);
 	}
-	return (await response.json()) as T;
+	if (json) {
+		return (await response.json()) as T;
+	} else {
+		return response as T;
+	}
 }
 
 /**
@@ -44,7 +49,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
  */
 export async function apiFetch<T = unknown>(
 	input: RequestInfo | URL,
-	init: RequestInit = {}
+	init: RequestInit = {},
+	json: boolean = true
 ): Promise<T> {
 	const defaultHeaders: Record<string, string> = {
 		Accept: 'application/json',
@@ -55,7 +61,7 @@ export async function apiFetch<T = unknown>(
 	Object.assign(defaultHeaders, userHeaders);
 
 	// Handle situations where we are uploading FormData
-	// remove Content-Type so the browser can set it (with the boundary).
+	// remove Content-Type so the browser can properl set it (with the boundary).
 	if (init.body instanceof FormData) {
 		delete defaultHeaders['Content-Type'];
 	}
@@ -82,6 +88,6 @@ export async function apiFetch<T = unknown>(
 		// this is mostly to satisfy the return type in the signature
 		throw new ApiError('Not authenticated', 401);
 	} else {
-		return handleResponse<T>(response);
+		return handleResponse<T>(response, json);
 	}
 }
