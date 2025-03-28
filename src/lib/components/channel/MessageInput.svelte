@@ -174,7 +174,7 @@
 
 		try {
 			// During the file upload, file content is automatically extracted.
-			const uploadedFile = await uploadFile(localStorage.token, file);
+			const uploadedFile = await uploadFile(file);
 
 			if (uploadedFile) {
 				console.log('File upload completed:', {

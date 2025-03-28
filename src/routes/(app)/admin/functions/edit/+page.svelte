@@ -35,7 +35,7 @@
 			return;
 		}
 
-		const res = await updateFunctionById(localStorage.token, func.id, {
+		const res = await updateFunctionById(func.id, {
 			id: data.id,
 			name: data.name,
 			meta: data.meta,
@@ -47,7 +47,7 @@
 
 		if (res) {
 			toast.success($i18n.t('Function updated successfully'));
-			functions.set(await getFunctions(localStorage.token));
+			functions.set(await getFunctions());
 			models.set(await getModels());
 		}
 	};
@@ -57,7 +57,7 @@
 		const id = $page.url.searchParams.get('id');
 
 		if (id) {
-			func = await getFunctionById(localStorage.token, id).catch((error) => {
+			func = await getFunctionById(id).catch((error) => {
 				toast.error(error);
 				goto('/admin/functions');
 				return null;

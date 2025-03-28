@@ -189,7 +189,7 @@
 
 	const setToolIds = async () => {
 		if (!$tools) {
-			tools.set(await getTools(localStorage.token));
+			tools.set(await getTools());
 		}
 
 		if (selectedModels.length !== 1) {
@@ -526,7 +526,7 @@
 
 			// Upload file to server
 			console.log('Uploading file to server...');
-			const uploadedFile = await uploadFile(localStorage.token, file);
+			const uploadedFile = await uploadFile(file);
 
 			if (!uploadedFile) {
 				throw new Error('Server returned null response for file upload');
@@ -1450,7 +1450,7 @@
 					let userContext = null;
 					if ($settings?.memory ?? false) {
 						if (userContext === null) {
-							const res = await queryMemory(localStorage.token, prompt).catch((error) => {
+							const res = await queryMemory(prompt).catch((error) => {
 								toast.error(error);
 								return null;
 							});

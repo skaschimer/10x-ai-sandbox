@@ -293,9 +293,6 @@ export const uploadPipeline = async (file: File, urlIdx: string) => {
 
 	return await apiFetch(`${WEBUI_BASE_URL}/api/v1/pipelines/upload`, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'multipart/form-data' // override the default in apiFetch()
-		},
 		body: formData
 	});
 };

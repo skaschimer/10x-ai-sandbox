@@ -78,7 +78,7 @@
 	let folders = {};
 
 	const initFolders = async () => {
-		const folderList = await getFolders(localStorage.token).catch((error) => {
+		const folderList = await getFolders().catch((error) => {
 			toast.error(error);
 			return [];
 		});
@@ -143,7 +143,7 @@
 			}
 		};
 
-		const res = await createNewFolder(localStorage.token, name).catch((error) => {
+		const res = await createNewFolder(name).catch((error) => {
 			toast.error(error);
 			return null;
 		});
@@ -736,12 +736,10 @@
 							return;
 						}
 
-						const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
-							(error) => {
-								toast.error(error);
-								return null;
-							}
-						);
+						const res = await updateFolderParentIdById(id, null).catch((error) => {
+							toast.error(error);
+							return null;
+						});
 
 						if (res) {
 							await initFolders();

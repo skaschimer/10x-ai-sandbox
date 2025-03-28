@@ -46,7 +46,7 @@
 				prompts.set(await getPrompts(localStorage.token));
 			})(),
 			(async () => {
-				knowledge.set(await getKnowledgeBases(localStorage.token));
+				knowledge.set(await getKnowledgeBases());
 			})()
 		]);
 		loading = false;

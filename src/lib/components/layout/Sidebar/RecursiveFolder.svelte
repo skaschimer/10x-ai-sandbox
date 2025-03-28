@@ -114,12 +114,10 @@
 								return;
 							}
 							// Move the folder
-							const res = await updateFolderParentIdById(localStorage.token, id, folderId).catch(
-								(error) => {
-									toast.error(error);
-									return null;
-								}
-							);
+							const res = await updateFolderParentIdById(id, folderId).catch((error) => {
+								toast.error(error);
+								return null;
+							});
 
 							if (res) {
 								dispatch('update');
@@ -230,7 +228,7 @@
 	let showDeleteConfirm = false;
 
 	const deleteHandler = async () => {
-		const res = await deleteFolderById(localStorage.token, folderId).catch((error) => {
+		const res = await deleteFolderById(folderId).catch((error) => {
 			toast.error(error);
 			return null;
 		});
@@ -257,7 +255,7 @@
 		name = name.trim();
 		folders[folderId].name = name;
 
-		const res = await updateFolderNameById(localStorage.token, folderId, name).catch((error) => {
+		const res = await updateFolderNameById(folderId, name).catch((error) => {
 			toast.error(error);
 
 			folders[folderId].name = currentName;
@@ -272,12 +270,10 @@
 	};
 
 	const isExpandedUpdateHandler = async () => {
-		const res = await updateFolderIsExpandedById(localStorage.token, folderId, open).catch(
-			(error) => {
-				toast.error(error);
-				return null;
-			}
-		);
+		const res = await updateFolderIsExpandedById(folderId, open).catch((error) => {
+			toast.error(error);
+			return null;
+		});
 	};
 
 	let isExpandedUpdateTimeout;

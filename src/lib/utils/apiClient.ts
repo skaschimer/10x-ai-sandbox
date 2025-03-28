@@ -46,14 +46,23 @@ export async function apiFetch<T = unknown>(
 	input: RequestInfo | URL,
 	init: RequestInit = {}
 ): Promise<T> {
+	const defaultHeaders: Record<string, string> = {
+		Accept: 'application/json',
+		'Content-Type': 'application/json'
+	};
+
+	const userHeaders = init.headers ?? {};
+	Object.assign(defaultHeaders, userHeaders);
+
+	// Handle situations where we are uploading FormData
+	// remove Content-Type so the browser can set it (with the boundary).
+	if (init.body instanceof FormData) {
+		delete defaultHeaders['Content-Type'];
+	}
 	const mergedInit: RequestInit = {
 		credentials: 'include',
 		...init,
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			...(init.headers || {})
-		}
+		headers: defaultHeaders
 	};
 
 	let response: Response;
