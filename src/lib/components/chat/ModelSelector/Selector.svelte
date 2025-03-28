@@ -326,57 +326,54 @@
 							{/if}
 							<div class="flex items-center gap-2">
 								<div class="flex items-center min-w-fit">
-									<div class="line-clamp-1">
-										<div class="flex items-center min-w-fit">
-											<div class="flex flex-row gap-1 items-center">
-												<div class="flex-none">
+									<div class="flex items-center min-w-fit">
+										<div class="flex flex-row gap-1 items-center">
+											<div class="flex-none">
+												<Tooltip
+													content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
+													placement="top-start"
+												>
+													<img
+														src={item.model?.info?.meta?.profile_image_url ?? '/static/favicon.png'}
+														alt=""
+														class="rounded-full size-5 flex items-center mr-2"
+													/>
+												</Tooltip>
+											</div>
+											<div class="flex flex-col">
+												<div class="flex flex-row items-center">
 													<Tooltip
 														content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
 														placement="top-start"
 													>
-														<img
-															src={item.model?.info?.meta?.profile_image_url ??
-																'/static/favicon.png'}
-															alt=""
-															class="rounded-full size-5 flex items-center mr-2"
-														/>
+														{item.label}
 													</Tooltip>
+													{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
+														<div class="ml-1 flex gap-0.5 self-center items-center h-full">
+															{#each item.model?.info?.meta.tags as tag}
+																<Tooltip content={tag.name}>
+																	<div
+																		class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
+																	>
+																		{tag.name}
+																	</div>
+																</Tooltip>
+															{/each}
+														</div>
+													{/if}
 												</div>
-												<div class="flex flex-col">
-													<div class="flex flex-row items-center">
+												<div class="text-xs">
+													{#if item.model?.info?.meta?.description}
 														<Tooltip
-															content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
-															placement="top-start"
+															content={`${marked.parse(
+																sanitizeResponseContent(
+																	item.model?.info?.meta?.description
+																).replaceAll('\n', '<br>')
+															)}`}
 														>
-															{item.label}
+															{item.model?.info?.meta?.description}
 														</Tooltip>
-														{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
-															<div class="ml-1 flex gap-0.5 self-center items-center h-full">
-																{#each item.model?.info?.meta.tags as tag}
-																	<Tooltip content={tag.name}>
-																		<div
-																			class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
-																		>
-																			{tag.name}
-																		</div>
-																	</Tooltip>
-																{/each}
-															</div>
-														{/if}
-													</div>
-													<div class="text-xs">
-														{#if item.model?.info?.meta?.description}
-															<Tooltip
-																content={`${marked.parse(
-																	sanitizeResponseContent(
-																		item.model?.info?.meta?.description
-																	).replaceAll('\n', '<br>')
-																)}`}
-															>
-																{item.model?.info?.meta?.description}
-															</Tooltip>
-														{/if}
-													</div>
+													{/if}
 												</div>
 											</div>
 										</div>
