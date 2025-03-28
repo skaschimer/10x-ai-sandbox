@@ -127,20 +127,18 @@
 						} else if (type === 'chat') {
 							open = true;
 
-							let chat = await getChatById(localStorage.token, id).catch((error) => {
+							let chat = await getChatById(id).catch((error) => {
 								return null;
 							});
 							if (!chat && item) {
-								chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
+								chat = await importChat(item.chat, item?.meta ?? {});
 							}
 
 							// Move the chat
-							const res = await updateChatFolderIdById(localStorage.token, chat.id, folderId).catch(
-								(error) => {
-									toast.error(error);
-									return null;
-								}
-							);
+							const res = await updateChatFolderIdById(chat.id, folderId).catch((error) => {
+								toast.error(error);
+								return null;
+							});
 
 							if (res) {
 								dispatch('update');
@@ -309,7 +307,7 @@
 	};
 
 	const exportHandler = async () => {
-		const chats = await getChatsByFolderId(localStorage.token, folderId).catch((error) => {
+		const chats = await getChatsByFolderId(folderId).catch((error) => {
 			toast.error(error);
 			return null;
 		});

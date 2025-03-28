@@ -277,10 +277,10 @@
 				} else if (type === 'chat:title') {
 					chatTitle.set(data);
 					currentChatPage.set(1);
-					await chats.set(await getChatList(localStorage.token, $currentChatPage));
+					await chats.set(await getChatList($currentChatPage));
 				} else if (type === 'chat:tags') {
-					chat = await getChatById(localStorage.token, $chatId);
-					allTags.set(await getAllTags(localStorage.token));
+					chat = await getChatById($chatId);
+					allTags.set(await getAllTags());
 				} else if (type === 'message') {
 					message.content += data.content;
 				} else if (type === 'replace') {
@@ -753,13 +753,13 @@
 
 	const loadChat = async () => {
 		chatId.set(chatIdProp);
-		chat = await getChatById(localStorage.token, $chatId).catch(async (error) => {
+		chat = await getChatById($chatId).catch(async (error) => {
 			await goto('/');
 			return null;
 		});
 
 		if (chat) {
-			tags = await getTagsById(localStorage.token, $chatId).catch(async (error) => {
+			tags = await getTagsById($chatId).catch(async (error) => {
 				return [];
 			});
 
@@ -872,7 +872,7 @@
 
 		if ($chatId == chatId) {
 			if (!$temporaryChatEnabled) {
-				chat = await updateChatById(localStorage.token, chatId, {
+				chat = await updateChatById(chatId, {
 					models: selectedModels,
 					messages: messages,
 					history: history,
@@ -881,7 +881,7 @@
 				});
 
 				currentChatPage.set(1);
-				await chats.set(await getChatList(localStorage.token, $currentChatPage));
+				await chats.set(await getChatList($currentChatPage));
 			}
 		}
 	};
@@ -924,7 +924,7 @@
 
 		if ($chatId == chatId) {
 			if (!$temporaryChatEnabled) {
-				chat = await updateChatById(localStorage.token, chatId, {
+				chat = await updateChatById(chatId, {
 					models: selectedModels,
 					messages: messages,
 					history: history,
@@ -933,7 +933,7 @@
 				});
 
 				currentChatPage.set(1);
-				await chats.set(await getChatList(localStorage.token, $currentChatPage));
+				await chats.set(await getChatList($currentChatPage));
 			}
 		}
 	};
@@ -1484,7 +1484,7 @@
 		);
 
 		currentChatPage.set(1);
-		chats.set(await getChatList(localStorage.token, $currentChatPage));
+		chats.set(await getChatList($currentChatPage));
 	};
 
 	const sendPromptSocket = async (model, responseMessageId, _chatId) => {
@@ -1815,7 +1815,7 @@
 
 	const initChatHandler = async () => {
 		if (!$temporaryChatEnabled) {
-			chat = await createNewChat(localStorage.token, {
+			chat = await createNewChat({
 				id: $chatId,
 				title: $i18n.t('New Chat'),
 				models: selectedModels,
@@ -1828,7 +1828,7 @@
 			});
 
 			currentChatPage.set(1);
-			await chats.set(await getChatList(localStorage.token, $currentChatPage));
+			await chats.set(await getChatList($currentChatPage));
 			await chatId.set(chat.id);
 
 			window.history.replaceState(history.state, '', `/c/${chat.id}`);
@@ -1841,7 +1841,7 @@
 	const saveChatHandler = async (_chatId) => {
 		if ($chatId == _chatId) {
 			if (!$temporaryChatEnabled) {
-				chat = await updateChatById(localStorage.token, _chatId, {
+				chat = await updateChatById(_chatId, {
 					models: selectedModels,
 					history: history,
 					messages: createMessagesList(history.currentId),
@@ -1850,7 +1850,7 @@
 				});
 
 				currentChatPage.set(1);
-				await chats.set(await getChatList(localStorage.token, $currentChatPage));
+				await chats.set(await getChatList($currentChatPage));
 			}
 		}
 	};

@@ -60,7 +60,7 @@
 	const loadSharedChat = async () => {
 		await models.set(await getModels());
 		await chatId.set($page.params.id);
-		chat = await getChatByShareId(localStorage.token, $chatId).catch(async (error) => {
+		chat = await getChatByShareId($chatId).catch(async (error) => {
 			await goto('/');
 			return null;
 		});

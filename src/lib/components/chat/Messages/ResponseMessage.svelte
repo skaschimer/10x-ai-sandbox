@@ -355,7 +355,7 @@
 			}
 		};
 
-		const chat = await getChatById(localStorage.token, chatId).catch((error) => {
+		const chat = await getChatById(chatId).catch((error) => {
 			toast.error(error);
 		});
 		if (!chat) {
