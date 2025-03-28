@@ -113,15 +113,16 @@ export const synthesizeOpenAISpeech = async (
 	text: string = '',
 	model: string = 'tts-1'
 ): Promise<Response> => {
-	// This does not parse json from the response
-	// instead it takes the res.blob, so just return the
-	// response object
-	return await fetch(`${OPENAI_API_BASE_URL}/audio/speech`, {
-		method: 'POST',
-		body: JSON.stringify({
-			model: model,
-			input: text,
-			voice: speaker
-		})
-	});
+	return await apiFetch(
+		`${OPENAI_API_BASE_URL}/audio/speech`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				model: model,
+				input: text,
+				voice: speaker
+			})
+		},
+		false
+	);
 };
