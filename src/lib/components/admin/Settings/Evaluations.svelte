@@ -20,7 +20,7 @@
 	let showAddModel = false;
 
 	const submitHandler = async () => {
-		config = await updateConfig(localStorage.token, config).catch((err) => {
+		config = await updateConfig(config).catch((err) => {
 			toast.error(err);
 			return null;
 		});
@@ -58,7 +58,7 @@
 
 	onMount(async () => {
 		if ($user.role === 'admin') {
-			config = await getConfig(localStorage.token).catch((err) => {
+			config = await getConfig().catch((err) => {
 				toast.error(err);
 				return null;
 			});

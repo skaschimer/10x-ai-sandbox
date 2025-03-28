@@ -320,7 +320,7 @@
 
 	const generateImage = async (message: MessageType) => {
 		generatingImage = true;
-		const res = await imageGenerations(localStorage.token, message.content).catch((error) => {
+		const res = await imageGenerations(message.content).catch((error) => {
 			toast.error(error);
 		});
 		console.log(res);
@@ -406,15 +406,11 @@
 
 		let feedback = null;
 		if (message?.feedbackId) {
-			feedback = await updateFeedbackById(
-				localStorage.token,
-				message.feedbackId,
-				feedbackItem
-			).catch((error) => {
+			feedback = await updateFeedbackById(message.feedbackId, feedbackItem).catch((error) => {
 				toast.error(error);
 			});
 		} else {
-			feedback = await createNewFeedback(localStorage.token, feedbackItem).catch((error) => {
+			feedback = await createNewFeedback(feedbackItem).catch((error) => {
 				toast.error(error);
 			});
 
@@ -444,11 +440,7 @@
 					feedbackItem.data.tags = tags;
 
 					saveMessage(message.id, updatedMessage);
-					await updateFeedbackById(
-						localStorage.token,
-						updatedMessage.feedbackId,
-						feedbackItem
-					).catch((error) => {
+					await updateFeedbackById(updatedMessage.feedbackId, feedbackItem).catch((error) => {
 						toast.error(error);
 					});
 				}
