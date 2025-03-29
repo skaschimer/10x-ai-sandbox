@@ -43,7 +43,7 @@
 		loading = true;
 		await Promise.all([
 			(async () => {
-				prompts.set(await getPrompts(localStorage.token));
+				prompts.set(await getPrompts());
 			})(),
 			(async () => {
 				knowledge.set(await getKnowledgeBases());
