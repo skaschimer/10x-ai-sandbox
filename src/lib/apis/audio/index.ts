@@ -37,14 +37,18 @@ export const synthesizeOpenAISpeech = async (
 	text: string = '',
 	model?: string
 ) => {
-	return await apiFetch(`${AUDIO_API_BASE_URL}/speech`, {
-		method: 'POST',
-		body: JSON.stringify({
-			input: text,
-			voice: speaker,
-			...(model && { model })
-		})
-	});
+	return await apiFetch(
+		`${AUDIO_API_BASE_URL}/speech`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				input: text,
+				voice: speaker,
+				...(model && { model })
+			})
+		},
+		false
+	);
 };
 
 interface AvailableModelsResponse {

@@ -89,40 +89,52 @@ export const generatePrompt = async (model: string, conversation: string) => {
 		conversation = '[no existing conversation]';
 	}
 
-	return await apiFetch(`${OLLAMA_API_BASE_URL}/api/generate`, {
-		method: 'POST',
-		body: JSON.stringify({
-			model: model,
-			prompt: `Conversation:
+	return await apiFetch(
+		`${OLLAMA_API_BASE_URL}/api/generate`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				model: model,
+				prompt: `Conversation:
 			${conversation}
 
 			As USER in the conversation above, your task is to continue the conversation. Remember, Your responses should be crafted as if you're a human conversing in a natural, realistic manner, keeping in mind the context and flow of the dialogue. Please generate a fitting response to the last message in the conversation, or if there is no existing conversation, initiate one as a normal person would.
 			
 			Response:
 			`
-		})
-	});
+			})
+		},
+		false
+	);
 };
 
 export const generateEmbeddings = async (model: string, text: string) => {
-	return await apiFetch(`${OLLAMA_API_BASE_URL}/api/embeddings`, {
-		method: 'POST',
-		body: JSON.stringify({
-			model: model,
-			prompt: text
-		})
-	});
+	return await apiFetch(
+		`${OLLAMA_API_BASE_URL}/api/embeddings`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				model: model,
+				prompt: text
+			})
+		},
+		false
+	);
 };
 
 export const generateTextCompletion = async (model: string, text: string) => {
-	return await apiFetch(`${OLLAMA_API_BASE_URL}/api/generate`, {
-		method: 'POST',
-		body: JSON.stringify({
-			model: model,
-			prompt: text,
-			stream: true
-		})
-	});
+	return await apiFetch(
+		`${OLLAMA_API_BASE_URL}/api/generate`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				model: model,
+				prompt: text,
+				stream: true
+			})
+		},
+		false
+	);
 };
 
 export const generateChatCompletion = async (
@@ -148,13 +160,17 @@ export const createModel = async (
 	content: string,
 	urlIdx: string | null = null
 ) => {
-	return await apiFetch(`${OLLAMA_API_BASE_URL}/api/create${urlIdx !== null ? `/${urlIdx}` : ''}`, {
-		method: 'POST',
-		body: JSON.stringify({
-			name: tagName,
-			modelfile: content
-		})
-	});
+	return await apiFetch(
+		`${OLLAMA_API_BASE_URL}/api/create${urlIdx !== null ? `/${urlIdx}` : ''}`,
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				name: tagName,
+				modelfile: content
+			})
+		},
+		false
+	);
 };
 
 export const deleteModel = async (tagName: string, urlIdx: string | null = null) => {
@@ -200,7 +216,8 @@ export const downloadModel = async (download_url: string, urlIdx: string | null 
 			body: JSON.stringify({
 				url: download_url
 			})
-		}
+		},
+		false
 	);
 };
 
@@ -213,6 +230,7 @@ export const uploadModel = async (file: File, urlIdx: string | null = null) => {
 		{
 			method: 'POST',
 			body: formData
-		}
+		},
+		false
 	);
 };
