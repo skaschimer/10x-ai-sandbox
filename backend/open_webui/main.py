@@ -984,10 +984,10 @@ async def get_app_config(request: Request, response: Response):
                 data = refresh_jwt(request, response)
             except jwt.ExpiredSignatureError:
                 # if this is expired it's okay
-                # otherwise bubble up
+                # The current code allows accessing config
+                # for onboarding below.
                 pass
         except Exception as e:
-            print("got different exception:", e)
             log.debug(e)
 
             raise HTTPException(
