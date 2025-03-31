@@ -311,7 +311,7 @@
 		console.log(updated);
 		await settings.set({ ...$settings, ...updated });
 		await models.set(await getModels());
-		await updateUserSettings(localStorage.token, { ui: $settings });
+		await updateUserSettings({ ui: $settings });
 	};
 
 	const getModels = async () => {

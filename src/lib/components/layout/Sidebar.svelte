@@ -609,11 +609,7 @@
 								if (chat) {
 									console.log(chat);
 									if (chat.folder_id) {
-										const res = await updateChatFolderIdById(
-											localStorage.token,
-											chat.id,
-											null
-										).catch((error) => {
+										const res = await updateChatFolderIdById(chat.id, null).catch((error) => {
 											toast.error(error);
 											return null;
 										});

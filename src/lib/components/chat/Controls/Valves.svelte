@@ -90,11 +90,7 @@
 					valves = res;
 				}
 			} else if (tab === 'functions') {
-				const res = await updateFunctionUserValvesById(
-					localStorage.token,
-					selectedId,
-					valves
-				).catch((error) => {
+				const res = await updateFunctionUserValvesById(selectedId, valves).catch((error) => {
 					toast.error(error);
 					return null;
 				});

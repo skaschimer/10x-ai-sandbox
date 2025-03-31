@@ -77,7 +77,7 @@
 				// IndexedDB Not Found
 			}
 
-			const userSettings = await getUserSettings(localStorage.token).catch((error) => {
+			const userSettings = await getUserSettings().catch((error) => {
 				console.error(error);
 				return null;
 			});
@@ -218,7 +218,7 @@
 	});
 
 	const checkForVersionUpdates = async () => {
-		version = await getVersionUpdates(localStorage.token).catch((error) => {
+		version = await getVersionUpdates().catch((error) => {
 			return {
 				current: WEBUI_VERSION,
 				latest: WEBUI_VERSION

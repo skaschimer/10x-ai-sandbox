@@ -222,7 +222,6 @@
 
 			for (const [idx, sentence] of messageContentParts.entries()) {
 				const res = await synthesizeOpenAISpeech(
-					localStorage.token,
 					$settings?.audio?.tts?.defaultVoice === $config.audio.tts.voice
 						? ($settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice)
 						: $config?.audio?.tts?.voice,

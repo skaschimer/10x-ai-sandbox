@@ -251,7 +251,7 @@
 							}
 
 							prompts = await getPromptList();
-							await _prompts.set(await getPrompts(localStorage.token));
+							await _prompts.set(await getPrompts());
 
 							importFiles = [];
 							promptsImportInputElement.value = '';

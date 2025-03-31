@@ -32,7 +32,7 @@
 			return;
 		}
 
-		const res = await createNewTool(localStorage.token, {
+		const res = await createNewTool({
 			id: data.id,
 			name: data.name,
 			meta: data.meta,

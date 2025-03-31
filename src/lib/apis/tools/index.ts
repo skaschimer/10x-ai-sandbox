@@ -1,7 +1,7 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 import { apiFetch } from '$lib/utils/apiClient';
 
-export const createNewTool = async (token: string, tool: object) => {
+export const createNewTool = async (tool: object) => {
 	return await apiFetch(`${WEBUI_API_BASE_URL}/tools/create`, {
 		method: 'POST',
 		body: JSON.stringify({

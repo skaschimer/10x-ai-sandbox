@@ -32,7 +32,6 @@ export const transcribeAudio = async (file: File) => {
 };
 
 export const synthesizeOpenAISpeech = async (
-	token: string = '',
 	speaker: string = 'alloy',
 	text: string = '',
 	model?: string
@@ -55,10 +54,10 @@ interface AvailableModelsResponse {
 	models: { name: string; id: string }[] | { id: string }[];
 }
 
-export const getModels = async (token: string = ''): Promise<AvailableModelsResponse> => {
+export const getModels = async (): Promise<AvailableModelsResponse> => {
 	return await apiFetch(`${AUDIO_API_BASE_URL}/models`, { method: 'GET' });
 };
 
-export const getVoices = async (token: string = '') => {
+export const getVoices = async () => {
 	return await apiFetch(`${AUDIO_API_BASE_URL}/voices`, { method: 'GET' });
 };

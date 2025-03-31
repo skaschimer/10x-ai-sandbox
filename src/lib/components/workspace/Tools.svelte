@@ -486,7 +486,7 @@
 				console.log(_tools);
 
 				for (const tool of _tools) {
-					const res = await createNewTool(localStorage.token, tool).catch((error) => {
+					const res = await createNewTool(tool).catch((error) => {
 						toast.error(error);
 						return null;
 					});

@@ -50,7 +50,7 @@
 		if (TTS_ENGINE === '') {
 			models = [];
 		} else {
-			const res = await _getModels(localStorage.token).catch((e) => {
+			const res = await _getModels().catch((e) => {
 				toast.error(e);
 			});
 
@@ -73,7 +73,7 @@
 				}
 			}, 100);
 		} else {
-			const res = await _getVoices(localStorage.token).catch((e) => {
+			const res = await _getVoices().catch((e) => {
 				toast.error(e);
 			});
 

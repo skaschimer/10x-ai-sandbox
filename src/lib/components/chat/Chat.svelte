@@ -569,7 +569,7 @@
 
 		try {
 			files = [...files, fileItem];
-			const res = await processWeb(localStorage.token, '', url);
+			const res = await processWeb('', url);
 
 			if (res) {
 				fileItem.status = 'uploaded';
@@ -603,7 +603,7 @@
 
 		try {
 			files = [...files, fileItem];
-			const res = await processYoutubeVideo(localStorage.token, url);
+			const res = await processYoutubeVideo(url);
 
 			if (res) {
 				fileItem.status = 'uploaded';
@@ -742,7 +742,7 @@
 			$models.map((m) => m.id).includes(modelId) ? modelId : ''
 		);
 
-		const userSettings = await getUserSettings(localStorage.token);
+		const userSettings = await getUserSettings();
 
 		if (userSettings) {
 			settings.set(userSettings.ui);
@@ -779,7 +779,7 @@
 
 				chatTitle.set(chatContent.title);
 
-				const userSettings = await getUserSettings(localStorage.token);
+				const userSettings = await getUserSettings();
 
 				if (userSettings) {
 					await settings.set(userSettings.ui);
@@ -1527,9 +1527,7 @@
 						content: `${promptTemplate(
 							params?.system ?? $settings?.system ?? '',
 							$user.name,
-							$settings?.userLocation
-								? await getAndUpdateUserLocation(localStorage.token)
-								: undefined
+							$settings?.userLocation ? await getAndUpdateUserLocation() : undefined
 						)}${
 							(responseMessage?.userContext ?? null)
 								? `\n\nUser Context:\n${responseMessage?.userContext ?? ''}`

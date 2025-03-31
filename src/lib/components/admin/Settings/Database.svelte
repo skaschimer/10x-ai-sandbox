@@ -129,7 +129,7 @@
 						on:click={() => {
 							// exportAllUserChats();
 
-							downloadDatabase(localStorage.token).catch((error) => {
+							downloadDatabase().catch((error) => {
 								toast.error(error);
 							});
 						}}

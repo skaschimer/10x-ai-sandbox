@@ -66,7 +66,7 @@
 		});
 
 		if (chat) {
-			user = await getUserById(localStorage.token, chat.user_id).catch((error) => {
+			user = await getUserById(chat.user_id).catch((error) => {
 				console.error(error);
 				return null;
 			});

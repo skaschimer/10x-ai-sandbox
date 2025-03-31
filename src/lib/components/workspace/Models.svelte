@@ -66,7 +66,7 @@
 		}
 
 		await _models.set(await getModels());
-		models = await getWorkspaceModels(localStorage.token);
+		models = await getWorkspaceModels();
 	};
 
 	const cloneModelHandler = async (model) => {
@@ -132,7 +132,7 @@
 		}
 
 		await _models.set(await getModels());
-		models = await getWorkspaceModels(localStorage.token);
+		models = await getWorkspaceModels();
 	};
 
 	const downloadModels = async (models) => {
@@ -150,7 +150,7 @@
 	};
 
 	onMount(async () => {
-		models = await getWorkspaceModels(localStorage.token);
+		models = await getWorkspaceModels();
 
 		loaded = true;
 
@@ -411,7 +411,7 @@
 							}
 
 							await _models.set(await getModels());
-							models = await getWorkspaceModels(localStorage.token);
+							models = await getWorkspaceModels();
 						};
 
 						reader.readAsText(importFiles[0]);
