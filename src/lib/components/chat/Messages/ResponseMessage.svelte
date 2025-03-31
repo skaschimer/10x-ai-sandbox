@@ -345,6 +345,17 @@
 	const feedbackHandler = async (rating: number | null = null, details: object | null = null) => {
 		feedbackLoading = true;
 		console.log('Feedback', rating, details);
+		if (rating === 1) {
+			// positive rating not tracking details info
+			details = {
+				reason: null,
+				comment: null,
+				tags: [],
+				details: {
+					rating: null
+				}
+			};
+		}
 
 		const updatedMessage = {
 			...message,
@@ -982,6 +993,7 @@
 												disabled={feedbackLoading}
 												on:click={async () => {
 													await feedbackHandler(1);
+													showRateComment = false;
 													window.setTimeout(() => {
 														document
 															.getElementById(`message-feedback-${message.id}`)
