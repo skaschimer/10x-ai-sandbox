@@ -33,31 +33,13 @@ export const updateFileDataContentById = async (id: string, content: string) => 
 };
 
 export const getFileContentById = async (id: string) => {
-	let error = null;
-
-	const res = await fetch(`${WEBUI_API_BASE_URL}/files/${id}/content`, {
-		method: 'GET',
-		headers: {
-			Accept: 'application/json'
+	const res = await apiFetch<Response>(
+		`${WEBUI_API_BASE_URL}/files/${id}/content`,
+		{
+			method: 'GET'
 		},
-		credentials: 'include'
-	})
-		.then(async (res) => {
-			if (!res.ok) throw await res.json();
-			return await res.blob(); // TODO figure out to deal with this
-		})
-		.catch((err) => {
-			error = err.detail;
-			console.log(err);
-
-			return null;
-		});
-
-	if (error) {
-		throw error;
-	}
-
-	return res;
+		false
+	).then(async (res) => res.blob());
 };
 
 export const deleteFileById = async (id: string) => {
