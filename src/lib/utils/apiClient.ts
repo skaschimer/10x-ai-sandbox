@@ -1,4 +1,4 @@
-import { goto } from '$app/navigation';
+import { userSignOut } from '$lib/apis/auths';
 
 /**
  * apiClient.ts
@@ -81,6 +81,11 @@ export async function apiFetch<T = unknown>(
 
 	if (response.status === 401 || response.status === 403) {
 		console.log('got unauth response from API, redirecting');
+		try {
+			await userSignOut();
+		} catch (err) {
+			console.log('error signing out', err);
+		}
 		if (window.location.pathname !== '/auth') {
 			window.location.href = '/auth';
 		}
