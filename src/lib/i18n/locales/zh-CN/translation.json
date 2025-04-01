@@ -737,7 +737,6 @@
 	"Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative. (Default: 40)": "降低产生无意义答案的概率。数值越大（如 100），答案就越多样化，而数值越小（如 10），答案就越保守。(默认值：40）",
 	"Refer to yourself as \"User\" (e.g., \"User is learning Spanish\")": "使用\"User\" (用户) 来指代自己（例如：“User 正在学习西班牙语”）",
 	"References from": "来自",
-	"Refresh Token Expiration": "",
 	"Refused when it shouldn't have": "无理拒绝",
 	"Regenerate": "重新生成",
 	"Release Notes": "更新日志",
