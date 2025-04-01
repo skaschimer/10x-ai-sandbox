@@ -731,6 +731,7 @@
 	"Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative. (Default: 40)": "Reduz a probabilidade de gerar absurdos. Um valor mais alto (por exemplo, 100) dará respostas mais diversas, enquanto um valor mais baixo (por exemplo, 10) será mais conservador. (Padrão: 40)",
 	"Refer to yourself as \"User\" (e.g., \"User is learning Spanish\")": "Refira-se como \"Usuário\" (por exemplo, \"Usuário está aprendendo espanhol\")",
 	"References from": "Referências de",
+	"Refresh Token Expiration": "",
 	"Regenerate": "Gerar novamente",
 	"Release Notes": "Notas de Lançamento",
 	"Relevance": "Relevância",

@@ -731,6 +731,7 @@
 	"Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative. (Default: 40)": "Zentzugabekeriak sortzeko probabilitatea murrizten du. Balio altuago batek (adib. 100) erantzun anitzagoak emango ditu, balio baxuago batek (adib. 10) kontserbadoreagoa izango den bitartean. (Lehenetsia: 40)",
 	"Refer to yourself as \"User\" (e.g., \"User is learning Spanish\")": "Egin erreferentzia zure buruari \"Erabiltzaile\" gisa (adib., \"Erabiltzailea gaztelania ikasten ari da\")",
 	"References from": "Erreferentziak hemendik",
+	"Refresh Token Expiration": "",
 	"Regenerate": "Bersortu",
 	"Release Notes": "Bertsio oharrak",
 	"Relevance": "Garrantzia",

@@ -731,6 +731,7 @@
 	"Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative. (Default: 40)": "Laghdaíonn sé an dóchúlacht go giniúint nonsense. Tabharfaidh luach níos airde (m.sh. 100) freagraí níos éagsúla, agus beidh luach níos ísle (m.sh. 10) níos coimeádaí. (Réamhshocrú: 40)",
 	"Refer to yourself as \"User\" (e.g., \"User is learning Spanish\")": "Tagairt duit féin mar \"Úsáideoir\" (m.sh., \"Tá an úsáideoir ag foghlaim Spáinnis\")",
 	"References from": "Tagairtí ó",
+	"Refresh Token Expiration": "",
 	"Regenerate": "Athghiniúint",
 	"Release Notes": "Nótaí Scaoilte",
 	"Relevance": "Ábharthacht",

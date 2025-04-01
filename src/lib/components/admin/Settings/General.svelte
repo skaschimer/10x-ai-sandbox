@@ -230,7 +230,7 @@
 				<div class=" w-full justify-between">
 					<div class="flex w-full justify-between">
 						<div class=" self-center text-xs font-medium">
-							{$i18n.t('JWT Expiration')}
+							{$i18n.t('Refresh Token Expiration')}
 						</div>
 					</div>
 
