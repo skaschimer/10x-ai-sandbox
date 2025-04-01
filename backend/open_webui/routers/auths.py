@@ -434,6 +434,13 @@ async def signup(request: Request, response: Response, form_data: SignupForm):
                 expires_delta=expires_delta,
             )
 
+            jwt_refresh_token = create_token(
+                data={"id": user.id},
+                expires_delta=parse_duration(
+                    request.app.state.config.JWT_REFRESH_EXPIRES_IN
+                ),
+            )
+
             datetime_expires_at = (
                 datetime.datetime.fromtimestamp(expires_at, datetime.timezone.utc)
                 if expires_at
@@ -446,6 +453,14 @@ async def signup(request: Request, response: Response, form_data: SignupForm):
                 value=token,
                 expires=datetime_expires_at,
                 httponly=True,  # Ensures the cookie is not accessible via JavaScript
+                samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
+                secure=WEBUI_SESSION_COOKIE_SECURE,
+            )
+
+            response.set_cookie(
+                key="refresh_token",
+                value=jwt_refresh_token,
+                httponly=True,
                 samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
                 secure=WEBUI_SESSION_COOKIE_SECURE,
             )
