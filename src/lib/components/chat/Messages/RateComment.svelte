@@ -12,40 +12,16 @@
 	export let message;
 	export let show = false;
 
-	let LIKE_REASONS = [
-		'accurate_information',
-		'followed_instructions_perfectly',
-		'showcased_creativity',
-		'positive_attitude',
-		'attention_to_detail',
-		'thorough_explanation',
-		'other'
-	];
-	let DISLIKE_REASONS = [
-		'dont_like_the_style',
-		'too_verbose',
-		'not_helpful',
-		'not_factually_correct',
-		'didnt_fully_follow_instructions',
-		'refused_when_it_shouldnt_have',
-		'being_lazy',
-		'other'
-	];
+	let reasons = ['harmful_or_offensive', 'not_relevant', 'not_accurate', 'incomplete_response'];
 
+	let detailed_ratings = ['bad', 'very_bad', 'extremely_bad'];
 	let tags = [];
 
-	let reasons = [];
 	let selectedReason = null;
 	let comment = '';
 
 	let detailedRating = null;
 	let selectedModel = null;
-
-	$: if (message?.annotation?.rating === 1) {
-		reasons = LIKE_REASONS;
-	} else if (message?.annotation?.rating === -1) {
-		reasons = DISLIKE_REASONS;
-	}
 
 	$: if (message) {
 		init();
@@ -96,7 +72,7 @@
 			}
 		});
 
-		toast.success($i18n.t('Thanks for your feedback!'));
+		// toast.success($i18n.t('Thanks for your feedback!'));
 		show = false;
 	};
 </script>
@@ -113,69 +89,45 @@
 	class=" my-2.5 rounded-xl px-4 py-3 border border-gray-50 dark:border-gray-850"
 	id="message-feedback-{message.id}"
 >
-	<div class="flex justify-between items-center">
-		<div class="text-sm font-medium">{$i18n.t('How would you rate this response?')}</div>
-
-		<!-- <div class=" text-sm">{$i18n.t('Tell us more:')}</div> -->
-
-		<button
-			on:click={() => {
-				show = false;
-			}}
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-4"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-			</svg>
-		</button>
-	</div>
-
-	<div class="w-full flex justify-center">
-		<div class=" relative w-fit">
-			<div class="mt-1.5 w-fit flex gap-1 pb-5">
-				<!-- 1-10 scale -->
-				{#each Array.from({ length: 10 }).map((_, i) => i + 1) as rating}
-					<button
-						class="size-7 text-sm border border-gray-50 dark:border-gray-850 hover:bg-gray-50 dark:hover:bg-gray-850 {detailedRating ===
-						rating
-							? 'bg-gray-100 dark:bg-gray-800'
-							: ''} transition rounded-full disabled:cursor-not-allowed disabled:text-gray-500 disabled:bg-white disabled:dark:bg-gray-900"
-						on:click={() => {
-							detailedRating = rating;
-						}}
-						disabled={message?.annotation?.rating === -1 ? rating > 5 : rating < 6}
-					>
+	<div>
+		<div class="text-sm mt-1.5 py-2 font-medium">
+			{$i18n.t('How would you rate this response?')}
+		</div>
+		<div class="flex flex-wrap gap-1.5 text-sm mt-1.5">
+			{#each detailed_ratings as rating}
+				<button
+					class="px-3 py-2 border border-gray-400 text-sm items-center text-gray-600 dark:text-gray-400 rounded-full hover:text-gray-800 hover:border-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-gray-100 dark:hover:text-gray-100 {detailedRating ===
+					rating
+						? 'bg-gray-100 dark:bg-gray-800'
+						: ''} transition rounded-xl"
+					on:click={() => {
+						detailedRating = rating;
+					}}
+				>
+					{#if rating === 'bad'}
+						{$i18n.t('Bad')}
+					{:else if rating === 'very_bad'}
+						{$i18n.t('Very Bad')}
+					{:else if rating === 'extremely_bad'}
+						{$i18n.t('Extremely bad')}
+					{:else}
 						{rating}
-					</button>
-				{/each}
-			</div>
-
-			<div class="absolute bottom-0 left-0 right-0 flex justify-between text-xs">
-				<div>
-					1 - {$i18n.t('Awful')}
-				</div>
-
-				<div>
-					10 - {$i18n.t('Amazing')}
-				</div>
-			</div>
+					{/if}
+				</button>
+			{/each}
 		</div>
 	</div>
 
 	<div>
 		{#if reasons.length > 0}
-			<div class="text-sm mt-1.5 font-medium">{$i18n.t('Why?')}</div>
+			<div class="text-sm mt-1.5 py-2 font-medium">
+				{$i18n.t("What didn't you like about this response?")}
+			</div>
 
 			<div class="flex flex-wrap gap-1.5 text-sm mt-1.5">
 				{#each reasons as reason}
 					<button
-						class="px-3 py-0.5 border border-gray-50 dark:border-gray-850 hover:bg-gray-50 dark:hover:bg-gray-850 {selectedReason ===
+						class="px-3 py-2 border border-gray-400 text-sm items-center text-gray-600 dark:text-gray-400 rounded-full hover:text-gray-800 hover:border-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-gray-100 dark:hover:text-gray-100 {selectedReason ===
 						reason
 							? 'bg-gray-100 dark:bg-gray-800'
 							: ''} transition rounded-xl"
@@ -183,34 +135,14 @@
 							selectedReason = reason;
 						}}
 					>
-						{#if reason === 'accurate_information'}
-							{$i18n.t('Accurate information')}
-						{:else if reason === 'followed_instructions_perfectly'}
-							{$i18n.t('Followed instructions perfectly')}
-						{:else if reason === 'showcased_creativity'}
-							{$i18n.t('Showcased creativity')}
-						{:else if reason === 'positive_attitude'}
-							{$i18n.t('Positive attitude')}
-						{:else if reason === 'attention_to_detail'}
-							{$i18n.t('Attention to detail')}
-						{:else if reason === 'thorough_explanation'}
-							{$i18n.t('Thorough explanation')}
-						{:else if reason === 'dont_like_the_style'}
-							{$i18n.t("Don't like the style")}
-						{:else if reason === 'too_verbose'}
-							{$i18n.t('Too verbose')}
-						{:else if reason === 'not_helpful'}
-							{$i18n.t('Not helpful')}
-						{:else if reason === 'not_factually_correct'}
-							{$i18n.t('Not factually correct')}
-						{:else if reason === 'didnt_fully_follow_instructions'}
-							{$i18n.t("Didn't fully follow instructions")}
-						{:else if reason === 'refused_when_it_shouldnt_have'}
-							{$i18n.t("Refused when it shouldn't have")}
-						{:else if reason === 'being_lazy'}
-							{$i18n.t('Being lazy')}
-						{:else if reason === 'other'}
-							{$i18n.t('Other')}
+						{#if reason === 'harmful_or_offensive'}
+							{$i18n.t('Harmful or offensive')}
+						{:else if reason === 'not_relevant'}
+							{$i18n.t('Not relevant')}
+						{:else if reason === 'not_accurate'}
+							{$i18n.t('Not accurate')}
+						{:else if reason === 'incomplete_response'}
+							{$i18n.t('Incomplete response')}
 						{:else}
 							{reason}
 						{/if}
@@ -221,31 +153,33 @@
 	</div>
 
 	<div class="mt-2">
+		<div class="text-sm mt-1.5 font-medium py-2" id="lbl-comment">
+			{$i18n.t('Provide any specific details')}
+		</div>
 		<textarea
 			bind:value={comment}
-			class="w-full text-sm px-1 py-2 bg-transparent outline-none resize-none rounded-xl"
-			placeholder={$i18n.t('Feel free to add specific details')}
+			class="w-full text-sm px-3 py-2 bg-transparent resize-none rounded-xl border border-gray-400 dark:border-gray-600"
 			rows="3"
+			aria-labelledby="lbl-comment"
 		/>
 	</div>
 
-	<div class="mt-2 gap-1.5 flex justify-between">
-		<div class="flex items-end group">
-			<Tags
-				{tags}
-				on:delete={(e) => {
-					tags = tags.filter(
-						(tag) =>
-							tag.name.replaceAll(' ', '_').toLowerCase() !==
-							e.detail.replaceAll(' ', '_').toLowerCase()
-					);
-				}}
-				on:add={(e) => {
-					tags = [...tags, { name: e.detail }];
-				}}
-			/>
-		</div>
-
+	<div class="flex items-end group">
+		<Tags
+			{tags}
+			on:delete={(e) => {
+				tags = tags.filter(
+					(tag) =>
+						tag.name.replaceAll(' ', '_').toLowerCase() !==
+						e.detail.replaceAll(' ', '_').toLowerCase()
+				);
+			}}
+			on:add={(e) => {
+				tags = [...tags, { name: e.detail }];
+			}}
+		/>
+	</div>
+	<div class="mt-3 flex justify-end">
 		<button
 			class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full"
 			on:click={() => {
