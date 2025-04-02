@@ -344,7 +344,6 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
         response.set_cookie(
             key="token",
             value=token,
-            expires=datetime_expires_at,
             httponly=True,
             samesite=WEBUI_SESSION_COOKIE_SAME_SITE,
             secure=WEBUI_SESSION_COOKIE_SECURE,
