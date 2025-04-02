@@ -480,6 +480,18 @@
 				showUsaGovSection={false}
 			>
 				<IdentifierLink href="mailto:chat@gsa.gov" text="chat@gsa.gov" />
+				<IdentifierLink
+					href=" https://insite.gsa.gov/services-and-offices/staff-offices/office-of-gsa-it/artificial-intelligence/gsas-aipowered-chat/chat-resources/chat-user-guide"
+					text="Help"
+				/>
+				<IdentifierLink
+					href="https://insite.gsa.gov/services-and-offices/staff-offices/office-of-gsa-it/artificial-intelligence/gsas-aipowered-chat/chat-resources/chat-privacy-policy"
+					text="Privacy policy"
+				/>
+				<IdentifierLink
+					href="https://www.gsa.gov/website-information/accessibility-statement"
+					text="Accessibility statement"
+				/>
 			</Identifier>
 		</div>
 	{/if}
