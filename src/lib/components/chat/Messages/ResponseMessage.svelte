@@ -350,7 +350,6 @@
 			details = {
 				reason: null,
 				comment: null,
-				tags: [],
 				details: {
 					rating: null
 				}
@@ -466,6 +465,9 @@
 					});
 				}
 			}
+		} else {
+			// only show succuess message after all operations complete
+			toast.success($i18n.t('Thanks for your feedback!'));
 		}
 
 		feedbackLoading = false;
