@@ -58,11 +58,6 @@
 
 	const saveHandler = () => {
 		console.log('saveHandler');
-		// if (!selectedReason) {
-		// 	toast.error($i18n.t('Please select a reason'));
-		// 	return;
-		// }
-
 		dispatch('save', {
 			reason: selectedReason,
 			comment: comment,
@@ -71,8 +66,6 @@
 				rating: detailedRating
 			}
 		});
-
-		// toast.success($i18n.t('Thanks for your feedback!'));
 		show = false;
 	};
 </script>
@@ -107,7 +100,7 @@
 					{#if rating === 'bad'}
 						{$i18n.t('Bad')}
 					{:else if rating === 'very_bad'}
-						{$i18n.t('Very Bad')}
+						{$i18n.t('Very bad')}
 					{:else if rating === 'extremely_bad'}
 						{$i18n.t('Extremely bad')}
 					{:else}
