@@ -18,7 +18,7 @@
 		updateRAGConfig
 	} from '$lib/apis/retrieval';
 
-	import { knowledge, models } from '$lib/stores';
+	import { knowledge, models, config } from '$lib/stores';
 	import { getKnowledgeBases } from '$lib/apis/knowledge';
 	import { uploadDir, deleteAllFiles, deleteFileById } from '$lib/apis/files';
 
@@ -370,24 +370,25 @@
 					</div>
 				</div>
 			{/if}
+			{#if $config?.features?.enable_rag_hybrid_search}
+				<div class=" flex w-full justify-between">
+					<div class=" self-center text-xs font-medium">{$i18n.t('Hybrid Search')}</div>
 
-			<div class=" flex w-full justify-between">
-				<div class=" self-center text-xs font-medium">{$i18n.t('Hybrid Search')}</div>
-
-				<button
-					class="p-1 px-3 text-xs flex rounded transition"
-					on:click={() => {
-						toggleHybridSearch();
-					}}
-					type="button"
-				>
-					{#if querySettings.hybrid === true}
-						<span class="ml-2 self-center">{$i18n.t('On')}</span>
-					{:else}
-						<span class="ml-2 self-center">{$i18n.t('Off')}</span>
-					{/if}
-				</button>
-			</div>
+					<button
+						class="p-1 px-3 text-xs flex rounded transition"
+						on:click={() => {
+							toggleHybridSearch();
+						}}
+						type="button"
+					>
+						{#if querySettings.hybrid === true}
+							<span class="ml-2 self-center">{$i18n.t('On')}</span>
+						{:else}
+							<span class="ml-2 self-center">{$i18n.t('Off')}</span>
+						{/if}
+					</button>
+				</div>
+			{/if}
 		</div>
 
 		<hr class="dark:border-gray-850" />
