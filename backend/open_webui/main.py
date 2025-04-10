@@ -1037,6 +1037,7 @@ async def get_app_config(request: Request):
                     "enable_model_selector_search": ENABLE_MODEL_SELECTOR_SEARCH,
                     "enable_response_prompt_edit": ENABLE_RESPONSE_PROMPT_EDIT,
                     "enable_response_continue": ENABLE_RESPONSE_CONTINUE,
+                    "enable_rag_hybrid_search": app.state.config.ENABLE_RAG_HYBRID_SEARCH,
                 }
                 if user is not None
                 else {}

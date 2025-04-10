@@ -221,6 +221,7 @@ type Config = {
 		enable_model_selector_search: boolean;
 		enable_response_prompt_edit: boolean;
 		enable_response_continue: boolean;
+		enable_rag_hybrid_search: boolean;
 	};
 	oauth: {
 		providers: {
