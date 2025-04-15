@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from typing import Optional, List, Dict, Any
 from sqlalchemy import (
     cast,
@@ -18,8 +19,13 @@ from sqlalchemy.dialects.postgresql import JSONB, array
 from pgvector.sqlalchemy import Vector
 from sqlalchemy.ext.mutable import MutableDict
 
+from open_webui.env import SRC_LOG_LEVELS
 from open_webui.retrieval.vector.main import VectorItem, SearchResult, GetResult
 from open_webui.config import PGVECTOR_DB_URL
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["RAG"])
+
 
 VECTOR_LENGTH = 1536
 Base = declarative_base()
@@ -40,13 +46,10 @@ class PgvectorClient:
 
         # if no pgvector uri, use the existing database connection
         if not PGVECTOR_DB_URL:
-            print("no PGVECTOR_DB_URL ")
             from open_webui.internal.db import Session as MainLocalSession
 
             self.session = MainLocalSession
         else:
-            print("PGVECTOR_DB_URL: ", PGVECTOR_DB_URL)
-
             engine = create_engine(PGVECTOR_DB_URL, pool_pre_ping=True)
             # save the session factory, not the session it generates
             self.SessionLocal = sessionmaker(
@@ -74,9 +77,9 @@ class PgvectorClient:
                         "ON document_chunk (collection_name);"
                     )
                 )
-                print("Initialization complete.")
+                log.info("Initialization complete.")
         except Exception as e:
-            print(f"Error during initialization: {e}")
+            log.error(e, stack_info=True, exc_info=True)
             raise
 
     @contextlib.contextmanager
@@ -87,6 +90,7 @@ class PgvectorClient:
             yield session
             session.commit()
         except Exception as e:
+            log.error(e, stack_info=True, exc_info=True)
             session.rollback()
             raise
         finally:
@@ -119,7 +123,9 @@ class PgvectorClient:
         with self.get_session() as session:
             session.bulk_save_objects(new_items)
 
-        print(f"Inserted {len(new_items)} items into collection '{collection_name}'.")
+        log.debug(
+            f"Inserted {len(new_items)} items into collection '{collection_name}'."
+        )
 
     def upsert(self, collection_name: str, items: List[VectorItem]) -> None:
         with self.get_session() as session:
@@ -146,7 +152,9 @@ class PgvectorClient:
                         vmetadata=item["metadata"],
                     )
                     session.add(new_chunk)
-            print(f"Upserted {len(items)} items into collection '{collection_name}'.")
+            log.debug(
+                f"Upserted {len(items)} items into collection '{collection_name}'."
+            )
 
     def search(
         self,
@@ -299,12 +307,14 @@ class PgvectorClient:
                         DocumentChunk.vmetadata[key].astext == str(value)
                     )
             deleted = query.delete(synchronize_session=False)
-        print(f"Deleted {deleted} items from collection '{collection_name}'.")
+        log.debug(f"Deleted {deleted} items from collection '{collection_name}'.")
 
     def reset(self) -> None:
         with self.get_session() as session:
             deleted = session.query(DocumentChunk).delete()
-        print(f"Reset complete. Deleted {deleted} items from 'document_chunk' table.")
+        log.debug(
+            f"Reset complete. Deleted {deleted} items from 'document_chunk' table."
+        )
 
     def close(self) -> None:
         pass
@@ -321,4 +331,4 @@ class PgvectorClient:
 
     def delete_collection(self, collection_name: str) -> None:
         self.delete(collection_name)
-        print(f"Collection '{collection_name}' deleted.")
+        log.debug(f"Collection '{collection_name}' deleted.")
