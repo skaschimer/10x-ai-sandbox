@@ -25,6 +25,7 @@ from open_webui.env import (
     OFFLINE_MODE,
     CONFIGURATION_REDIS_URL,
 )
+from .config_migration import migrate_db_config
 
 
 class EndpointFilter(logging.Filter):
@@ -90,6 +91,9 @@ def get_config():
 def save_config(config):
     for key, value in config.items():
         r.hset(hash_name, key, json.dumps(value))
+
+
+migrate_db_config(r, hash_name)
 
 
 T = TypeVar("T")
