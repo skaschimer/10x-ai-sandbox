@@ -3,10 +3,12 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar, List
 from urllib.parse import urlparse
 
 import chromadb
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 import redis
 import requests
 
@@ -23,7 +25,6 @@ from open_webui.env import (
     OFFLINE_MODE,
     CONFIGURATION_REDIS_URL,
 )
-from pydantic import BaseModel
 
 
 class EndpointFilter(logging.Filter):
@@ -143,235 +144,10 @@ class AppConfig:
 
 
 ####################################
-# WEBUI_AUTH (Required for security)
-####################################
-
-ENABLE_API_KEY = PersistentConfig(
-    "ENABLE_API_KEY",
-    os.environ.get("ENABLE_API_KEY", "True").lower() == "true",
-)
-
-ENABLE_API_KEY_ENDPOINT_RESTRICTIONS = PersistentConfig(
-    "ENABLE_API_KEY_ENDPOINT_RESTRICTIONS",
-    os.environ.get("ENABLE_API_KEY_ENDPOINT_RESTRICTIONS", "False").lower() == "true",
-)
-
-API_KEY_ALLOWED_ENDPOINTS = PersistentConfig(
-    "API_KEY_ALLOWED_ENDPOINTS",
-    os.environ.get("API_KEY_ALLOWED_ENDPOINTS", ""),
-)
-
-JWT_EXPIRES_IN = PersistentConfig(
-    "JWT_EXPIRES_IN", os.environ.get("JWT_EXPIRES_IN", "-1")
-)
-
-####################################
 # OAuth config
 ####################################
 
-ENABLE_OAUTH_SIGNUP = PersistentConfig(
-    "ENABLE_OAUTH_SIGNUP",
-    os.environ.get("ENABLE_OAUTH_SIGNUP", "False").lower() == "true",
-)
-
-OAUTH_MERGE_ACCOUNTS_BY_EMAIL = PersistentConfig(
-    "OAUTH_MERGE_ACCOUNTS_BY_EMAIL",
-    os.environ.get("OAUTH_MERGE_ACCOUNTS_BY_EMAIL", "False").lower() == "true",
-)
-
 OAUTH_PROVIDERS = {}
-
-GOOGLE_CLIENT_ID = PersistentConfig(
-    "GOOGLE_CLIENT_ID",
-    os.environ.get("GOOGLE_CLIENT_ID", ""),
-)
-
-GOOGLE_CLIENT_SECRET = PersistentConfig(
-    "GOOGLE_CLIENT_SECRET",
-    os.environ.get("GOOGLE_CLIENT_SECRET", ""),
-)
-
-GOOGLE_OAUTH_SCOPE = PersistentConfig(
-    "GOOGLE_OAUTH_SCOPE",
-    os.environ.get("GOOGLE_OAUTH_SCOPE", "openid email profile"),
-)
-
-GOOGLE_REDIRECT_URI = PersistentConfig(
-    "GOOGLE_REDIRECT_URI",
-    os.environ.get("GOOGLE_REDIRECT_URI", ""),
-)
-
-MICROSOFT_CLIENT_ID = PersistentConfig(
-    "MICROSOFT_CLIENT_ID",
-    os.environ.get("MICROSOFT_CLIENT_ID", ""),
-)
-
-MICROSOFT_CLIENT_SECRET = PersistentConfig(
-    "MICROSOFT_CLIENT_SECRET",
-    os.environ.get("MICROSOFT_CLIENT_SECRET", ""),
-)
-
-MICROSOFT_CLIENT_TENANT_ID = PersistentConfig(
-    "MICROSOFT_CLIENT_TENANT_ID",
-    os.environ.get("MICROSOFT_CLIENT_TENANT_ID", ""),
-)
-
-MICROSOFT_OAUTH_SCOPE = PersistentConfig(
-    "MICROSOFT_OAUTH_SCOPE",
-    os.environ.get("MICROSOFT_OAUTH_SCOPE", "openid email profile"),
-)
-
-MICROSOFT_REDIRECT_URI = PersistentConfig(
-    "MICROSOFT_REDIRECT_URI",
-    os.environ.get("MICROSOFT_REDIRECT_URI", ""),
-)
-
-OAUTH_CLIENT_ID = PersistentConfig(
-    "OAUTH_CLIENT_ID",
-    os.environ.get("OAUTH_CLIENT_ID", ""),
-)
-
-OAUTH_CLIENT_SECRET = PersistentConfig(
-    "OAUTH_CLIENT_SECRET",
-    os.environ.get("OAUTH_CLIENT_SECRET", ""),
-)
-
-OPENID_PROVIDER_URL = PersistentConfig(
-    "OPENID_PROVIDER_URL",
-    os.environ.get("OPENID_PROVIDER_URL", ""),
-)
-
-OPENID_REDIRECT_URI = PersistentConfig(
-    "OPENID_REDIRECT_URI",
-    os.environ.get("OPENID_REDIRECT_URI", ""),
-)
-
-OAUTH_SCOPES = PersistentConfig(
-    "OAUTH_SCOPES",
-    os.environ.get("OAUTH_SCOPES", "openid email profile"),
-)
-
-OAUTH_PROVIDER_NAME = PersistentConfig(
-    "OAUTH_PROVIDER_NAME",
-    os.environ.get("OAUTH_PROVIDER_NAME", "SSO"),
-)
-
-OAUTH_USERNAME_CLAIM = PersistentConfig(
-    "OAUTH_USERNAME_CLAIM",
-    os.environ.get("OAUTH_USERNAME_CLAIM", "name"),
-)
-
-OAUTH_PICTURE_CLAIM = PersistentConfig(
-    "OAUTH_PICTURE_CLAIM",
-    os.environ.get("OAUTH_PICTURE_CLAIM", "picture"),
-)
-
-OAUTH_EMAIL_CLAIM = PersistentConfig(
-    "OAUTH_EMAIL_CLAIM",
-    os.environ.get("OAUTH_EMAIL_CLAIM", "email"),
-)
-
-OAUTH_GROUPS_CLAIM = PersistentConfig(
-    "OAUTH_GROUPS_CLAIM",
-    os.environ.get("OAUTH_GROUP_CLAIM", "groups"),
-)
-
-ENABLE_OAUTH_ROLE_MANAGEMENT = PersistentConfig(
-    "ENABLE_OAUTH_ROLE_MANAGEMENT",
-    os.environ.get("ENABLE_OAUTH_ROLE_MANAGEMENT", "False").lower() == "true",
-)
-
-ENABLE_OAUTH_GROUP_MANAGEMENT = PersistentConfig(
-    "ENABLE_OAUTH_GROUP_MANAGEMENT",
-    os.environ.get("ENABLE_OAUTH_GROUP_MANAGEMENT", "False").lower() == "true",
-)
-
-OAUTH_ROLES_CLAIM = PersistentConfig(
-    "OAUTH_ROLES_CLAIM",
-    os.environ.get("OAUTH_ROLES_CLAIM", "roles"),
-)
-
-OAUTH_ALLOWED_ROLES = PersistentConfig(
-    "OAUTH_ALLOWED_ROLES",
-    [
-        role.strip()
-        for role in os.environ.get("OAUTH_ALLOWED_ROLES", "user,admin").split(",")
-    ],
-)
-
-OAUTH_ADMIN_ROLES = PersistentConfig(
-    "OAUTH_ADMIN_ROLES",
-    [role.strip() for role in os.environ.get("OAUTH_ADMIN_ROLES", "admin").split(",")],
-)
-
-OAUTH_ACR_CLAIM = PersistentConfig(
-    "OAUTH_ACR_CLAIM",
-    os.environ.get("OAUTH_ACR_CLAIM", ""),
-)
-
-OAUTH_NONCE_CLAIM = PersistentConfig(
-    "OAUTH_NONCE_CLAIM",
-    os.environ.get("OAUTH_NONCE_CLAIM", ""),
-)
-
-OAUTH_USE_PKCE = PersistentConfig(
-    "OAUTH_USE_PKCE",
-    os.environ.get("OAUTH_USE_PKCE", ""),
-)
-
-OAUTH_ALLOWED_DOMAINS = PersistentConfig(
-    "OAUTH_ALLOWED_DOMAINS",
-    [
-        domain.strip()
-        for domain in os.environ.get("OAUTH_ALLOWED_DOMAINS", "*").split(",")
-    ],
-)
-
-
-def load_oauth_providers():
-    OAUTH_PROVIDERS.clear()
-    if GOOGLE_CLIENT_ID.value and GOOGLE_CLIENT_SECRET.value:
-        OAUTH_PROVIDERS["google"] = {
-            "client_id": GOOGLE_CLIENT_ID.value,
-            "client_secret": GOOGLE_CLIENT_SECRET.value,
-            "server_metadata_url": "https://accounts.google.com/.well-known/openid-configuration",
-            "scope": GOOGLE_OAUTH_SCOPE.value,
-            "redirect_uri": GOOGLE_REDIRECT_URI.value,
-        }
-
-    if (
-        MICROSOFT_CLIENT_ID.value
-        and MICROSOFT_CLIENT_SECRET.value
-        and MICROSOFT_CLIENT_TENANT_ID.value
-    ):
-        OAUTH_PROVIDERS["microsoft"] = {
-            "client_id": MICROSOFT_CLIENT_ID.value,
-            "client_secret": MICROSOFT_CLIENT_SECRET.value,
-            "server_metadata_url": f"https://login.microsoftonline.com/{MICROSOFT_CLIENT_TENANT_ID.value}/v2.0/.well-known/openid-configuration",
-            "scope": MICROSOFT_OAUTH_SCOPE.value,
-            "redirect_uri": MICROSOFT_REDIRECT_URI.value,
-        }
-
-    if (
-        OAUTH_CLIENT_ID.value
-        and OAUTH_CLIENT_SECRET.value
-        and OPENID_PROVIDER_URL.value
-    ):
-        OAUTH_PROVIDERS["oidc"] = {
-            "client_id": OAUTH_CLIENT_ID.value,
-            "client_secret": OAUTH_CLIENT_SECRET.value,
-            "server_metadata_url": OPENID_PROVIDER_URL.value,
-            "scope": OAUTH_SCOPES.value,
-            "name": OAUTH_PROVIDER_NAME.value,
-            "redirect_uri": OPENID_REDIRECT_URI.value,
-        }
-
-        # TODO: does this work out of the box for google and microsoft, too?
-        if OAUTH_USE_PKCE.value:
-            OAUTH_PROVIDERS["oidc"]["pkce"] = OAUTH_USE_PKCE.value
-
-
-load_oauth_providers()
 
 ####################################
 # Static DIR
@@ -587,15 +363,6 @@ OPENAI_API_BASE_URL = "https://api.openai.com/v1"
 # WEBUI
 ####################################
 
-
-WEBUI_URL = PersistentConfig(
-    "WEBUI_URL", os.environ.get("WEBUI_URL", "http://localhost:3000")
-)
-
-ENABLE_ONBOARDING_PAGE = (
-    os.environ.get("ENABLE_ONBOARDING_PAGE", "False").lower() == "true"
-)
-
 ENABLE_SIGNUP = PersistentConfig(
     "ENABLE_SIGNUP",
     (
@@ -603,21 +370,6 @@ ENABLE_SIGNUP = PersistentConfig(
         if not WEBUI_AUTH
         else os.environ.get("ENABLE_SIGNUP", "True").lower() == "true"
     ),
-)
-
-ENABLE_LOGIN_FORM = PersistentConfig(
-    "ENABLE_LOGIN_FORM",
-    os.environ.get("ENABLE_LOGIN_FORM", "True").lower() == "true",
-)
-
-
-DEFAULT_LOCALE = PersistentConfig(
-    "DEFAULT_LOCALE",
-    os.environ.get("DEFAULT_LOCALE", ""),
-)
-
-DEFAULT_MODELS = PersistentConfig(
-    "DEFAULT_MODELS", os.environ.get("DEFAULT_MODELS", None)
 )
 
 DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
@@ -642,16 +394,6 @@ DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
             "content": "Summarize meeting notes and pull out key points and next steps. Remember to avoid putting personally identifiable information into the chat.",
         },
     ],
-)
-
-MODEL_ORDER_LIST = PersistentConfig(
-    "MODEL_ORDER_LIST",
-    [],
-)
-
-DEFAULT_USER_ROLE = PersistentConfig(
-    "DEFAULT_USER_ROLE",
-    os.getenv("DEFAULT_USER_ROLE", "pending"),
 )
 
 USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS = (
@@ -707,22 +449,6 @@ USER_PERMISSIONS = PersistentConfig(
     },
 )
 
-ENABLE_CHANNELS = PersistentConfig(
-    "ENABLE_CHANNELS",
-    os.environ.get("ENABLE_CHANNELS", "False").lower() == "true",
-)
-
-
-ENABLE_EVALUATION_ARENA_MODELS = PersistentConfig(
-    "ENABLE_EVALUATION_ARENA_MODELS",
-    os.environ.get("ENABLE_EVALUATION_ARENA_MODELS", "True").lower() == "true",
-)
-
-EVALUATION_ARENA_MODELS = PersistentConfig(
-    "EVALUATION_ARENA_MODELS",
-    [],
-)
-
 DEFAULT_ARENA_MODEL = {
     "id": "arena-model",
     "name": "Arena Model",
@@ -733,22 +459,10 @@ DEFAULT_ARENA_MODEL = {
     },
 }
 
-WEBHOOK_URL = PersistentConfig("WEBHOOK_URL", os.environ.get("WEBHOOK_URL", ""))
-
 ENABLE_ADMIN_EXPORT = os.environ.get("ENABLE_ADMIN_EXPORT", "True").lower() == "true"
 
 ENABLE_ADMIN_CHAT_ACCESS = (
     os.environ.get("ENABLE_ADMIN_CHAT_ACCESS", "True").lower() == "true"
-)
-
-ENABLE_COMMUNITY_SHARING = PersistentConfig(
-    "ENABLE_COMMUNITY_SHARING",
-    os.environ.get("ENABLE_COMMUNITY_SHARING", "True").lower() == "true",
-)
-
-ENABLE_MESSAGE_RATING = PersistentConfig(
-    "ENABLE_MESSAGE_RATING",
-    os.environ.get("ENABLE_MESSAGE_RATING", "True").lower() == "true",
 )
 
 ALLOW_SIMULTANEOUS_MODELS = (
@@ -882,37 +596,9 @@ except Exception as e:
 
 WEBUI_BANNERS = PersistentConfig("WEBUI_BANNERS", banners)
 
-
-SHOW_ADMIN_DETAILS = PersistentConfig(
-    "SHOW_ADMIN_DETAILS",
-    os.environ.get("SHOW_ADMIN_DETAILS", "true").lower() == "true",
-)
-
-ADMIN_EMAIL = PersistentConfig(
-    "ADMIN_EMAIL",
-    os.environ.get("ADMIN_EMAIL", None),
-)
-
-
 ####################################
 # TASKS
 ####################################
-
-
-TASK_MODEL = PersistentConfig(
-    "TASK_MODEL",
-    os.environ.get("TASK_MODEL", ""),
-)
-
-TASK_MODEL_EXTERNAL = PersistentConfig(
-    "TASK_MODEL_EXTERNAL",
-    os.environ.get("TASK_MODEL_EXTERNAL", ""),
-)
-
-TITLE_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
-    "TITLE_GENERATION_PROMPT_TEMPLATE",
-    os.environ.get("TITLE_GENERATION_PROMPT_TEMPLATE", ""),
-)
 
 DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE = """Create a concise, 3-5 word title with an emoji as a title for the chat history, in the given language. Suitable Emojis for the summary can be used to enhance understanding but avoid quotation marks or special formatting. RESPOND ONLY WITH THE TITLE TEXT.
 
@@ -927,12 +613,6 @@ Artificial Intelligence in Healthcare
 <chat_history>
 {{MESSAGES:END:2}}
 </chat_history>"""
-
-
-TAGS_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
-    "TAGS_GENERATION_PROMPT_TEMPLATE",
-    os.environ.get("TAGS_GENERATION_PROMPT_TEMPLATE", ""),
-)
 
 DEFAULT_TAGS_GENERATION_PROMPT_TEMPLATE = """### Task:
 Generate 1-3 broad tags categorizing the main themes of the chat history, along with 1-3 more specific subtopic tags.
@@ -951,28 +631,6 @@ JSON format: { "tags": ["tag1", "tag2", "tag3"] }
 <chat_history>
 {{MESSAGES:END:6}}
 </chat_history>"""
-
-ENABLE_TAGS_GENERATION = PersistentConfig(
-    "ENABLE_TAGS_GENERATION",
-    os.environ.get("ENABLE_TAGS_GENERATION", "True").lower() == "true",
-)
-
-
-ENABLE_SEARCH_QUERY_GENERATION = PersistentConfig(
-    "ENABLE_SEARCH_QUERY_GENERATION",
-    os.environ.get("ENABLE_SEARCH_QUERY_GENERATION", "True").lower() == "true",
-)
-
-ENABLE_RETRIEVAL_QUERY_GENERATION = PersistentConfig(
-    "ENABLE_RETRIEVAL_QUERY_GENERATION",
-    os.environ.get("ENABLE_RETRIEVAL_QUERY_GENERATION", "True").lower() == "true",
-)
-
-
-QUERY_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
-    "QUERY_GENERATION_PROMPT_TEMPLATE",
-    os.environ.get("QUERY_GENERATION_PROMPT_TEMPLATE", ""),
-)
 
 DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE = """### Task:
 Analyze the chat history to determine the necessity of generating search queries, in the given language. By default, **prioritize generating 1-3 broad and relevant search queries** unless it is absolutely certain that no additional information is required. The aim is to retrieve comprehensive, updated, and valuable information even with minimal uncertainty. If no search is unequivocally needed, return an empty list.
@@ -997,22 +655,6 @@ Strictly return in JSON format:
 {{MESSAGES:END:6}}
 </chat_history>
 """
-
-ENABLE_AUTOCOMPLETE_GENERATION = PersistentConfig(
-    "ENABLE_AUTOCOMPLETE_GENERATION",
-    os.environ.get("ENABLE_AUTOCOMPLETE_GENERATION", "True").lower() == "true",
-)
-
-AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH = PersistentConfig(
-    "AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH",
-    int(os.environ.get("AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH", "-1")),
-)
-
-AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
-    "AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE",
-    os.environ.get("AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE", ""),
-)
-
 
 DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE = """### Task:
 You are an autocompletion system. Continue the text in `<text>` based on the **completion type** in `<type>` and the given language.
@@ -1056,14 +698,7 @@ Output:
 #### Output:
 """
 
-TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = PersistentConfig(
-    "TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE",
-    os.environ.get("TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE", ""),
-)
-
-
 DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = """Available Tools: {{TOOLS}}\nReturn an empty string if no tools match the query. If a function tool matches, construct and return a JSON object in the format {\"name\": \"functionName\", \"parameters\": {\"requiredFunctionParamKey\": \"requiredFunctionParamValue\"}} using the appropriate tool and its parameters. Only return the object and limit the response to the JSON object without additional text."""
-
 
 DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE = """Your task is to reflect the speaker's likely facial expression through a fitting emoji. Interpret emotions from the message and reflect their facial expression using fitting, diverse emojis (e.g., 😊, 😢, 😡, 😱).
 
@@ -1126,135 +761,17 @@ if VECTOR_DB == "pgvector" and not PGVECTOR_DB_URL.startswith("postgres"):
 # Information Retrieval (RAG)
 ####################################
 
-
-# If configured, Google Drive will be available as an upload option.
-ENABLE_GOOGLE_DRIVE_INTEGRATION = PersistentConfig(
-    "ENABLE_GOOGLE_DRIVE_INTEGRATION",
-    os.getenv("ENABLE_GOOGLE_DRIVE_INTEGRATION", "False").lower() == "true",
-)
-
-GOOGLE_DRIVE_CLIENT_ID = PersistentConfig(
-    "GOOGLE_DRIVE_CLIENT_ID",
-    os.environ.get("GOOGLE_DRIVE_CLIENT_ID", ""),
-)
-
-GOOGLE_DRIVE_API_KEY = PersistentConfig(
-    "GOOGLE_DRIVE_API_KEY",
-    os.environ.get("GOOGLE_DRIVE_API_KEY", ""),
-)
-
-# RAG Content Extraction
-CONTENT_EXTRACTION_ENGINE = PersistentConfig(
-    "CONTENT_EXTRACTION_ENGINE",
-    os.environ.get("CONTENT_EXTRACTION_ENGINE", "").lower(),
-)
-
-TIKA_SERVER_URL = PersistentConfig(
-    "TIKA_SERVER_URL",
-    os.getenv("TIKA_SERVER_URL", "http://tika:9998"),  # Default for sidecar deployment
-)
-
-RAG_TOP_K = PersistentConfig("RAG_TOP_K", int(os.environ.get("RAG_TOP_K", "3")))
-RAG_RELEVANCE_THRESHOLD = PersistentConfig(
-    "RAG_RELEVANCE_THRESHOLD",
-    float(os.environ.get("RAG_RELEVANCE_THRESHOLD", "0.0")),
-)
-
-ENABLE_RAG_HYBRID_SEARCH = PersistentConfig(
-    "ENABLE_RAG_HYBRID_SEARCH",
-    os.environ.get("ENABLE_RAG_HYBRID_SEARCH", "").lower() == "true",
-)
-
-RAG_FILE_MAX_COUNT = PersistentConfig(
-    "RAG_FILE_MAX_COUNT",
-    (
-        int(os.environ.get("RAG_FILE_MAX_COUNT"))
-        if os.environ.get("RAG_FILE_MAX_COUNT")
-        else None
-    ),
-)
-
-RAG_FILE_MAX_SIZE = PersistentConfig(
-    "RAG_FILE_MAX_SIZE",
-    (
-        int(os.environ.get("RAG_FILE_MAX_SIZE"))
-        if os.environ.get("RAG_FILE_MAX_SIZE")
-        else None
-    ),
-)
-
-ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = PersistentConfig(
-    "ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION",
-    os.environ.get("ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION", "True").lower() == "true",
-)
-
-RAG_EMBEDDING_ENGINE = PersistentConfig(
-    "RAG_EMBEDDING_ENGINE",
-    os.environ.get("RAG_EMBEDDING_ENGINE", ""),
-)
-
-PDF_EXTRACT_IMAGES = PersistentConfig(
-    "PDF_EXTRACT_IMAGES",
-    os.environ.get("PDF_EXTRACT_IMAGES", "False").lower() == "true",
-)
-
-RAG_EMBEDDING_MODEL = PersistentConfig(
-    "RAG_EMBEDDING_MODEL",
-    os.environ.get("RAG_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
-)
-
 RAG_EMBEDDING_MODEL_AUTO_UPDATE = (
     not OFFLINE_MODE
     and os.environ.get("RAG_EMBEDDING_MODEL_AUTO_UPDATE", "True").lower() == "true"
 )
-
-RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE = (
-    os.environ.get("RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
-)
-
-RAG_EMBEDDING_BATCH_SIZE = PersistentConfig(
-    "RAG_EMBEDDING_BATCH_SIZE",
-    int(
-        os.environ.get("RAG_EMBEDDING_BATCH_SIZE")
-        or os.environ.get("RAG_EMBEDDING_OPENAI_BATCH_SIZE", "1")
-    ),
-)
-
-RAG_RERANKING_MODEL = PersistentConfig(
-    "RAG_RERANKING_MODEL",
-    os.environ.get("RAG_RERANKING_MODEL", ""),
-)
-if RAG_RERANKING_MODEL.value != "":
-    log.info(f"Reranking model set: {RAG_RERANKING_MODEL.value}")
 
 RAG_RERANKING_MODEL_AUTO_UPDATE = (
     not OFFLINE_MODE
     and os.environ.get("RAG_RERANKING_MODEL_AUTO_UPDATE", "True").lower() == "true"
 )
 
-RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = (
-    os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
-)
-
-
-RAG_TEXT_SPLITTER = PersistentConfig(
-    "RAG_TEXT_SPLITTER",
-    os.environ.get("RAG_TEXT_SPLITTER", ""),
-)
-
-
 TIKTOKEN_CACHE_DIR = os.environ.get("TIKTOKEN_CACHE_DIR", f"{CACHE_DIR}/tiktoken")
-TIKTOKEN_ENCODING_NAME = PersistentConfig(
-    "TIKTOKEN_ENCODING_NAME",
-    os.environ.get("TIKTOKEN_ENCODING_NAME", "cl100k_base"),
-)
-
-
-CHUNK_SIZE = PersistentConfig("CHUNK_SIZE", int(os.environ.get("CHUNK_SIZE", "1000")))
-CHUNK_OVERLAP = PersistentConfig(
-    "CHUNK_OVERLAP",
-    int(os.environ.get("CHUNK_OVERLAP", "100")),
-)
 
 DEFAULT_RAG_TEMPLATE = """### Task:
 Respond to the user query using the provided context, incorporating inline citations in the format [source_id] **only when the <source_id> tag is explicitly provided** in the context.
@@ -1287,223 +804,9 @@ Provide a clear and direct response to the user's query, including inline citati
 </user_query>
 """
 
-RAG_TEMPLATE = PersistentConfig(
-    "RAG_TEMPLATE",
-    os.environ.get("RAG_TEMPLATE", DEFAULT_RAG_TEMPLATE),
-)
-
-RAG_OPENAI_API_BASE_URL = PersistentConfig(
-    "RAG_OPENAI_API_BASE_URL",
-    os.getenv("RAG_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL),
-)
-RAG_OPENAI_API_KEY = PersistentConfig(
-    "RAG_OPENAI_API_KEY",
-    os.getenv("RAG_OPENAI_API_KEY", OPENAI_API_KEY),
-)
-
-RAG_OLLAMA_BASE_URL = PersistentConfig(
-    "RAG_OLLAMA_BASE_URL",
-    os.getenv("RAG_OLLAMA_BASE_URL", OLLAMA_BASE_URL),
-)
-
-RAG_OLLAMA_API_KEY = PersistentConfig(
-    "RAG_OLLAMA_API_KEY",
-    os.getenv("RAG_OLLAMA_API_KEY", ""),
-)
-
-
-ENABLE_RAG_LOCAL_WEB_FETCH = (
-    os.getenv("ENABLE_RAG_LOCAL_WEB_FETCH", "False").lower() == "true"
-)
-
-YOUTUBE_LOADER_LANGUAGE = PersistentConfig(
-    "YOUTUBE_LOADER_LANGUAGE",
-    os.getenv("YOUTUBE_LOADER_LANGUAGE", "en").split(","),
-)
-
-YOUTUBE_LOADER_PROXY_URL = PersistentConfig(
-    "YOUTUBE_LOADER_PROXY_URL",
-    os.getenv("YOUTUBE_LOADER_PROXY_URL", ""),
-)
-
-
-ENABLE_RAG_WEB_SEARCH = PersistentConfig(
-    "ENABLE_RAG_WEB_SEARCH",
-    os.getenv("ENABLE_RAG_WEB_SEARCH", "False").lower() == "true",
-)
-
-RAG_WEB_SEARCH_ENGINE = PersistentConfig(
-    "RAG_WEB_SEARCH_ENGINE",
-    os.getenv("RAG_WEB_SEARCH_ENGINE", ""),
-)
-
-# You can provide a list of your own websites to filter after performing a web search.
-# This ensures the highest level of safety and reliability of the information sources.
-RAG_WEB_SEARCH_DOMAIN_FILTER_LIST = PersistentConfig(
-    "RAG_WEB_SEARCH_DOMAIN_FILTER_LIST",
-    [
-        # "wikipedia.com",
-        # "wikimedia.org",
-        # "wikidata.org",
-    ],
-)
-
-
-SEARXNG_QUERY_URL = PersistentConfig(
-    "SEARXNG_QUERY_URL",
-    os.getenv("SEARXNG_QUERY_URL", ""),
-)
-
-GOOGLE_PSE_API_KEY = PersistentConfig(
-    "GOOGLE_PSE_API_KEY",
-    os.getenv("GOOGLE_PSE_API_KEY", ""),
-)
-
-GOOGLE_PSE_ENGINE_ID = PersistentConfig(
-    "GOOGLE_PSE_ENGINE_ID",
-    os.getenv("GOOGLE_PSE_ENGINE_ID", ""),
-)
-
-BRAVE_SEARCH_API_KEY = PersistentConfig(
-    "BRAVE_SEARCH_API_KEY",
-    os.getenv("BRAVE_SEARCH_API_KEY", ""),
-)
-
-KAGI_SEARCH_API_KEY = PersistentConfig(
-    "KAGI_SEARCH_API_KEY",
-    os.getenv("KAGI_SEARCH_API_KEY", ""),
-)
-
-MOJEEK_SEARCH_API_KEY = PersistentConfig(
-    "MOJEEK_SEARCH_API_KEY",
-    os.getenv("MOJEEK_SEARCH_API_KEY", ""),
-)
-
-SERPSTACK_API_KEY = PersistentConfig(
-    "SERPSTACK_API_KEY",
-    os.getenv("SERPSTACK_API_KEY", ""),
-)
-
-SERPSTACK_HTTPS = PersistentConfig(
-    "SERPSTACK_HTTPS",
-    os.getenv("SERPSTACK_HTTPS", "True").lower() == "true",
-)
-
-SERPER_API_KEY = PersistentConfig(
-    "SERPER_API_KEY",
-    os.getenv("SERPER_API_KEY", ""),
-)
-
-SERPLY_API_KEY = PersistentConfig(
-    "SERPLY_API_KEY",
-    os.getenv("SERPLY_API_KEY", ""),
-)
-
-TAVILY_API_KEY = PersistentConfig(
-    "TAVILY_API_KEY",
-    os.getenv("TAVILY_API_KEY", ""),
-)
-
-JINA_API_KEY = PersistentConfig(
-    "JINA_API_KEY",
-    os.getenv("JINA_API_KEY", ""),
-)
-
-SEARCHAPI_API_KEY = PersistentConfig(
-    "SEARCHAPI_API_KEY",
-    os.getenv("SEARCHAPI_API_KEY", ""),
-)
-
-SEARCHAPI_ENGINE = PersistentConfig(
-    "SEARCHAPI_ENGINE",
-    os.getenv("SEARCHAPI_ENGINE", ""),
-)
-
-BING_SEARCH_V7_ENDPOINT = PersistentConfig(
-    "BING_SEARCH_V7_ENDPOINT",
-    os.environ.get(
-        "BING_SEARCH_V7_ENDPOINT", "https://api.bing.microsoft.com/v7.0/search"
-    ),
-)
-
-BING_SEARCH_V7_SUBSCRIPTION_KEY = PersistentConfig(
-    "BING_SEARCH_V7_SUBSCRIPTION_KEY",
-    os.environ.get("BING_SEARCH_V7_SUBSCRIPTION_KEY", ""),
-)
-
-
-RAG_WEB_SEARCH_RESULT_COUNT = PersistentConfig(
-    "RAG_WEB_SEARCH_RESULT_COUNT",
-    int(os.getenv("RAG_WEB_SEARCH_RESULT_COUNT", "3")),
-)
-
-RAG_WEB_SEARCH_CONCURRENT_REQUESTS = PersistentConfig(
-    "RAG_WEB_SEARCH_CONCURRENT_REQUESTS",
-    int(os.getenv("RAG_WEB_SEARCH_CONCURRENT_REQUESTS", "10")),
-)
-
-
 ####################################
 # Images
 ####################################
-
-IMAGE_GENERATION_ENGINE = PersistentConfig(
-    "IMAGE_GENERATION_ENGINE",
-    os.getenv("IMAGE_GENERATION_ENGINE", "openai"),
-)
-
-ENABLE_IMAGE_GENERATION = PersistentConfig(
-    "ENABLE_IMAGE_GENERATION",
-    os.environ.get("ENABLE_IMAGE_GENERATION", "").lower() == "true",
-)
-
-AUTOMATIC1111_BASE_URL = PersistentConfig(
-    "AUTOMATIC1111_BASE_URL",
-    os.getenv("AUTOMATIC1111_BASE_URL", ""),
-)
-
-AUTOMATIC1111_API_AUTH = PersistentConfig(
-    "AUTOMATIC1111_API_AUTH",
-    os.getenv("AUTOMATIC1111_API_AUTH", ""),
-)
-
-AUTOMATIC1111_CFG_SCALE = PersistentConfig(
-    "AUTOMATIC1111_CFG_SCALE",
-    (
-        float(os.environ.get("AUTOMATIC1111_CFG_SCALE"))
-        if os.environ.get("AUTOMATIC1111_CFG_SCALE")
-        else None
-    ),
-)
-
-
-AUTOMATIC1111_SAMPLER = PersistentConfig(
-    "AUTOMATIC1111_SAMPLER",
-    (
-        os.environ.get("AUTOMATIC1111_SAMPLER")
-        if os.environ.get("AUTOMATIC1111_SAMPLER")
-        else None
-    ),
-)
-
-AUTOMATIC1111_SCHEDULER = PersistentConfig(
-    "AUTOMATIC1111_SCHEDULER",
-    (
-        os.environ.get("AUTOMATIC1111_SCHEDULER")
-        if os.environ.get("AUTOMATIC1111_SCHEDULER")
-        else None
-    ),
-)
-
-COMFYUI_BASE_URL = PersistentConfig(
-    "COMFYUI_BASE_URL",
-    os.getenv("COMFYUI_BASE_URL", ""),
-)
-
-COMFYUI_API_KEY = PersistentConfig(
-    "COMFYUI_API_KEY",
-    os.getenv("COMFYUI_API_KEY", ""),
-)
 
 COMFYUI_DEFAULT_WORKFLOW = """
 {
@@ -1615,45 +918,9 @@ COMFYUI_DEFAULT_WORKFLOW = """
 }
 """
 
-
-COMFYUI_WORKFLOW = PersistentConfig(
-    "COMFYUI_WORKFLOW",
-    os.getenv("COMFYUI_WORKFLOW", COMFYUI_DEFAULT_WORKFLOW),
-)
-
-COMFYUI_WORKFLOW_NODES = PersistentConfig(
-    "COMFYUI_WORKFLOW",
-    [],
-)
-
-IMAGES_OPENAI_API_BASE_URL = PersistentConfig(
-    "IMAGES_OPENAI_API_BASE_URL",
-    os.getenv("IMAGES_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL),
-)
-
-IMAGES_OPENAI_API_KEY = PersistentConfig(
-    "IMAGES_OPENAI_API_KEY",
-    os.getenv("IMAGES_OPENAI_API_KEY", OPENAI_API_KEY),
-)
-
-IMAGE_SIZE = PersistentConfig("IMAGE_SIZE", os.getenv("IMAGE_SIZE", "512x512"))
-
-IMAGE_STEPS = PersistentConfig("IMAGE_STEPS", int(os.getenv("IMAGE_STEPS", 50)))
-
-IMAGE_GENERATION_MODEL = PersistentConfig(
-    "IMAGE_GENERATION_MODEL",
-    os.getenv("IMAGE_GENERATION_MODEL", ""),
-)
-
 ####################################
 # Audio
 ####################################
-
-# Transcription
-WHISPER_MODEL = PersistentConfig(
-    "WHISPER_MODEL",
-    os.getenv("WHISPER_MODEL", "base"),
-)
 
 WHISPER_MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", f"{CACHE_DIR}/whisper/models")
 WHISPER_MODEL_AUTO_UPDATE = (
@@ -1662,127 +929,237 @@ WHISPER_MODEL_AUTO_UPDATE = (
 )
 
 
-AUDIO_STT_OPENAI_API_BASE_URL = PersistentConfig(
-    "AUDIO_STT_OPENAI_API_BASE_URL",
-    os.getenv("AUDIO_STT_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL),
-)
+class PersistentConfigSettings(BaseSettings):
+    """
+    Track persistent configuration settings to provide validation and type checking.
+    Individual PersistentConfig instances should be generated from these settings.
+    """
 
-AUDIO_STT_OPENAI_API_KEY = PersistentConfig(
-    "AUDIO_STT_OPENAI_API_KEY",
-    os.getenv("AUDIO_STT_OPENAI_API_KEY", OPENAI_API_KEY),
-)
+    # API Key Settings
+    ENABLE_API_KEY: bool = True
+    ENABLE_API_KEY_ENDPOINT_RESTRICTIONS: bool = False
+    API_KEY_ALLOWED_ENDPOINTS: str = ""
+    JWT_EXPIRES_IN: str = "-1"
 
-AUDIO_STT_ENGINE = PersistentConfig(
-    "AUDIO_STT_ENGINE",
-    os.getenv("AUDIO_STT_ENGINE", ""),
-)
+    # OAuth Settings
+    ENABLE_OAUTH_SIGNUP: bool = False
+    OAUTH_MERGE_ACCOUNTS_BY_EMAIL: bool = False
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_OAUTH_SCOPE: str = "openid email profile"
+    GOOGLE_REDIRECT_URI: str = ""
+    MICROSOFT_CLIENT_ID: str = ""
+    MICROSOFT_CLIENT_SECRET: str = ""
+    MICROSOFT_CLIENT_TENANT_ID: str = ""
+    MICROSOFT_OAUTH_SCOPE: str = "openid email profile"
+    MICROSOFT_REDIRECT_URI: str = ""
+    OAUTH_CLIENT_ID: str = ""
+    OAUTH_CLIENT_SECRET: str = ""
+    OPENID_PROVIDER_URL: str = ""
+    OPENID_REDIRECT_URI: str = ""
+    OAUTH_SCOPES: str = "openid email profile"
+    OAUTH_PROVIDER_NAME: str = "SSO"
+    OAUTH_USERNAME_CLAIM: str = "name"
+    OAUTH_PICTURE_CLAIM: str = "picture"
+    OAUTH_EMAIL_CLAIM: str = "email"
+    OAUTH_GROUPS_CLAIM: str = "groups"
+    ENABLE_OAUTH_ROLE_MANAGEMENT: bool = False
+    ENABLE_OAUTH_GROUP_MANAGEMENT: bool = False
+    OAUTH_ROLES_CLAIM: str = "roles"
+    OAUTH_ALLOWED_ROLES: List[str] = ["user", "admin"]
+    OAUTH_ADMIN_ROLES: List[str] = ["admin"]
+    OAUTH_ACR_CLAIM: str = ""
+    OAUTH_NONCE_CLAIM: str = ""
+    OAUTH_USE_PKCE: str = ""
+    OAUTH_ALLOWED_DOMAINS: List[str] = ["*"]
 
-AUDIO_STT_MODEL = PersistentConfig(
-    "AUDIO_STT_MODEL",
-    os.getenv("AUDIO_STT_MODEL", ""),
-)
+    # WebUI Settings
+    WEBUI_URL: str = "http://localhost:3000"
+    ENABLE_ONBOARDING_PAGE: bool = False
+    ENABLE_LOGIN_FORM: bool = True
+    DEFAULT_LOCALE: str = ""
+    DEFAULT_MODELS: Optional[str] = None
+    MODEL_ORDER_LIST: List[str] = []
+    DEFAULT_USER_ROLE: str = "pending"
+    ENABLE_CHANNELS: bool = False
+    ENABLE_EVALUATION_ARENA_MODELS: bool = True
+    EVALUATION_ARENA_MODELS: List[str] = []
+    WEBHOOK_URL: str = ""
+    ENABLE_COMMUNITY_SHARING: bool = True
+    ENABLE_MESSAGE_RATING: bool = True
+    SHOW_ADMIN_DETAILS: bool = True
+    ADMIN_EMAIL: Optional[str] = None
 
-AUDIO_TTS_OPENAI_API_BASE_URL = PersistentConfig(
-    "AUDIO_TTS_OPENAI_API_BASE_URL",
-    os.getenv("AUDIO_TTS_OPENAI_API_BASE_URL", OPENAI_API_BASE_URL),
-)
+    # Task Settings
+    TASK_MODEL: str = ""
+    TASK_MODEL_EXTERNAL: str = ""
+    TITLE_GENERATION_PROMPT_TEMPLATE: str = ""
+    TAGS_GENERATION_PROMPT_TEMPLATE: str = ""
+    ENABLE_TAGS_GENERATION: bool = True
+    ENABLE_SEARCH_QUERY_GENERATION: bool = True
+    ENABLE_RETRIEVAL_QUERY_GENERATION: bool = True
+    QUERY_GENERATION_PROMPT_TEMPLATE: str = ""
+    ENABLE_AUTOCOMPLETE_GENERATION: bool = True
+    AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH: int = -1
+    AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE: str = ""
+    TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE: str = ""
 
-AUDIO_TTS_OPENAI_API_KEY = PersistentConfig(
-    "AUDIO_TTS_OPENAI_API_KEY",
-    os.getenv("AUDIO_TTS_OPENAI_API_KEY", OPENAI_API_KEY),
-)
+    # RAG Settings
+    ENABLE_GOOGLE_DRIVE_INTEGRATION: bool = False
+    GOOGLE_DRIVE_CLIENT_ID: str = ""
+    GOOGLE_DRIVE_API_KEY: str = ""
+    CONTENT_EXTRACTION_ENGINE: str = ""  # RAG Content Extraction
+    TIKA_SERVER_URL: str = "http://tika:9998"  # Default for sidecar deployment
+    RAG_TOP_K: int = 3
+    RAG_RELEVANCE_THRESHOLD: float = 0.0
+    ENABLE_RAG_HYBRID_SEARCH: bool = False
+    RAG_FILE_MAX_COUNT: Optional[int] = None
+    RAG_FILE_MAX_SIZE: Optional[int] = None
+    ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION: bool = True
+    RAG_EMBEDDING_ENGINE: str = ""
+    PDF_EXTRACT_IMAGES: bool = False
+    RAG_EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE: bool = True
+    RAG_EMBEDDING_BATCH_SIZE: int = 1
+    RAG_RERANKING_MODEL: str = ""
+    RAG_RERANKING_MODEL_TRUST_REMOTE_CODE: bool = True
+    RAG_TEXT_SPLITTER: str = ""
+    TIKTOKEN_ENCODING_NAME: str = "cl100k_base"
+    CHUNK_SIZE: int = 1000
+    CHUNK_OVERLAP: int = 100
+    RAG_TEMPLATE: str = DEFAULT_RAG_TEMPLATE
+    RAG_OPENAI_API_BASE_URL: str = OPENAI_API_BASE_URL
+    RAG_OPENAI_API_KEY: str = OPENAI_API_KEY
+    RAG_OLLAMA_BASE_URL: str = OLLAMA_BASE_URL
+    RAG_OLLAMA_API_KEY: str = ""
+    ENABLE_RAG_LOCAL_WEB_FETCH: bool = False
+    YOUTUBE_LOADER_LANGUAGE: List[str] = ["en"]
+    YOUTUBE_LOADER_PROXY_URL: str = ""
+    ENABLE_RAG_WEB_SEARCH: bool = False
+    RAG_WEB_SEARCH_ENGINE: str = ""
+    # You can provide a list of your own websites to filter after performing a web search.
+    # This ensures the highest level of safety and reliability of the information sources.
+    # Example: ["wikipedia.com", "wikimedia.org", "wikidata.org"]
+    RAG_WEB_SEARCH_DOMAIN_FILTER_LIST: List[str] = []
+    RAG_WEB_SEARCH_RESULT_COUNT: int = 3
+    RAG_WEB_SEARCH_CONCURRENT_REQUESTS: int = 10
+    SEARXNG_QUERY_URL: str = ""
+    GOOGLE_PSE_API_KEY: str = ""
+    GOOGLE_PSE_ENGINE_ID: str = ""
+    BRAVE_SEARCH_API_KEY: str = ""
+    KAGI_SEARCH_API_KEY: str = ""
+    MOJEEK_SEARCH_API_KEY: str = ""
+    SERPSTACK_API_KEY: str = ""
+    SERPSTACK_HTTPS: bool = True
+    SERPER_API_KEY: str = ""
+    SERPLY_API_KEY: str = ""
+    TAVILY_API_KEY: str = ""
+    JINA_API_KEY: str = ""
+    SEARCHAPI_API_KEY: str = ""
+    SEARCHAPI_ENGINE: str = ""
+    BING_SEARCH_V7_ENDPOINT: str = "https://api.bing.microsoft.com/v7.0/search"
+    BING_SEARCH_V7_SUBSCRIPTION_KEY: str = ""
 
-AUDIO_TTS_API_KEY = PersistentConfig(
-    "AUDIO_TTS_API_KEY",
-    os.getenv("AUDIO_TTS_API_KEY", ""),
-)
+    # Image Settings
+    IMAGE_GENERATION_ENGINE: str = "openai"
+    ENABLE_IMAGE_GENERATION: bool = False
+    AUTOMATIC1111_BASE_URL: str = ""
+    AUTOMATIC1111_API_AUTH: str = ""
+    AUTOMATIC1111_CFG_SCALE: Optional[float] = None
+    AUTOMATIC1111_SAMPLER: Optional[str] = None
+    AUTOMATIC1111_SCHEDULER: Optional[str] = None
+    COMFYUI_BASE_URL: str = ""
+    COMFYUI_API_KEY: str = ""
+    COMFYUI_WORKFLOW: str = COMFYUI_DEFAULT_WORKFLOW
+    COMFYUI_WORKFLOW_NODES: List[str] = []
+    IMAGES_OPENAI_API_BASE_URL: str = OPENAI_API_BASE_URL
+    IMAGES_OPENAI_API_KEY: str = OPENAI_API_KEY
+    IMAGE_SIZE: str = "512x512"
+    IMAGE_STEPS: int = 50
+    IMAGE_GENERATION_MODEL: str = ""
 
-AUDIO_TTS_ENGINE = PersistentConfig(
-    "AUDIO_TTS_ENGINE",
-    os.getenv("AUDIO_TTS_ENGINE", ""),
-)
+    # Audio Settings
+    WHISPER_MODEL: str = "base"
+    AUDIO_STT_OPENAI_API_BASE_URL: str = OPENAI_API_BASE_URL
+    AUDIO_STT_OPENAI_API_KEY: str = OPENAI_API_KEY
+    AUDIO_STT_ENGINE: str = ""
+    AUDIO_STT_MODEL: str = ""
+    AUDIO_TTS_OPENAI_API_BASE_URL: str = OPENAI_API_BASE_URL
+    AUDIO_TTS_OPENAI_API_KEY: str = OPENAI_API_KEY
+    AUDIO_TTS_API_KEY: str = ""
+    AUDIO_TTS_ENGINE: str = ""
+    AUDIO_TTS_MODEL: str = "tts-1"
+    AUDIO_TTS_VOICE: str = "alloy"
+    AUDIO_TTS_SPLIT_ON: str = "punctuation"
+    AUDIO_TTS_AZURE_SPEECH_REGION: str = "eastus"
+    AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT: str = "audio-24khz-160kbitrate-mono-mp3"
 
-AUDIO_TTS_MODEL = PersistentConfig(
-    "AUDIO_TTS_MODEL",
-    os.getenv("AUDIO_TTS_MODEL", "tts-1"),
-)
-
-AUDIO_TTS_VOICE = PersistentConfig(
-    "AUDIO_TTS_VOICE",
-    os.getenv("AUDIO_TTS_VOICE", "alloy"),
-)
-
-AUDIO_TTS_SPLIT_ON = PersistentConfig(
-    "AUDIO_TTS_SPLIT_ON",
-    os.getenv("AUDIO_TTS_SPLIT_ON", "punctuation"),
-)
-
-AUDIO_TTS_AZURE_SPEECH_REGION = PersistentConfig(
-    "AUDIO_TTS_AZURE_SPEECH_REGION",
-    os.getenv("AUDIO_TTS_AZURE_SPEECH_REGION", "eastus"),
-)
-
-AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT = PersistentConfig(
-    "AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT",
-    os.getenv(
-        "AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT", "audio-24khz-160kbitrate-mono-mp3"
-    ),
-)
+    # LDAP Settings
+    ENABLE_LDAP: bool = False
+    LDAP_SERVER_LABEL: str = "LDAP Server"
+    LDAP_SERVER_HOST: str = "localhost"
+    LDAP_SERVER_PORT: int = 389
+    LDAP_ATTRIBUTE_FOR_USERNAME: str = "uid"
+    LDAP_APP_DN: str = ""
+    LDAP_APP_PASSWORD: str = ""
+    LDAP_SEARCH_BASE: str = ""
+    LDAP_SEARCH_FILTERS: str = ""
+    LDAP_USE_TLS: bool = True
+    LDAP_CA_CERT_FILE: str = ""
+    LDAP_CIPHERS: str = "ALL"
 
 
-####################################
-# LDAP
-####################################
+# Initialize PersistentConfig settings
+settings = PersistentConfigSettings()
 
-ENABLE_LDAP = PersistentConfig(
-    "ENABLE_LDAP",
-    os.environ.get("ENABLE_LDAP", "false").lower() == "true",
-)
+# Create PersistentConfig instances from settings
+for field_name, field_value in settings.model_dump().items():
+    # TODO: add these PersistentConfigs to an AppConfig instance?
+    if field_name not in globals():
+        globals()[field_name] = PersistentConfig(field_name, field_value)
 
-LDAP_SERVER_LABEL = PersistentConfig(
-    "LDAP_SERVER_LABEL",
-    os.environ.get("LDAP_SERVER_LABEL", "LDAP Server"),
-)
 
-LDAP_SERVER_HOST = PersistentConfig(
-    "LDAP_SERVER_HOST",
-    os.environ.get("LDAP_SERVER_HOST", "localhost"),
-)
+def load_oauth_providers():
+    OAUTH_PROVIDERS.clear()
+    if settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET:
+        OAUTH_PROVIDERS["google"] = {
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "server_metadata_url": "https://accounts.google.com/.well-known/openid-configuration",
+            "scope": settings.GOOGLE_OAUTH_SCOPE,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        }
 
-LDAP_SERVER_PORT = PersistentConfig(
-    "LDAP_SERVER_PORT",
-    int(os.environ.get("LDAP_SERVER_PORT", "389")),
-)
+    if (
+        settings.MICROSOFT_CLIENT_ID
+        and settings.MICROSOFT_CLIENT_SECRET
+        and settings.MICROSOFT_CLIENT_TENANT_ID
+    ):
+        OAUTH_PROVIDERS["microsoft"] = {
+            "client_id": settings.MICROSOFT_CLIENT_ID,
+            "client_secret": settings.MICROSOFT_CLIENT_SECRET,
+            "server_metadata_url": f"https://login.microsoftonline.com/{settings.MICROSOFT_CLIENT_TENANT_ID}/v2.0/.well-known/openid-configuration",
+            "scope": settings.MICROSOFT_OAUTH_SCOPE,
+            "redirect_uri": settings.MICROSOFT_REDIRECT_URI,
+        }
 
-LDAP_ATTRIBUTE_FOR_USERNAME = PersistentConfig(
-    "LDAP_ATTRIBUTE_FOR_USERNAME",
-    os.environ.get("LDAP_ATTRIBUTE_FOR_USERNAME", "uid"),
-)
+    if (
+        settings.OAUTH_CLIENT_ID
+        and settings.OAUTH_CLIENT_SECRET
+        and settings.OPENID_PROVIDER_URL
+    ):
+        OAUTH_PROVIDERS["oidc"] = {
+            "client_id": settings.OAUTH_CLIENT_ID,
+            "client_secret": settings.OAUTH_CLIENT_SECRET,
+            "server_metadata_url": settings.OPENID_PROVIDER_URL,
+            "scope": settings.OAUTH_SCOPES,
+            "name": settings.OAUTH_PROVIDER_NAME,
+            "redirect_uri": settings.OPENID_REDIRECT_URI,
+        }
 
-LDAP_APP_DN = PersistentConfig("LDAP_APP_DN", os.environ.get("LDAP_APP_DN", ""))
+        # TODO: does this work out of the box for google and microsoft, too?
+        if settings.OAUTH_USE_PKCE:
+            OAUTH_PROVIDERS["oidc"]["pkce"] = settings.OAUTH_USE_PKCE
 
-LDAP_APP_PASSWORD = PersistentConfig(
-    "LDAP_APP_PASSWORD",
-    os.environ.get("LDAP_APP_PASSWORD", ""),
-)
 
-LDAP_SEARCH_BASE = PersistentConfig(
-    "LDAP_SEARCH_BASE", os.environ.get("LDAP_SEARCH_BASE", "")
-)
-
-LDAP_SEARCH_FILTERS = PersistentConfig(
-    "LDAP_SEARCH_FILTER",
-    os.environ.get("LDAP_SEARCH_FILTER", ""),
-)
-
-LDAP_USE_TLS = PersistentConfig(
-    "LDAP_USE_TLS",
-    os.environ.get("LDAP_USE_TLS", "True").lower() == "true",
-)
-
-LDAP_CA_CERT_FILE = PersistentConfig(
-    "LDAP_CA_CERT_FILE",
-    os.environ.get("LDAP_CA_CERT_FILE", ""),
-)
-
-LDAP_CIPHERS = PersistentConfig("LDAP_CIPHERS", os.environ.get("LDAP_CIPHERS", "ALL"))
+load_oauth_providers()
