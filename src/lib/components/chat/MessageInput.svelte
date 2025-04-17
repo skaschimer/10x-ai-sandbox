@@ -24,7 +24,14 @@
 	import { uploadFile } from '$lib/apis/files';
 	import { getTools } from '$lib/apis/tools';
 
-	import { WEBUI_BASE_URL, WEBUI_API_BASE_URL, PASTED_TEXT_CHARACTER_LIMIT } from '$lib/constants';
+	import {
+		WEBUI_BASE_URL,
+		WEBUI_API_BASE_URL,
+		PASTED_TEXT_CHARACTER_LIMIT,
+		UPLOAD_ALLOWED_FILE_TYPES,
+		UPLOAD_ALLOWED_FILE_EXTENSIONS,
+		FILE_TYPLE_ERROR
+	} from '$lib/constants';
 
 	import Tooltip from '../common/Tooltip.svelte';
 	import InputMenu from './MessageInput/InputMenu.svelte';
@@ -221,6 +228,14 @@
 				size: file.size,
 				extension: file.name.split('.').at(-1)
 			});
+			const fileExtension = file.name.split('.').at(-1)?.toLowerCase();
+			if (
+				!UPLOAD_ALLOWED_FILE_TYPES.includes(file.type) ||
+				!UPLOAD_ALLOWED_FILE_EXTENSIONS.includes(fileExtension)
+			) {
+				toast.error(FILE_TYPLE_ERROR);
+				return;
+			}
 
 			if (
 				($config?.file?.max_size ?? null) !== null &&
@@ -493,6 +508,7 @@
 						bind:this={filesInputElement}
 						bind:files={inputFiles}
 						type="file"
+						accept=".pdf,.doc,.docx,.txt,.rft,.png,.jpg,.jpeg"
 						hidden
 						multiple
 						on:change={async () => {
