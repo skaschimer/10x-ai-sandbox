@@ -102,9 +102,9 @@ T = TypeVar("T")
 class PersistentConfig(Generic[T]):
     def __init__(self, config_name: str, value: T):
         self.name = config_name
-        if not r.hexists(hash_name, config_name):
-            log.info(f"'{config_name}' is not in Redis, persisting value")
-            r.hset(hash_name, config_name, json.dumps(value))
+        result = r.hsetnx(hash_name, config_name, json.dumps(value))
+        if result == 1:
+            log.info(f"'{config_name}' was not in Redis, persisted it")
 
     def __str__(self):
         return str(self.value)
