@@ -64,6 +64,10 @@ def query_doc(
     k: int,
 ):
     try:
+        log.info(
+            "query_doc for collection: "
+            + f"{collection_name} and query {query_embedding} with k {k}"
+        )
         result = VECTOR_DB_CLIENT.search(
             collection_name=collection_name,
             vectors=[query_embedding],
@@ -71,11 +75,13 @@ def query_doc(
         )
 
         if result:
-            log.info(f"query_doc:result {result.ids} {result.metadatas}")
+            log.info(f"query_doc result {result.ids} {result.metadatas}")
+        else:
+            log.error(f"query_doc result None for collection {collection_name}")
 
         return result
     except Exception as e:
-        print(e)
+        log.error(f"Error in query_doc: {e}")
         raise e
 
 
@@ -88,7 +94,18 @@ def query_doc_with_hybrid_search(
     r: float,
 ) -> dict:
     try:
+        log.info(
+            "query_doc_with_hybrid_search for collection: "
+            + f"{collection_name} and query {query} with k {k}"
+        )
         result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
+        if result is None:
+            log.error(
+                f"Error in query_doc_with_hybrid_search collection {collection_name} does not exist in the vector database."  # noqa: E501
+            )
+            raise Exception(
+                f"Collection {collection_name} does not exist in the vector database."
+            )
 
         bm25_retriever = BM25Retriever.from_texts(
             texts=result.documents[0],
@@ -124,11 +141,12 @@ def query_doc_with_hybrid_search(
         }
 
         log.info(
-            "query_doc_with_hybrid_search:result "
+            "query_doc_with_hybrid_search result "
             + f'{result["metadatas"]} {result["distances"]}'
         )
         return result
     except Exception as e:
+        log.error(f"Error in query_doc_with_hybrid_search: {e}")
         raise e
 
 
