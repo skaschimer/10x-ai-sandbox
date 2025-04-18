@@ -43,7 +43,7 @@
 	import {
 		UPLOAD_ALLOWED_FILE_TYPES,
 		UPLOAD_ALLOWED_FILE_EXTENSIONS,
-		FILE_TYPLE_ERROR
+		FILE_TYPE_ERROR
 	} from '$lib/constants';
 
 	let largeScreen = true;
@@ -122,7 +122,7 @@
 			!UPLOAD_ALLOWED_FILE_TYPES.includes(file.type) ||
 			!UPLOAD_ALLOWED_FILE_EXTENSIONS.includes(fileExtension)
 		) {
-			toast.error(FILE_TYPLE_ERROR);
+			toast.error(FILE_TYPE_ERROR);
 			return;
 		}
 		const tempItemId = uuidv4();
@@ -161,7 +161,8 @@
 
 		try {
 			const uploadedFile = await uploadFile(file).catch((e) => {
-				toast.error(e);
+				knowledge.files = knowledge.files.filter((item) => item.itemId != tempItemId);
+				toast.error(e.message || e.detail || 'Failed to upload file');
 				return null;
 			});
 
@@ -177,11 +178,10 @@
 					return item;
 				});
 				await addFileHandler(uploadedFile.id);
-			} else {
-				toast.error($i18n.t('Failed to upload file.'));
 			}
 		} catch (e) {
-			toast.error(e);
+			knowledge.files = knowledge.files.filter((item) => item.itemId != tempItemId);
+			toast.error(e.message || e.detail || 'Failed to upload file');
 		}
 	};
 

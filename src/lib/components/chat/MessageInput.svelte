@@ -30,7 +30,7 @@
 		PASTED_TEXT_CHARACTER_LIMIT,
 		UPLOAD_ALLOWED_FILE_TYPES,
 		UPLOAD_ALLOWED_FILE_EXTENSIONS,
-		FILE_TYPLE_ERROR
+		FILE_TYPE_ERROR
 	} from '$lib/constants';
 
 	import Tooltip from '../common/Tooltip.svelte';
@@ -196,7 +196,6 @@
 					name: fileItem.name,
 					collection: uploadedFile?.meta?.collection_name
 				});
-
 				if (uploadedFile.error) {
 					console.warn('File upload warning:', uploadedFile.error);
 					toast.warning(uploadedFile.error);
@@ -210,12 +209,10 @@
 				fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
 
 				files = files;
-			} else {
-				files = files.filter((item) => item?.itemId !== tempItemId);
 			}
 		} catch (e) {
-			toast.error(e);
 			files = files.filter((item) => item?.itemId !== tempItemId);
+			toast.error(e.message || e.detail || 'Failed to upload file');
 		}
 	};
 
@@ -228,12 +225,13 @@
 				size: file.size,
 				extension: file.name.split('.').at(-1)
 			});
+
 			const fileExtension = file.name.split('.').at(-1)?.toLowerCase();
 			if (
 				!UPLOAD_ALLOWED_FILE_TYPES.includes(file.type) ||
 				!UPLOAD_ALLOWED_FILE_EXTENSIONS.includes(fileExtension)
 			) {
-				toast.error(FILE_TYPLE_ERROR);
+				toast.error(FILE_TYPE_ERROR);
 				return;
 			}
 

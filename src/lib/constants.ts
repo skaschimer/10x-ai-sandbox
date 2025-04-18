@@ -120,7 +120,7 @@ export const UPLOAD_ALLOWED_FILE_EXTENSIONS = [
 	'jpeg'
 ];
 
-export const FILE_TYPLE_ERROR = 'Only PDF, DOC, DOCX, TXT, RTF, PNG and JPG file are allowed.';
+export const FILE_TYPE_ERROR = 'Only PDF, DOC, DOCX, TXT, RTF, PNG and JPG file are allowed.';
 
 // Source: https://kit.svelte.dev/docs/modules#$env-static-public
 // This feature, akin to $env/static/private, exclusively incorporates environment variables
