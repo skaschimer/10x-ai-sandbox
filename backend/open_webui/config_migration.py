@@ -14,6 +14,7 @@ path_name_mapping = {
     "auth.api_key.endpoint_restrictions": "ENABLE_API_KEY_ENDPOINT_RESTRICTIONS",
     "auth.api_key.allowed_endpoints": "API_KEY_ALLOWED_ENDPOINTS",
     "auth.jwt_expiry": "JWT_EXPIRES_IN",
+    "auth.jwt_refresh_expiry": "JWT_REFRESH_EXPIRES_IN",
     "oauth.enable_signup": "ENABLE_OAUTH_SIGNUP",
     "oauth.merge_accounts_by_email": "OAUTH_MERGE_ACCOUNTS_BY_EMAIL",
     "oauth.google.client_id": "GOOGLE_CLIENT_ID",
