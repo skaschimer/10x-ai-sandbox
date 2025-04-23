@@ -259,7 +259,7 @@ app.state.config.DEFAULT_USER_ROLE = config.DEFAULT_USER_ROLE
 
 app.state.config.USER_PERMISSIONS = config.USER_PERMISSIONS
 app.state.config.WEBHOOK_URL = config.WEBHOOK_URL
-app.state.config.BANNERS = config.WEBUI_BANNERS
+app.state.config.WEBUI_BANNERS = config.WEBUI_BANNERS
 app.state.config.MODEL_ORDER_LIST = config.MODEL_ORDER_LIST
 
 
@@ -307,10 +307,10 @@ app.state.FUNCTIONS = {}
 ########################################
 
 
-app.state.config.TOP_K = config.RAG_TOP_K
-app.state.config.RELEVANCE_THRESHOLD = config.RAG_RELEVANCE_THRESHOLD
-app.state.config.FILE_MAX_SIZE = config.RAG_FILE_MAX_SIZE
-app.state.config.FILE_MAX_COUNT = config.RAG_FILE_MAX_COUNT
+app.state.config.RAG_TOP_K = config.RAG_TOP_K
+app.state.config.RAG_RELEVANCE_THRESHOLD = config.RAG_RELEVANCE_THRESHOLD
+app.state.config.RAG_FILE_MAX_SIZE = config.RAG_FILE_MAX_SIZE
+app.state.config.RAG_FILE_MAX_COUNT = config.RAG_FILE_MAX_COUNT
 
 app.state.config.ENABLE_RAG_HYBRID_SEARCH = config.ENABLE_RAG_HYBRID_SEARCH
 app.state.config.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
@@ -452,26 +452,24 @@ app.state.config.IMAGE_STEPS = config.IMAGE_STEPS
 #
 ########################################
 
-app.state.config.STT_OPENAI_API_BASE_URL = config.AUDIO_STT_OPENAI_API_BASE_URL
-app.state.config.STT_OPENAI_API_KEY = config.AUDIO_STT_OPENAI_API_KEY
-app.state.config.STT_ENGINE = config.AUDIO_STT_ENGINE
-app.state.config.STT_MODEL = config.AUDIO_STT_MODEL
+app.state.config.STT_OPENAI_API_BASE_URL = config.STT_OPENAI_API_BASE_URL
+app.state.config.STT_OPENAI_API_KEY = config.STT_OPENAI_API_KEY
+app.state.config.STT_ENGINE = config.STT_ENGINE
+app.state.config.STT_MODEL = config.STT_MODEL
 
 app.state.config.WHISPER_MODEL = config.WHISPER_MODEL
 
-app.state.config.TTS_OPENAI_API_BASE_URL = config.AUDIO_TTS_OPENAI_API_BASE_URL
-app.state.config.TTS_OPENAI_API_KEY = config.AUDIO_TTS_OPENAI_API_KEY
-app.state.config.TTS_ENGINE = config.AUDIO_TTS_ENGINE
-app.state.config.TTS_MODEL = config.AUDIO_TTS_MODEL
-app.state.config.TTS_VOICE = config.AUDIO_TTS_VOICE
-app.state.config.TTS_API_KEY = config.AUDIO_TTS_API_KEY
-app.state.config.TTS_SPLIT_ON = config.AUDIO_TTS_SPLIT_ON
+app.state.config.TTS_OPENAI_API_BASE_URL = config.TTS_OPENAI_API_BASE_URL
+app.state.config.TTS_OPENAI_API_KEY = config.TTS_OPENAI_API_KEY
+app.state.config.TTS_ENGINE = config.TTS_ENGINE
+app.state.config.TTS_MODEL = config.TTS_MODEL
+app.state.config.TTS_VOICE = config.TTS_VOICE
+app.state.config.TTS_API_KEY = config.TTS_API_KEY
+app.state.config.TTS_SPLIT_ON = config.TTS_SPLIT_ON
 
 
-app.state.config.TTS_AZURE_SPEECH_REGION = config.AUDIO_TTS_AZURE_SPEECH_REGION
-app.state.config.TTS_AZURE_SPEECH_OUTPUT_FORMAT = (
-    config.AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT
-)
+app.state.config.TTS_AZURE_SPEECH_REGION = config.TTS_AZURE_SPEECH_REGION
+app.state.config.TTS_AZURE_SPEECH_OUTPUT_FORMAT = config.TTS_AZURE_SPEECH_OUTPUT_FORMAT
 
 
 app.state.faster_whisper_model = None
@@ -912,8 +910,8 @@ async def get_app_config(request: Request, response: Response):
                     },
                 },
                 "file": {
-                    "max_size": app.state.config.FILE_MAX_SIZE,
-                    "max_count": app.state.config.FILE_MAX_COUNT,
+                    "max_size": app.state.config.RAG_FILE_MAX_SIZE,
+                    "max_count": app.state.config.RAG_FILE_MAX_COUNT,
                 },
                 "permissions": {**app.state.config.USER_PERMISSIONS},
             }

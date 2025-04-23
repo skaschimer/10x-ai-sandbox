@@ -354,8 +354,8 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
             "chunk_overlap": request.app.state.config.CHUNK_OVERLAP,
         },
         "file": {
-            "max_size": request.app.state.config.FILE_MAX_SIZE,
-            "max_count": request.app.state.config.FILE_MAX_COUNT,
+            "max_size": request.app.state.config.RAG_FILE_MAX_SIZE,
+            "max_count": request.app.state.config.RAG_FILE_MAX_COUNT,
         },
         "youtube": {
             "language": request.app.state.config.YOUTUBE_LOADER_LANGUAGE,
@@ -468,8 +468,8 @@ async def update_rag_config(
     )
 
     if form_data.file is not None:
-        request.app.state.config.FILE_MAX_SIZE = form_data.file.max_size
-        request.app.state.config.FILE_MAX_COUNT = form_data.file.max_count
+        request.app.state.config.RAG_FILE_MAX_SIZE = form_data.file.max_size
+        request.app.state.config.RAG_FILE_MAX_COUNT = form_data.file.max_count
 
     if form_data.content_extraction is not None:
         log.info(f"Updating text settings: {form_data.content_extraction}")
@@ -549,8 +549,8 @@ async def update_rag_config(
         "status": True,
         "pdf_extract_images": request.app.state.config.PDF_EXTRACT_IMAGES,
         "file": {
-            "max_size": request.app.state.config.FILE_MAX_SIZE,
-            "max_count": request.app.state.config.FILE_MAX_COUNT,
+            "max_size": request.app.state.config.RAG_FILE_MAX_SIZE,
+            "max_count": request.app.state.config.RAG_FILE_MAX_COUNT,
         },
         "content_extraction": {
             "engine": request.app.state.config.CONTENT_EXTRACTION_ENGINE,
@@ -607,8 +607,8 @@ async def get_query_settings(request: Request, user=Depends(get_admin_user)):
     return {
         "status": True,
         "template": request.app.state.config.RAG_TEMPLATE,
-        "k": request.app.state.config.TOP_K,
-        "r": request.app.state.config.RELEVANCE_THRESHOLD,
+        "k": request.app.state.config.RAG_TOP_K,
+        "r": request.app.state.config.RAG_RELEVANCE_THRESHOLD,
         "hybrid": request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
     }
 
@@ -625,8 +625,10 @@ async def update_query_settings(
     request: Request, form_data: QuerySettingsForm, user=Depends(get_admin_user)
 ):
     request.app.state.config.RAG_TEMPLATE = form_data.template
-    request.app.state.config.TOP_K = form_data.k if form_data.k else 4
-    request.app.state.config.RELEVANCE_THRESHOLD = form_data.r if form_data.r else 0.0
+    request.app.state.config.RAG_TOP_K = form_data.k if form_data.k else 4
+    request.app.state.config.RAG_RELEVANCE_THRESHOLD = (
+        form_data.r if form_data.r else 0.0
+    )
 
     request.app.state.config.ENABLE_RAG_HYBRID_SEARCH = (
         form_data.hybrid if form_data.hybrid else False
@@ -635,8 +637,8 @@ async def update_query_settings(
     return {
         "status": True,
         "template": request.app.state.config.RAG_TEMPLATE,
-        "k": request.app.state.config.TOP_K,
-        "r": request.app.state.config.RELEVANCE_THRESHOLD,
+        "k": request.app.state.config.RAG_TOP_K,
+        "r": request.app.state.config.RAG_RELEVANCE_THRESHOLD,
         "hybrid": request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
     }
 
@@ -1303,19 +1305,19 @@ def query_doc_handler(
                 collection_name=form_data.collection_name,
                 query=form_data.query,
                 embedding_function=request.app.state.EMBEDDING_FUNCTION,
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
+                k=form_data.k if form_data.k else request.app.state.config.RAG_TOP_K,
                 reranking_function=request.app.state.rf,
                 r=(
                     form_data.r
                     if form_data.r
-                    else request.app.state.config.RELEVANCE_THRESHOLD
+                    else request.app.state.config.RAG_RELEVANCE_THRESHOLD
                 ),
             )
         else:
             return query_doc(
                 collection_name=form_data.collection_name,
                 query_embedding=request.app.state.EMBEDDING_FUNCTION(form_data.query),
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
+                k=form_data.k if form_data.k else request.app.state.config.RAG_TOP_K,
             )
     except Exception as e:
         log.exception(e)
@@ -1345,12 +1347,12 @@ def query_collection_handler(
                 collection_names=form_data.collection_names,
                 queries=[form_data.query],
                 embedding_function=request.app.state.EMBEDDING_FUNCTION,
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
+                k=form_data.k if form_data.k else request.app.state.config.RAG_TOP_K,
                 reranking_function=request.app.state.rf,
                 r=(
                     form_data.r
                     if form_data.r
-                    else request.app.state.config.RELEVANCE_THRESHOLD
+                    else request.app.state.config.RAG_RELEVANCE_THRESHOLD
                 ),
             )
         else:
@@ -1358,7 +1360,7 @@ def query_collection_handler(
                 collection_names=form_data.collection_names,
                 queries=[form_data.query],
                 embedding_function=request.app.state.EMBEDDING_FUNCTION,
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
+                k=form_data.k if form_data.k else request.app.state.config.RAG_TOP_K,
             )
 
     except Exception as e:

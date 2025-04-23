@@ -146,19 +146,19 @@ path_name_mapping = {
     "image_generation.steps": "IMAGE_STEPS",
     "image_generation.model": "IMAGE_GENERATION_MODEL",
     "audio.stt.whisper_model": "WHISPER_MODEL",
-    "audio.stt.openai.api_base_url": "AUDIO_STT_OPENAI_API_BASE_URL",
-    "audio.stt.openai.api_key": "AUDIO_STT_OPENAI_API_KEY",  # pragma: allowlist secret
-    "audio.stt.engine": "AUDIO_STT_ENGINE",
-    "audio.stt.model": "AUDIO_STT_MODEL",
-    "audio.tts.openai.api_base_url": "AUDIO_TTS_OPENAI_API_BASE_URL",
-    "audio.tts.openai.api_key": "AUDIO_TTS_OPENAI_API_KEY",  # pragma: allowlist secret
-    "audio.tts.api_key": "AUDIO_TTS_API_KEY",  # pragma: allowlist secret
-    "audio.tts.engine": "AUDIO_TTS_ENGINE",
-    "audio.tts.model": "AUDIO_TTS_MODEL",
-    "audio.tts.voice": "AUDIO_TTS_VOICE",
-    "audio.tts.split_on": "AUDIO_TTS_SPLIT_ON",
-    "audio.tts.azure.speech_region": "AUDIO_TTS_AZURE_SPEECH_REGION",
-    "audio.tts.azure.speech_output_format": "AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT",
+    "audio.stt.openai.api_base_url": "STT_OPENAI_API_BASE_URL",
+    "audio.stt.openai.api_key": "STT_OPENAI_API_KEY",  # pragma: allowlist secret
+    "audio.stt.engine": "STT_ENGINE",
+    "audio.stt.model": "STT_MODEL",
+    "audio.tts.openai.api_base_url": "TTS_OPENAI_API_BASE_URL",
+    "audio.tts.openai.api_key": "TTS_OPENAI_API_KEY",  # pragma: allowlist secret
+    "audio.tts.api_key": "TTS_API_KEY",  # pragma: allowlist secret
+    "audio.tts.engine": "TTS_ENGINE",
+    "audio.tts.model": "TTS_MODEL",
+    "audio.tts.voice": "TTS_VOICE",
+    "audio.tts.split_on": "TTS_SPLIT_ON",
+    "audio.tts.azure.speech_region": "TTS_AZURE_SPEECH_REGION",
+    "audio.tts.azure.speech_output_format": "TTS_AZURE_SPEECH_OUTPUT_FORMAT",
     "ldap.enable": "ENABLE_LDAP",
     "ldap.server.label": "LDAP_SERVER_LABEL",
     "ldap.server.host": "LDAP_SERVER_HOST",

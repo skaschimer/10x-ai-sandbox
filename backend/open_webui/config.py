@@ -65,6 +65,10 @@ r = redis.from_url(CONFIGURATION_REDIS_URL)
 hash_name = "config"
 
 
+# TODO: Remove config migration once the config refactor is fully deployed
+migrate_db_config(r, hash_name)
+
+
 def load_json_config():
     with open(f"{DATA_DIR}/config.json", "r") as file:
         return json.load(file)
@@ -90,9 +94,6 @@ def get_config():
 def save_config(config):
     for key, value in config.items():
         r.hset(hash_name, key, json.dumps(value))
-
-
-migrate_db_config(r, hash_name)
 
 
 T = TypeVar("T")
@@ -428,10 +429,10 @@ class OpenAIConfig(Config):
     RAG_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
     IMAGES_OPENAI_API_BASE_URL: str = Config.persistent(OPENAI_API_BASE_URL)
     IMAGES_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
-    AUDIO_STT_OPENAI_API_BASE_URL: str = Config.persistent(OPENAI_API_BASE_URL)
-    AUDIO_STT_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
-    AUDIO_TTS_OPENAI_API_BASE_URL: str = Config.persistent(OPENAI_API_BASE_URL)
-    AUDIO_TTS_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
+    STT_OPENAI_API_BASE_URL: str = Config.persistent(OPENAI_API_BASE_URL)
+    STT_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
+    TTS_OPENAI_API_BASE_URL: str = Config.persistent(OPENAI_API_BASE_URL)
+    TTS_OPENAI_API_KEY: str = Config.persistent(OPENAI_API_KEY)
 
     def model_post_init(self, __context: Any) -> None:
         if self.OPENAI_API_KEY:
@@ -802,15 +803,15 @@ class AudioConfig(Config):
     WHISPER_MODEL: str = Config.persistent("base")
     WHISPER_MODEL_DIR: str = f"{CACHE_DIR}/whisper/models"
     WHISPER_MODEL_AUTO_UPDATE: bool = False
-    AUDIO_STT_ENGINE: str = Config.persistent("")
-    AUDIO_STT_MODEL: str = Config.persistent("")
-    AUDIO_TTS_API_KEY: str = Config.persistent("")
-    AUDIO_TTS_ENGINE: str = Config.persistent("")
-    AUDIO_TTS_MODEL: str = Config.persistent("tts-1")  # OpenAI default model
-    AUDIO_TTS_VOICE: str = Config.persistent("alloy")  # OpenAI default voice
-    AUDIO_TTS_SPLIT_ON: str = Config.persistent("punctuation")
-    AUDIO_TTS_AZURE_SPEECH_REGION: str = Config.persistent("eastus")
-    AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT: str = Config.persistent(
+    STT_ENGINE: str = Config.persistent("")
+    STT_MODEL: str = Config.persistent("")
+    TTS_API_KEY: str = Config.persistent("")
+    TTS_ENGINE: str = Config.persistent("")
+    TTS_MODEL: str = Config.persistent("tts-1")  # OpenAI default model
+    TTS_VOICE: str = Config.persistent("alloy")  # OpenAI default voice
+    TTS_SPLIT_ON: str = Config.persistent("punctuation")
+    TTS_AZURE_SPEECH_REGION: str = Config.persistent("eastus")
+    TTS_AZURE_SPEECH_OUTPUT_FORMAT: str = Config.persistent(
         "audio-24khz-160kbitrate-mono-mp3"
     )
 

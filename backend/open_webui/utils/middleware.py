@@ -526,9 +526,9 @@ async def chat_completion_files_handler(
             files=files,
             queries=queries,
             embedding_function=request.app.state.EMBEDDING_FUNCTION,
-            k=request.app.state.config.TOP_K,
+            k=request.app.state.config.RAG_TOP_K,
             reranking_function=request.app.state.rf,
-            r=request.app.state.config.RELEVANCE_THRESHOLD,
+            r=request.app.state.config.RAG_RELEVANCE_THRESHOLD,
             hybrid_search=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
         )
 
@@ -699,7 +699,7 @@ async def process_chat_payload(request, form_data, metadata, user, model):
         if prompt is None:
             raise Exception("No user message found")
         if (
-            request.app.state.config.RELEVANCE_THRESHOLD == 0
+            request.app.state.config.RAG_RELEVANCE_THRESHOLD == 0
             and context_string.strip() == ""
         ):
             log.debug(
