@@ -153,6 +153,15 @@ class AppConfig:
 
 
 class Config(BaseSettings):
+    """
+    Base class for all configuration items. This extends Pydantic's
+    BaseSettings to hook in some persistence features. When creating a
+    configuration class derived from this one, you can use the `persistent()`
+    static method to mark a field as persistent. This is the equivalent of
+    Field(default=..., persistent=True) in Pydantic, but it also ensures that
+    the correct extra attribute named "persistent" is used.
+    """
+
     @staticmethod
     def persistent(default: Any = None, **kwargs):
         """Convenience method that wraps Pydantic's Field to add a persistent attribute"""
@@ -352,7 +361,7 @@ if CUSTOM_NAME:
 
 
 class StorageProviderConfig(Config):
-    STORAGE_PROVIDER: str = Config.persistent("")  # local (default, s3)
+    STORAGE_PROVIDER: str = Config.persistent("")  # local (default), s3
     S3_ACCESS_KEY_ID: Optional[str] = Config.persistent(None)
     S3_SECRET_ACCESS_KEY: Optional[str] = Config.persistent(None)
     S3_REGION_NAME: Optional[str] = Config.persistent(None)
@@ -864,4 +873,5 @@ class FullConfig(
     pass
 
 
+# This `config` object should be imported by other modules in order to gain access to all configuration values.
 config = FullConfig()
