@@ -1,9 +1,7 @@
 import os
-import logging
 import pytest
 
 from open_webui.config import (
-    Config,
     OAuthConfig,
     WebUIConfig,
 )
@@ -26,8 +24,9 @@ def test_oauth_config_post_init():
 
     assert config.OAUTH_PROVIDERS["oidc"]["client_id"] == "test_client_id"
     assert (
-        config.OAUTH_PROVIDERS["oidc"]["client_secret"] == "test_client_secret"
-    )  # pragma: allowlist secret
+        config.OAUTH_PROVIDERS["oidc"]["client_secret"]
+        == "test_client_secret"  # pragma: allowlist secret
+    )
     assert (
         config.OAUTH_PROVIDERS["oidc"]["server_metadata_url"]
         == "https://example.com/.well-known/openid-configuration"
