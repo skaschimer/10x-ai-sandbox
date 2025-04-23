@@ -17,7 +17,6 @@ from open_webui.models.files import (
 )
 from open_webui.routers.retrieval import process_file, ProcessFileForm
 
-from open_webui.config import UPLOAD_DIR
 from open_webui.env import SRC_LOG_LEVELS
 from open_webui.constants import ERROR_MESSAGES
 

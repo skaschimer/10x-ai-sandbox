@@ -2,7 +2,7 @@ import black
 import markdown
 
 from open_webui.models.chats import ChatTitleMessagesForm
-from open_webui.config import DATA_DIR, ENABLE_ADMIN_EXPORT
+from open_webui.config import DATA_DIR, config
 from open_webui.constants import ERROR_MESSAGES
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
@@ -71,7 +71,7 @@ async def download_chat_as_pdf(
 
 @router.get("/db/download")
 async def download_db(user=Depends(get_admin_user)):
-    if not ENABLE_ADMIN_EXPORT:
+    if not config.ENABLE_ADMIN_EXPORT:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,

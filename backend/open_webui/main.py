@@ -90,201 +90,17 @@ from open_webui.models.models import Models
 from open_webui.models.users import UserModel, Users
 
 from open_webui.config import (
-    # Ollama
-    ENABLE_OLLAMA_API,
-    OLLAMA_BASE_URLS,
-    OLLAMA_API_CONFIGS,
-    # OpenAI
-    ENABLE_OPENAI_API,
-    OPENAI_API_BASE_URLS,
-    OPENAI_API_KEYS,
-    OPENAI_API_CONFIGS,
-    # Image
-    AUTOMATIC1111_API_AUTH,
-    AUTOMATIC1111_BASE_URL,
-    AUTOMATIC1111_CFG_SCALE,
-    AUTOMATIC1111_SAMPLER,
-    AUTOMATIC1111_SCHEDULER,
-    COMFYUI_BASE_URL,
-    COMFYUI_API_KEY,
-    COMFYUI_WORKFLOW,
-    COMFYUI_WORKFLOW_NODES,
-    ENABLE_IMAGE_GENERATION,
-    IMAGE_GENERATION_ENGINE,
-    IMAGE_GENERATION_MODEL,
-    IMAGE_SIZE,
-    IMAGE_STEPS,
-    IMAGES_OPENAI_API_BASE_URL,
-    IMAGES_OPENAI_API_KEY,
-    # Audio
-    AUDIO_STT_ENGINE,
-    AUDIO_STT_MODEL,
-    AUDIO_STT_OPENAI_API_BASE_URL,
-    AUDIO_STT_OPENAI_API_KEY,
-    AUDIO_TTS_API_KEY,
-    AUDIO_TTS_ENGINE,
-    AUDIO_TTS_MODEL,
-    AUDIO_TTS_OPENAI_API_BASE_URL,
-    AUDIO_TTS_OPENAI_API_KEY,
-    AUDIO_TTS_SPLIT_ON,
-    AUDIO_TTS_VOICE,
-    AUDIO_TTS_AZURE_SPEECH_REGION,
-    AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT,
-    WHISPER_MODEL,
-    WHISPER_MODEL_AUTO_UPDATE,
-    WHISPER_MODEL_DIR,
-    # Retrieval
-    RAG_TEMPLATE,
-    DEFAULT_RAG_TEMPLATE,
-    RAG_EMBEDDING_MODEL,
-    RAG_EMBEDDING_MODEL_AUTO_UPDATE,
-    RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE,
-    RAG_RERANKING_MODEL,
-    RAG_RERANKING_MODEL_AUTO_UPDATE,
-    RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
-    RAG_EMBEDDING_ENGINE,
-    RAG_EMBEDDING_BATCH_SIZE,
-    RAG_RELEVANCE_THRESHOLD,
-    RAG_FILE_MAX_COUNT,
-    RAG_FILE_MAX_SIZE,
-    RAG_OPENAI_API_BASE_URL,
-    RAG_OPENAI_API_KEY,
-    RAG_OLLAMA_BASE_URL,
-    RAG_OLLAMA_API_KEY,
-    CHUNK_OVERLAP,
-    CHUNK_SIZE,
-    CONTENT_EXTRACTION_ENGINE,
-    TIKA_SERVER_URL,
-    RAG_TOP_K,
-    RAG_TEXT_SPLITTER,
-    TIKTOKEN_ENCODING_NAME,
-    PDF_EXTRACT_IMAGES,
-    YOUTUBE_LOADER_LANGUAGE,
-    YOUTUBE_LOADER_PROXY_URL,
-    # Retrieval (Web Search)
-    RAG_WEB_SEARCH_ENGINE,
-    RAG_WEB_SEARCH_RESULT_COUNT,
-    RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
-    RAG_WEB_SEARCH_DOMAIN_FILTER_LIST,
-    JINA_API_KEY,
-    SEARCHAPI_API_KEY,
-    SEARCHAPI_ENGINE,
-    SEARXNG_QUERY_URL,
-    SERPER_API_KEY,
-    SERPLY_API_KEY,
-    SERPSTACK_API_KEY,
-    SERPSTACK_HTTPS,
-    TAVILY_API_KEY,
-    BING_SEARCH_V7_ENDPOINT,
-    BING_SEARCH_V7_SUBSCRIPTION_KEY,
-    BRAVE_SEARCH_API_KEY,
-    KAGI_SEARCH_API_KEY,
-    MOJEEK_SEARCH_API_KEY,
-    GOOGLE_PSE_API_KEY,
-    GOOGLE_PSE_ENGINE_ID,
-    GOOGLE_DRIVE_CLIENT_ID,
-    GOOGLE_DRIVE_API_KEY,
-    ENABLE_RAG_HYBRID_SEARCH,
-    ENABLE_RAG_LOCAL_WEB_FETCH,
-    ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION,
-    ENABLE_RAG_WEB_SEARCH,
-    ENABLE_GOOGLE_DRIVE_INTEGRATION,
-    UPLOAD_DIR,
     # WebUI
     WEBUI_AUTH,
     WEBUI_NAME,
-    WEBUI_BANNERS,
-    WEBHOOK_URL,
-    ADMIN_EMAIL,
-    SHOW_ADMIN_DETAILS,
-    JWT_EXPIRES_IN,
-    JWT_REFRESH_EXPIRES_IN,
-    ENABLE_ONBOARDING_PAGE,
-    ENABLE_SIGNUP,
-    ENABLE_LOGIN_FORM,
-    ENABLE_API_KEY,
-    ENABLE_API_KEY_ENDPOINT_RESTRICTIONS,
-    API_KEY_ALLOWED_ENDPOINTS,
-    ENABLE_CHANNELS,
-    ENABLE_COMMUNITY_SHARING,
-    ENABLE_MESSAGE_RATING,
-    ALLOW_SIMULTANEOUS_MODELS,
-    ENABLE_CHAT_CONTROLS,
-    ENABLE_SET_AS_DEFAULT_MODEL,
-    ENABLE_EVALUATION_ARENA_MODELS,
-    USER_PERMISSIONS,
-    DEFAULT_USER_ROLE,
-    DEFAULT_PROMPT_SUGGESTIONS,
-    DEFAULT_MODELS,
-    DEFAULT_ARENA_MODEL,
-    MODEL_ORDER_LIST,
-    EVALUATION_ARENA_MODELS,
-    DEFAULT_SHOW_VERSION_UPDATE,
-    DEFAULT_SHOW_CHANGELOG,
-    ENABLE_ACTIVE_USERS_COUNT,
-    ENABLE_ADMIN_FEEDBACKS,
-    ENABLE_RECORD_VOICE_AND_CALL,
-    ENABLE_MORE_INPUTS,
-    ENABLE_DISCLAIMER,
-    ENABLE_SIDEBAR_SEARCH,
-    ENABLE_SIDEBAR_CREATE_FOLDER,
-    ENABLE_FLOATING_BUTTONS,
-    ENABLE_DELETE_BUTTON,
-    ENABLE_MESSAGE_INPUT_LOGO,
-    ENABLE_SIDEBAR_USER_PROFILE,
-    ENABLE_PROMPT_SUGGESTIONS,
-    ENABLE_USER_SETTINGS_MENU,
-    ENABLE_MODEL_SELECTOR_SEARCH,
-    ENABLE_RESPONSE_PROMPT_EDIT,
-    ENABLE_RESPONSE_CONTINUE,
-    # WebUI (OAuth)
-    ENABLE_OAUTH_ROLE_MANAGEMENT,
-    OAUTH_ROLES_CLAIM,
-    OAUTH_EMAIL_CLAIM,
-    OAUTH_PICTURE_CLAIM,
-    OAUTH_USERNAME_CLAIM,
-    OAUTH_ALLOWED_ROLES,
-    OAUTH_ADMIN_ROLES,
-    # WebUI (LDAP)
-    ENABLE_LDAP,
-    LDAP_SERVER_LABEL,
-    LDAP_SERVER_HOST,
-    LDAP_SERVER_PORT,
-    LDAP_ATTRIBUTE_FOR_USERNAME,
-    LDAP_SEARCH_FILTERS,
-    LDAP_SEARCH_BASE,
-    LDAP_APP_DN,
-    LDAP_APP_PASSWORD,
-    LDAP_USE_TLS,
-    LDAP_CA_CERT_FILE,
-    LDAP_CIPHERS,
     # Misc
     ENV,
     CACHE_DIR,
     STATIC_DIR,
     FRONTEND_BUILD_DIR,
-    CORS_ALLOW_ORIGIN,
-    DEFAULT_LOCALE,
-    OAUTH_PROVIDERS,
-    WEBUI_URL,
-    # Admin
-    ENABLE_ADMIN_CHAT_ACCESS,
-    ENABLE_ADMIN_EXPORT,
-    # Tasks
-    TASK_MODEL,
-    TASK_MODEL_EXTERNAL,
-    ENABLE_TAGS_GENERATION,
-    ENABLE_SEARCH_QUERY_GENERATION,
-    ENABLE_RETRIEVAL_QUERY_GENERATION,
-    ENABLE_AUTOCOMPLETE_GENERATION,
-    TITLE_GENERATION_PROMPT_TEMPLATE,
-    TAGS_GENERATION_PROMPT_TEMPLATE,
-    TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE,
-    QUERY_GENERATION_PROMPT_TEMPLATE,
-    AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE,
-    AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH,
     AppConfig,
     reset_config,
+    config,
 )
 from open_webui.env import (
     CHANGELOG,
@@ -394,9 +210,9 @@ app.state.config = AppConfig()
 ########################################
 
 
-app.state.config.ENABLE_OLLAMA_API = ENABLE_OLLAMA_API
-app.state.config.OLLAMA_BASE_URLS = OLLAMA_BASE_URLS
-app.state.config.OLLAMA_API_CONFIGS = OLLAMA_API_CONFIGS
+app.state.config.ENABLE_OLLAMA_API = config.ENABLE_OLLAMA_API
+app.state.config.OLLAMA_BASE_URLS = config.OLLAMA_BASE_URLS
+app.state.config.OLLAMA_API_CONFIGS = config.OLLAMA_API_CONFIGS
 
 app.state.OLLAMA_MODELS = {}
 
@@ -406,10 +222,10 @@ app.state.OLLAMA_MODELS = {}
 #
 ########################################
 
-app.state.config.ENABLE_OPENAI_API = ENABLE_OPENAI_API
-app.state.config.OPENAI_API_BASE_URLS = OPENAI_API_BASE_URLS
-app.state.config.OPENAI_API_KEYS = OPENAI_API_KEYS
-app.state.config.OPENAI_API_CONFIGS = OPENAI_API_CONFIGS
+app.state.config.ENABLE_OPENAI_API = config.ENABLE_OPENAI_API
+app.state.config.OPENAI_API_BASE_URLS = config.OPENAI_API_BASE_URLS
+app.state.config.OPENAI_API_KEYS = config.OPENAI_API_KEYS
+app.state.config.OPENAI_API_CONFIGS = config.OPENAI_API_CONFIGS
 
 app.state.OPENAI_MODELS = {}
 
@@ -419,62 +235,62 @@ app.state.OPENAI_MODELS = {}
 #
 ########################################
 
-app.state.config.WEBUI_URL = WEBUI_URL
-app.state.config.ENABLE_SIGNUP = ENABLE_SIGNUP
-app.state.config.ENABLE_LOGIN_FORM = ENABLE_LOGIN_FORM
+app.state.config.WEBUI_URL = config.WEBUI_URL
+app.state.config.ENABLE_SIGNUP = config.ENABLE_SIGNUP
+app.state.config.ENABLE_LOGIN_FORM = config.ENABLE_LOGIN_FORM
 
-app.state.config.ENABLE_API_KEY = ENABLE_API_KEY
+app.state.config.ENABLE_API_KEY = config.ENABLE_API_KEY
 app.state.config.ENABLE_API_KEY_ENDPOINT_RESTRICTIONS = (
-    ENABLE_API_KEY_ENDPOINT_RESTRICTIONS
+    config.ENABLE_API_KEY_ENDPOINT_RESTRICTIONS
 )
-app.state.config.API_KEY_ALLOWED_ENDPOINTS = API_KEY_ALLOWED_ENDPOINTS
+app.state.config.API_KEY_ALLOWED_ENDPOINTS = config.API_KEY_ALLOWED_ENDPOINTS
 
-app.state.config.JWT_EXPIRES_IN = JWT_EXPIRES_IN
-app.state.config.JWT_REFRESH_EXPIRES_IN = JWT_REFRESH_EXPIRES_IN
-
-
-app.state.config.SHOW_ADMIN_DETAILS = SHOW_ADMIN_DETAILS
-app.state.config.ADMIN_EMAIL = ADMIN_EMAIL
+app.state.config.JWT_EXPIRES_IN = config.JWT_EXPIRES_IN
+app.state.config.JWT_REFRESH_EXPIRES_IN = config.JWT_REFRESH_EXPIRES_IN
 
 
-app.state.config.DEFAULT_MODELS = DEFAULT_MODELS
-app.state.config.DEFAULT_PROMPT_SUGGESTIONS = DEFAULT_PROMPT_SUGGESTIONS
-app.state.config.DEFAULT_USER_ROLE = DEFAULT_USER_ROLE
-
-app.state.config.USER_PERMISSIONS = USER_PERMISSIONS
-app.state.config.WEBHOOK_URL = WEBHOOK_URL
-app.state.config.BANNERS = WEBUI_BANNERS
-app.state.config.MODEL_ORDER_LIST = MODEL_ORDER_LIST
+app.state.config.SHOW_ADMIN_DETAILS = config.SHOW_ADMIN_DETAILS
+app.state.config.ADMIN_EMAIL = config.ADMIN_EMAIL
 
 
-app.state.config.ENABLE_CHANNELS = ENABLE_CHANNELS
-app.state.config.ENABLE_COMMUNITY_SHARING = ENABLE_COMMUNITY_SHARING
-app.state.config.ENABLE_MESSAGE_RATING = ENABLE_MESSAGE_RATING
+app.state.config.DEFAULT_MODELS = config.DEFAULT_MODELS
+app.state.config.DEFAULT_PROMPT_SUGGESTIONS = config.DEFAULT_PROMPT_SUGGESTIONS
+app.state.config.DEFAULT_USER_ROLE = config.DEFAULT_USER_ROLE
 
-app.state.config.ENABLE_EVALUATION_ARENA_MODELS = ENABLE_EVALUATION_ARENA_MODELS
-app.state.config.EVALUATION_ARENA_MODELS = EVALUATION_ARENA_MODELS
+app.state.config.USER_PERMISSIONS = config.USER_PERMISSIONS
+app.state.config.WEBHOOK_URL = config.WEBHOOK_URL
+app.state.config.BANNERS = config.WEBUI_BANNERS
+app.state.config.MODEL_ORDER_LIST = config.MODEL_ORDER_LIST
 
-app.state.config.OAUTH_USERNAME_CLAIM = OAUTH_USERNAME_CLAIM
-app.state.config.OAUTH_PICTURE_CLAIM = OAUTH_PICTURE_CLAIM
-app.state.config.OAUTH_EMAIL_CLAIM = OAUTH_EMAIL_CLAIM
 
-app.state.config.ENABLE_OAUTH_ROLE_MANAGEMENT = ENABLE_OAUTH_ROLE_MANAGEMENT
-app.state.config.OAUTH_ROLES_CLAIM = OAUTH_ROLES_CLAIM
-app.state.config.OAUTH_ALLOWED_ROLES = OAUTH_ALLOWED_ROLES
-app.state.config.OAUTH_ADMIN_ROLES = OAUTH_ADMIN_ROLES
+app.state.config.ENABLE_CHANNELS = config.ENABLE_CHANNELS
+app.state.config.ENABLE_COMMUNITY_SHARING = config.ENABLE_COMMUNITY_SHARING
+app.state.config.ENABLE_MESSAGE_RATING = config.ENABLE_MESSAGE_RATING
 
-app.state.config.ENABLE_LDAP = ENABLE_LDAP
-app.state.config.LDAP_SERVER_LABEL = LDAP_SERVER_LABEL
-app.state.config.LDAP_SERVER_HOST = LDAP_SERVER_HOST
-app.state.config.LDAP_SERVER_PORT = LDAP_SERVER_PORT
-app.state.config.LDAP_ATTRIBUTE_FOR_USERNAME = LDAP_ATTRIBUTE_FOR_USERNAME
-app.state.config.LDAP_APP_DN = LDAP_APP_DN
-app.state.config.LDAP_APP_PASSWORD = LDAP_APP_PASSWORD
-app.state.config.LDAP_SEARCH_BASE = LDAP_SEARCH_BASE
-app.state.config.LDAP_SEARCH_FILTERS = LDAP_SEARCH_FILTERS
-app.state.config.LDAP_USE_TLS = LDAP_USE_TLS
-app.state.config.LDAP_CA_CERT_FILE = LDAP_CA_CERT_FILE
-app.state.config.LDAP_CIPHERS = LDAP_CIPHERS
+app.state.config.ENABLE_EVALUATION_ARENA_MODELS = config.ENABLE_EVALUATION_ARENA_MODELS
+app.state.config.EVALUATION_ARENA_MODELS = config.EVALUATION_ARENA_MODELS
+
+app.state.config.OAUTH_USERNAME_CLAIM = config.OAUTH_USERNAME_CLAIM
+app.state.config.OAUTH_PICTURE_CLAIM = config.OAUTH_PICTURE_CLAIM
+app.state.config.OAUTH_EMAIL_CLAIM = config.OAUTH_EMAIL_CLAIM
+
+app.state.config.ENABLE_OAUTH_ROLE_MANAGEMENT = config.ENABLE_OAUTH_ROLE_MANAGEMENT
+app.state.config.OAUTH_ROLES_CLAIM = config.OAUTH_ROLES_CLAIM
+app.state.config.OAUTH_ALLOWED_ROLES = config.OAUTH_ALLOWED_ROLES
+app.state.config.OAUTH_ADMIN_ROLES = config.OAUTH_ADMIN_ROLES
+
+app.state.config.ENABLE_LDAP = config.ENABLE_LDAP
+app.state.config.LDAP_SERVER_LABEL = config.LDAP_SERVER_LABEL
+app.state.config.LDAP_SERVER_HOST = config.LDAP_SERVER_HOST
+app.state.config.LDAP_SERVER_PORT = config.LDAP_SERVER_PORT
+app.state.config.LDAP_ATTRIBUTE_FOR_USERNAME = config.LDAP_ATTRIBUTE_FOR_USERNAME
+app.state.config.LDAP_APP_DN = config.LDAP_APP_DN
+app.state.config.LDAP_APP_PASSWORD = config.LDAP_APP_PASSWORD
+app.state.config.LDAP_SEARCH_BASE = config.LDAP_SEARCH_BASE
+app.state.config.LDAP_SEARCH_FILTERS = config.LDAP_SEARCH_FILTERS
+app.state.config.LDAP_USE_TLS = config.LDAP_USE_TLS
+app.state.config.LDAP_CA_CERT_FILE = config.LDAP_CA_CERT_FILE
+app.state.config.LDAP_CIPHERS = config.LDAP_CIPHERS
 
 
 app.state.AUTH_TRUSTED_EMAIL_HEADER = WEBUI_AUTH_TRUSTED_EMAIL_HEADER
@@ -491,67 +307,75 @@ app.state.FUNCTIONS = {}
 ########################################
 
 
-app.state.config.TOP_K = RAG_TOP_K
-app.state.config.RELEVANCE_THRESHOLD = RAG_RELEVANCE_THRESHOLD
-app.state.config.FILE_MAX_SIZE = RAG_FILE_MAX_SIZE
-app.state.config.FILE_MAX_COUNT = RAG_FILE_MAX_COUNT
+app.state.config.TOP_K = config.RAG_TOP_K
+app.state.config.RELEVANCE_THRESHOLD = config.RAG_RELEVANCE_THRESHOLD
+app.state.config.FILE_MAX_SIZE = config.RAG_FILE_MAX_SIZE
+app.state.config.FILE_MAX_COUNT = config.RAG_FILE_MAX_COUNT
 
-app.state.config.ENABLE_RAG_HYBRID_SEARCH = ENABLE_RAG_HYBRID_SEARCH
+app.state.config.ENABLE_RAG_HYBRID_SEARCH = config.ENABLE_RAG_HYBRID_SEARCH
 app.state.config.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION = (
-    ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION
+    config.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION
 )
 
-app.state.config.CONTENT_EXTRACTION_ENGINE = CONTENT_EXTRACTION_ENGINE
-app.state.config.TIKA_SERVER_URL = TIKA_SERVER_URL
+app.state.config.CONTENT_EXTRACTION_ENGINE = config.CONTENT_EXTRACTION_ENGINE
+app.state.config.TIKA_SERVER_URL = config.TIKA_SERVER_URL
 
-app.state.config.TEXT_SPLITTER = RAG_TEXT_SPLITTER
-app.state.config.TIKTOKEN_ENCODING_NAME = TIKTOKEN_ENCODING_NAME
+app.state.config.TEXT_SPLITTER = config.RAG_TEXT_SPLITTER
+app.state.config.TIKTOKEN_ENCODING_NAME = config.TIKTOKEN_ENCODING_NAME
 
-app.state.config.CHUNK_SIZE = CHUNK_SIZE
-app.state.config.CHUNK_OVERLAP = CHUNK_OVERLAP
+app.state.config.CHUNK_SIZE = config.CHUNK_SIZE
+app.state.config.CHUNK_OVERLAP = config.CHUNK_OVERLAP
 
-app.state.config.RAG_EMBEDDING_ENGINE = RAG_EMBEDDING_ENGINE
-app.state.config.RAG_EMBEDDING_MODEL = RAG_EMBEDDING_MODEL
-app.state.config.RAG_EMBEDDING_BATCH_SIZE = RAG_EMBEDDING_BATCH_SIZE
-app.state.config.RAG_RERANKING_MODEL = RAG_RERANKING_MODEL
-app.state.config.RAG_TEMPLATE = RAG_TEMPLATE
+app.state.config.RAG_EMBEDDING_ENGINE = config.RAG_EMBEDDING_ENGINE
+app.state.config.RAG_EMBEDDING_MODEL = config.RAG_EMBEDDING_MODEL
+app.state.config.RAG_EMBEDDING_BATCH_SIZE = config.RAG_EMBEDDING_BATCH_SIZE
+app.state.config.RAG_RERANKING_MODEL = config.RAG_RERANKING_MODEL
+app.state.config.RAG_TEMPLATE = config.RAG_TEMPLATE
 
-app.state.config.RAG_OPENAI_API_BASE_URL = RAG_OPENAI_API_BASE_URL
-app.state.config.RAG_OPENAI_API_KEY = RAG_OPENAI_API_KEY
+app.state.config.RAG_OPENAI_API_BASE_URL = config.RAG_OPENAI_API_BASE_URL
+app.state.config.RAG_OPENAI_API_KEY = config.RAG_OPENAI_API_KEY
 
-app.state.config.RAG_OLLAMA_BASE_URL = RAG_OLLAMA_BASE_URL
-app.state.config.RAG_OLLAMA_API_KEY = RAG_OLLAMA_API_KEY
+app.state.config.RAG_OLLAMA_BASE_URL = config.RAG_OLLAMA_BASE_URL
+app.state.config.RAG_OLLAMA_API_KEY = config.RAG_OLLAMA_API_KEY
 
-app.state.config.PDF_EXTRACT_IMAGES = PDF_EXTRACT_IMAGES
+app.state.config.PDF_EXTRACT_IMAGES = config.PDF_EXTRACT_IMAGES
 
-app.state.config.YOUTUBE_LOADER_LANGUAGE = YOUTUBE_LOADER_LANGUAGE
-app.state.config.YOUTUBE_LOADER_PROXY_URL = YOUTUBE_LOADER_PROXY_URL
+app.state.config.YOUTUBE_LOADER_LANGUAGE = config.YOUTUBE_LOADER_LANGUAGE
+app.state.config.YOUTUBE_LOADER_PROXY_URL = config.YOUTUBE_LOADER_PROXY_URL
 
 
-app.state.config.ENABLE_RAG_WEB_SEARCH = ENABLE_RAG_WEB_SEARCH
-app.state.config.RAG_WEB_SEARCH_ENGINE = RAG_WEB_SEARCH_ENGINE
-app.state.config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST = RAG_WEB_SEARCH_DOMAIN_FILTER_LIST
+app.state.config.ENABLE_RAG_WEB_SEARCH = config.ENABLE_RAG_WEB_SEARCH
+app.state.config.RAG_WEB_SEARCH_ENGINE = config.RAG_WEB_SEARCH_ENGINE
+app.state.config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST = (
+    config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST
+)
 
-app.state.config.ENABLE_GOOGLE_DRIVE_INTEGRATION = ENABLE_GOOGLE_DRIVE_INTEGRATION
-app.state.config.SEARXNG_QUERY_URL = SEARXNG_QUERY_URL
-app.state.config.GOOGLE_PSE_API_KEY = GOOGLE_PSE_API_KEY
-app.state.config.GOOGLE_PSE_ENGINE_ID = GOOGLE_PSE_ENGINE_ID
-app.state.config.BRAVE_SEARCH_API_KEY = BRAVE_SEARCH_API_KEY
-app.state.config.KAGI_SEARCH_API_KEY = KAGI_SEARCH_API_KEY
-app.state.config.MOJEEK_SEARCH_API_KEY = MOJEEK_SEARCH_API_KEY
-app.state.config.SERPSTACK_API_KEY = SERPSTACK_API_KEY
-app.state.config.SERPSTACK_HTTPS = SERPSTACK_HTTPS
-app.state.config.SERPER_API_KEY = SERPER_API_KEY
-app.state.config.SERPLY_API_KEY = SERPLY_API_KEY
-app.state.config.TAVILY_API_KEY = TAVILY_API_KEY
-app.state.config.SEARCHAPI_API_KEY = SEARCHAPI_API_KEY
-app.state.config.SEARCHAPI_ENGINE = SEARCHAPI_ENGINE
-app.state.config.JINA_API_KEY = JINA_API_KEY
-app.state.config.BING_SEARCH_V7_ENDPOINT = BING_SEARCH_V7_ENDPOINT
-app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY = BING_SEARCH_V7_SUBSCRIPTION_KEY
+app.state.config.ENABLE_GOOGLE_DRIVE_INTEGRATION = (
+    config.ENABLE_GOOGLE_DRIVE_INTEGRATION
+)
+app.state.config.SEARXNG_QUERY_URL = config.SEARXNG_QUERY_URL
+app.state.config.GOOGLE_PSE_API_KEY = config.GOOGLE_PSE_API_KEY
+app.state.config.GOOGLE_PSE_ENGINE_ID = config.GOOGLE_PSE_ENGINE_ID
+app.state.config.BRAVE_SEARCH_API_KEY = config.BRAVE_SEARCH_API_KEY
+app.state.config.KAGI_SEARCH_API_KEY = config.KAGI_SEARCH_API_KEY
+app.state.config.MOJEEK_SEARCH_API_KEY = config.MOJEEK_SEARCH_API_KEY
+app.state.config.SERPSTACK_API_KEY = config.SERPSTACK_API_KEY
+app.state.config.SERPSTACK_HTTPS = config.SERPSTACK_HTTPS
+app.state.config.SERPER_API_KEY = config.SERPER_API_KEY
+app.state.config.SERPLY_API_KEY = config.SERPLY_API_KEY
+app.state.config.TAVILY_API_KEY = config.TAVILY_API_KEY
+app.state.config.SEARCHAPI_API_KEY = config.SEARCHAPI_API_KEY
+app.state.config.SEARCHAPI_ENGINE = config.SEARCHAPI_ENGINE
+app.state.config.JINA_API_KEY = config.JINA_API_KEY
+app.state.config.BING_SEARCH_V7_ENDPOINT = config.BING_SEARCH_V7_ENDPOINT
+app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY = (
+    config.BING_SEARCH_V7_SUBSCRIPTION_KEY
+)
 
-app.state.config.RAG_WEB_SEARCH_RESULT_COUNT = RAG_WEB_SEARCH_RESULT_COUNT
-app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS = RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+app.state.config.RAG_WEB_SEARCH_RESULT_COUNT = config.RAG_WEB_SEARCH_RESULT_COUNT
+app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS = (
+    config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+)
 
 app.state.EMBEDDING_FUNCTION = None
 app.state.ef = None
@@ -564,12 +388,12 @@ try:
     app.state.ef = get_ef(
         app.state.config.RAG_EMBEDDING_ENGINE,
         app.state.config.RAG_EMBEDDING_MODEL,
-        RAG_EMBEDDING_MODEL_AUTO_UPDATE,
+        config.RAG_EMBEDDING_MODEL_AUTO_UPDATE,
     )
 
     app.state.rf = get_rf(
         app.state.config.RAG_RERANKING_MODEL,
-        RAG_RERANKING_MODEL_AUTO_UPDATE,
+        config.RAG_RERANKING_MODEL_AUTO_UPDATE,
     )
 except Exception as e:
     log.error(f"Error updating models: {e}")
@@ -600,26 +424,26 @@ app.state.EMBEDDING_FUNCTION = get_embedding_function(
 #
 ########################################
 
-app.state.config.IMAGE_GENERATION_ENGINE = IMAGE_GENERATION_ENGINE
-app.state.config.ENABLE_IMAGE_GENERATION = ENABLE_IMAGE_GENERATION
+app.state.config.IMAGE_GENERATION_ENGINE = config.IMAGE_GENERATION_ENGINE
+app.state.config.ENABLE_IMAGE_GENERATION = config.ENABLE_IMAGE_GENERATION
 
-app.state.config.IMAGES_OPENAI_API_BASE_URL = IMAGES_OPENAI_API_BASE_URL
-app.state.config.IMAGES_OPENAI_API_KEY = IMAGES_OPENAI_API_KEY
+app.state.config.IMAGES_OPENAI_API_BASE_URL = config.IMAGES_OPENAI_API_BASE_URL
+app.state.config.IMAGES_OPENAI_API_KEY = config.IMAGES_OPENAI_API_KEY
 
-app.state.config.IMAGE_GENERATION_MODEL = IMAGE_GENERATION_MODEL
+app.state.config.IMAGE_GENERATION_MODEL = config.IMAGE_GENERATION_MODEL
 
-app.state.config.AUTOMATIC1111_BASE_URL = AUTOMATIC1111_BASE_URL
-app.state.config.AUTOMATIC1111_API_AUTH = AUTOMATIC1111_API_AUTH
-app.state.config.AUTOMATIC1111_CFG_SCALE = AUTOMATIC1111_CFG_SCALE
-app.state.config.AUTOMATIC1111_SAMPLER = AUTOMATIC1111_SAMPLER
-app.state.config.AUTOMATIC1111_SCHEDULER = AUTOMATIC1111_SCHEDULER
-app.state.config.COMFYUI_BASE_URL = COMFYUI_BASE_URL
-app.state.config.COMFYUI_API_KEY = COMFYUI_API_KEY
-app.state.config.COMFYUI_WORKFLOW = COMFYUI_WORKFLOW
-app.state.config.COMFYUI_WORKFLOW_NODES = COMFYUI_WORKFLOW_NODES
+app.state.config.AUTOMATIC1111_BASE_URL = config.AUTOMATIC1111_BASE_URL
+app.state.config.AUTOMATIC1111_API_AUTH = config.AUTOMATIC1111_API_AUTH
+app.state.config.AUTOMATIC1111_CFG_SCALE = config.AUTOMATIC1111_CFG_SCALE
+app.state.config.AUTOMATIC1111_SAMPLER = config.AUTOMATIC1111_SAMPLER
+app.state.config.AUTOMATIC1111_SCHEDULER = config.AUTOMATIC1111_SCHEDULER
+app.state.config.COMFYUI_BASE_URL = config.COMFYUI_BASE_URL
+app.state.config.COMFYUI_API_KEY = config.COMFYUI_API_KEY
+app.state.config.COMFYUI_WORKFLOW = config.COMFYUI_WORKFLOW
+app.state.config.COMFYUI_WORKFLOW_NODES = config.COMFYUI_WORKFLOW_NODES
 
-app.state.config.IMAGE_SIZE = IMAGE_SIZE
-app.state.config.IMAGE_STEPS = IMAGE_STEPS
+app.state.config.IMAGE_SIZE = config.IMAGE_SIZE
+app.state.config.IMAGE_STEPS = config.IMAGE_STEPS
 
 
 ########################################
@@ -628,24 +452,26 @@ app.state.config.IMAGE_STEPS = IMAGE_STEPS
 #
 ########################################
 
-app.state.config.STT_OPENAI_API_BASE_URL = AUDIO_STT_OPENAI_API_BASE_URL
-app.state.config.STT_OPENAI_API_KEY = AUDIO_STT_OPENAI_API_KEY
-app.state.config.STT_ENGINE = AUDIO_STT_ENGINE
-app.state.config.STT_MODEL = AUDIO_STT_MODEL
+app.state.config.STT_OPENAI_API_BASE_URL = config.AUDIO_STT_OPENAI_API_BASE_URL
+app.state.config.STT_OPENAI_API_KEY = config.AUDIO_STT_OPENAI_API_KEY
+app.state.config.STT_ENGINE = config.AUDIO_STT_ENGINE
+app.state.config.STT_MODEL = config.AUDIO_STT_MODEL
 
-app.state.config.WHISPER_MODEL = WHISPER_MODEL
+app.state.config.WHISPER_MODEL = config.WHISPER_MODEL
 
-app.state.config.TTS_OPENAI_API_BASE_URL = AUDIO_TTS_OPENAI_API_BASE_URL
-app.state.config.TTS_OPENAI_API_KEY = AUDIO_TTS_OPENAI_API_KEY
-app.state.config.TTS_ENGINE = AUDIO_TTS_ENGINE
-app.state.config.TTS_MODEL = AUDIO_TTS_MODEL
-app.state.config.TTS_VOICE = AUDIO_TTS_VOICE
-app.state.config.TTS_API_KEY = AUDIO_TTS_API_KEY
-app.state.config.TTS_SPLIT_ON = AUDIO_TTS_SPLIT_ON
+app.state.config.TTS_OPENAI_API_BASE_URL = config.AUDIO_TTS_OPENAI_API_BASE_URL
+app.state.config.TTS_OPENAI_API_KEY = config.AUDIO_TTS_OPENAI_API_KEY
+app.state.config.TTS_ENGINE = config.AUDIO_TTS_ENGINE
+app.state.config.TTS_MODEL = config.AUDIO_TTS_MODEL
+app.state.config.TTS_VOICE = config.AUDIO_TTS_VOICE
+app.state.config.TTS_API_KEY = config.AUDIO_TTS_API_KEY
+app.state.config.TTS_SPLIT_ON = config.AUDIO_TTS_SPLIT_ON
 
 
-app.state.config.TTS_AZURE_SPEECH_REGION = AUDIO_TTS_AZURE_SPEECH_REGION
-app.state.config.TTS_AZURE_SPEECH_OUTPUT_FORMAT = AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT
+app.state.config.TTS_AZURE_SPEECH_REGION = config.AUDIO_TTS_AZURE_SPEECH_REGION
+app.state.config.TTS_AZURE_SPEECH_OUTPUT_FORMAT = (
+    config.AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT
+)
 
 
 app.state.faster_whisper_model = None
@@ -660,27 +486,35 @@ app.state.speech_speaker_embeddings_dataset = None
 ########################################
 
 
-app.state.config.TASK_MODEL = TASK_MODEL
-app.state.config.TASK_MODEL_EXTERNAL = TASK_MODEL_EXTERNAL
+app.state.config.TASK_MODEL = config.TASK_MODEL
+app.state.config.TASK_MODEL_EXTERNAL = config.TASK_MODEL_EXTERNAL
 
 
-app.state.config.ENABLE_SEARCH_QUERY_GENERATION = ENABLE_SEARCH_QUERY_GENERATION
-app.state.config.ENABLE_RETRIEVAL_QUERY_GENERATION = ENABLE_RETRIEVAL_QUERY_GENERATION
-app.state.config.ENABLE_AUTOCOMPLETE_GENERATION = ENABLE_AUTOCOMPLETE_GENERATION
-app.state.config.ENABLE_TAGS_GENERATION = ENABLE_TAGS_GENERATION
-
-
-app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE = TITLE_GENERATION_PROMPT_TEMPLATE
-app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE = TAGS_GENERATION_PROMPT_TEMPLATE
-app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = (
-    TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+app.state.config.ENABLE_SEARCH_QUERY_GENERATION = config.ENABLE_SEARCH_QUERY_GENERATION
+app.state.config.ENABLE_RETRIEVAL_QUERY_GENERATION = (
+    config.ENABLE_RETRIEVAL_QUERY_GENERATION
 )
-app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE = QUERY_GENERATION_PROMPT_TEMPLATE
+app.state.config.ENABLE_AUTOCOMPLETE_GENERATION = config.ENABLE_AUTOCOMPLETE_GENERATION
+app.state.config.ENABLE_TAGS_GENERATION = config.ENABLE_TAGS_GENERATION
+
+
+app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE = (
+    config.TITLE_GENERATION_PROMPT_TEMPLATE
+)
+app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE = (
+    config.TAGS_GENERATION_PROMPT_TEMPLATE
+)
+app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = (
+    config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+)
+app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE = (
+    config.QUERY_GENERATION_PROMPT_TEMPLATE
+)
 app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE = (
-    AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
+    config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
 )
 app.state.config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH = (
-    AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH
+    config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH
 )
 
 ########################################
@@ -754,7 +588,7 @@ async def inspect_websocket(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ALLOW_ORIGIN,
+    allow_origins=config.CORS_ALLOW_ORIGIN,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -1000,18 +834,18 @@ async def get_app_config(request: Request, response: Response):
     onboarding = False
     if user is None:
         user_count = Users.get_num_users()
-        onboarding = user_count == 0 and ENABLE_ONBOARDING_PAGE
+        onboarding = user_count == 0 and config.ENABLE_ONBOARDING_PAGE
 
     return {
         **({"onboarding": True} if onboarding else {}),
         "status": True,
         "name": WEBUI_NAME,
         "version": VERSION,
-        "default_locale": str(DEFAULT_LOCALE),
+        "default_locale": str(config.DEFAULT_LOCALE),
         "oauth": {
             "providers": {
                 name: config.get("name", name)
-                for name, config in OAUTH_PROVIDERS.items()
+                for name, config in config.OAUTH_PROVIDERS.items()
             }
         },
         "features": {
@@ -1030,29 +864,29 @@ async def get_app_config(request: Request, response: Response):
                     "enable_image_generation": app.state.config.ENABLE_IMAGE_GENERATION,
                     "enable_community_sharing": app.state.config.ENABLE_COMMUNITY_SHARING,
                     "enable_message_rating": app.state.config.ENABLE_MESSAGE_RATING,
-                    "allow_simultaneous_models": ALLOW_SIMULTANEOUS_MODELS,
-                    "enable_chat_controls": ENABLE_CHAT_CONTROLS,
-                    "enable_set_as_default_model": ENABLE_SET_AS_DEFAULT_MODEL,
-                    "enable_admin_export": ENABLE_ADMIN_EXPORT,
-                    "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
-                    "default_show_changelog": DEFAULT_SHOW_CHANGELOG,
-                    "default_show_version_update": DEFAULT_SHOW_VERSION_UPDATE,
-                    "enable_active_users_count": ENABLE_ACTIVE_USERS_COUNT,
-                    "enable_admin_feedbacks": ENABLE_ADMIN_FEEDBACKS,
-                    "enable_record_voice_and_call": ENABLE_RECORD_VOICE_AND_CALL,
-                    "enable_more_inputs": ENABLE_MORE_INPUTS,
-                    "enable_disclaimer": ENABLE_DISCLAIMER,
-                    "enable_sidebar_search": ENABLE_SIDEBAR_SEARCH,
-                    "enable_sidebar_create_folder": ENABLE_SIDEBAR_CREATE_FOLDER,
-                    "enable_floating_buttons": ENABLE_FLOATING_BUTTONS,
-                    "enable_delete_button": ENABLE_DELETE_BUTTON,
-                    "enable_sidebar_user_profile": ENABLE_SIDEBAR_USER_PROFILE,
-                    "enable_message_input_logo": ENABLE_MESSAGE_INPUT_LOGO,
-                    "enable_prompt_suggestions": ENABLE_PROMPT_SUGGESTIONS,
-                    "enable_user_settings_menu": ENABLE_USER_SETTINGS_MENU,
-                    "enable_model_selector_search": ENABLE_MODEL_SELECTOR_SEARCH,
-                    "enable_response_prompt_edit": ENABLE_RESPONSE_PROMPT_EDIT,
-                    "enable_response_continue": ENABLE_RESPONSE_CONTINUE,
+                    "allow_simultaneous_models": config.ALLOW_SIMULTANEOUS_MODELS,
+                    "enable_chat_controls": config.ENABLE_CHAT_CONTROLS,
+                    "enable_set_as_default_model": config.ENABLE_SET_AS_DEFAULT_MODEL,
+                    "enable_admin_export": config.ENABLE_ADMIN_EXPORT,
+                    "enable_admin_chat_access": config.ENABLE_ADMIN_CHAT_ACCESS,
+                    "default_show_changelog": config.DEFAULT_SHOW_CHANGELOG,
+                    "default_show_version_update": config.DEFAULT_SHOW_VERSION_UPDATE,
+                    "enable_active_users_count": config.ENABLE_ACTIVE_USERS_COUNT,
+                    "enable_admin_feedbacks": config.ENABLE_ADMIN_FEEDBACKS,
+                    "enable_record_voice_and_call": config.ENABLE_RECORD_VOICE_AND_CALL,
+                    "enable_more_inputs": config.ENABLE_MORE_INPUTS,
+                    "enable_disclaimer": config.ENABLE_DISCLAIMER,
+                    "enable_sidebar_search": config.ENABLE_SIDEBAR_SEARCH,
+                    "enable_sidebar_create_folder": config.ENABLE_SIDEBAR_CREATE_FOLDER,
+                    "enable_floating_buttons": config.ENABLE_FLOATING_BUTTONS,
+                    "enable_delete_button": config.ENABLE_DELETE_BUTTON,
+                    "enable_sidebar_user_profile": config.ENABLE_SIDEBAR_USER_PROFILE,
+                    "enable_message_input_logo": config.ENABLE_MESSAGE_INPUT_LOGO,
+                    "enable_prompt_suggestions": config.ENABLE_PROMPT_SUGGESTIONS,
+                    "enable_user_settings_menu": config.ENABLE_USER_SETTINGS_MENU,
+                    "enable_model_selector_search": config.ENABLE_MODEL_SELECTOR_SEARCH,
+                    "enable_response_prompt_edit": config.ENABLE_RESPONSE_PROMPT_EDIT,
+                    "enable_response_continue": config.ENABLE_RESPONSE_CONTINUE,
                     "enable_rag_hybrid_search": app.state.config.ENABLE_RAG_HYBRID_SEARCH,
                 }
                 if user is not None
@@ -1060,8 +894,8 @@ async def get_app_config(request: Request, response: Response):
             ),
         },
         "google_drive": {
-            "client_id": GOOGLE_DRIVE_CLIENT_ID.value,
-            "api_key": GOOGLE_DRIVE_API_KEY.value,
+            "client_id": config.GOOGLE_DRIVE_CLIENT_ID,
+            "api_key": config.GOOGLE_DRIVE_API_KEY,
         },
         **(
             {
@@ -1147,7 +981,7 @@ async def get_app_changelog():
 ############################
 
 # SessionMiddleware is used by authlib for oauth
-if len(OAUTH_PROVIDERS) > 0:
+if len(config.OAUTH_PROVIDERS) > 0:
     app.add_middleware(
         SessionMiddleware,
         secret_key=WEBUI_SECRET_KEY,

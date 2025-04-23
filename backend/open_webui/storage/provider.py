@@ -8,12 +8,7 @@ from typing import BinaryIO, Tuple, Optional, Union
 
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.config import (
-    STORAGE_PROVIDER,
-    S3_ACCESS_KEY_ID,
-    S3_SECRET_ACCESS_KEY,
-    S3_BUCKET_NAME,
-    S3_REGION_NAME,
-    S3_ENDPOINT_URL,
+    config,
     UPLOAD_DIR,
 )
 
@@ -25,7 +20,7 @@ from typing import BinaryIO, Tuple, Optional
 
 class StorageProvider:
     def __init__(self, provider: Optional[str] = None):
-        self.storage_provider: str = provider or STORAGE_PROVIDER
+        self.storage_provider: str = provider or config.STORAGE_PROVIDER
 
         self.s3_client = None
         self.s3_bucket_name: Optional[str] = None
@@ -37,12 +32,12 @@ class StorageProvider:
         """Initializes the S3 client and bucket name if using S3 storage."""
         self.s3_client = boto3.client(
             "s3",
-            region_name=S3_REGION_NAME,
-            endpoint_url=S3_ENDPOINT_URL,
-            aws_access_key_id=S3_ACCESS_KEY_ID,
-            aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+            region_name=config.S3_REGION_NAME,
+            endpoint_url=config.S3_ENDPOINT_URL,
+            aws_access_key_id=config.S3_ACCESS_KEY_ID,
+            aws_secret_access_key=config.S3_SECRET_ACCESS_KEY,
         )
-        self.bucket_name = S3_BUCKET_NAME
+        self.bucket_name = config.S3_BUCKET_NAME
 
     def _upload_to_s3(self, file_path: str, filename: str) -> Tuple[bytes, str]:
         """Handles uploading of the file to S3 storage."""
@@ -166,4 +161,4 @@ class StorageProvider:
         self._delete_all_from_local()
 
 
-Storage = StorageProvider(provider=STORAGE_PROVIDER)
+Storage = StorageProvider(provider=config.STORAGE_PROVIDER)

@@ -142,7 +142,10 @@ class AppConfig:
         if isinstance(value, PersistentConfig):
             self._state[key] = value
         else:
-            self._state[key].value = value
+            if key in self._state:
+                self._state[key].value = value
+            else:
+                self._state[key] = PersistentConfig(key, value)
 
     def __getattr__(self, key):
         return self._state[key].value
@@ -158,9 +161,7 @@ class Config(BaseSettings):
     def model_post_init(self, __context: Any) -> None:
         for key, field in self.model_fields.items():
             if field.json_schema_extra and field.json_schema_extra.get("persistent"):
-                globals()[key] = PersistentConfig(key, field.default)
-            else:
-                globals()[key] = field.default
+                PersistentConfig(key, field.default)
 
 
 ####################################

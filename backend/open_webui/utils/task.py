@@ -9,7 +9,7 @@ import uuid
 from open_webui.utils.misc import get_last_user_message, get_messages_content
 
 from open_webui.env import SRC_LOG_LEVELS
-from open_webui.config import DEFAULT_RAG_TEMPLATE
+from open_webui.config import config
 
 
 log = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ def replace_messages_variable(
 
 def rag_template(template: str, context: str, query: str):
     if template.strip() == "":
-        template = DEFAULT_RAG_TEMPLATE
+        template = config.DEFAULT_RAG_TEMPLATE
 
     if "[context]" not in template and "{{CONTEXT}}" not in template:
         log.debug(

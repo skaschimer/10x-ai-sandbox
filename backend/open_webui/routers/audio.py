@@ -29,9 +29,8 @@ from pydantic import BaseModel
 
 from open_webui.utils.auth import get_admin_user, get_verified_user
 from open_webui.config import (
-    WHISPER_MODEL_AUTO_UPDATE,
-    WHISPER_MODEL_DIR,
     CACHE_DIR,
+    config,
 )
 
 from open_webui.constants import ERROR_MESSAGES
@@ -98,7 +97,7 @@ def set_faster_whisper_model(model: str, auto_update: bool = False):
             "model_size_or_path": model,
             "device": DEVICE_TYPE if DEVICE_TYPE and DEVICE_TYPE == "cuda" else "cpu",
             "compute_type": "int8",
-            "download_root": WHISPER_MODEL_DIR,
+            "download_root": config.WHISPER_MODEL_DIR,
             "local_files_only": not auto_update,
         }
 
@@ -193,7 +192,7 @@ async def update_audio_config(
 
     if request.app.state.config.STT_ENGINE == "":
         request.app.state.faster_whisper_model = set_faster_whisper_model(
-            form_data.stt.WHISPER_MODEL, WHISPER_MODEL_AUTO_UPDATE
+            form_data.stt.WHISPER_MODEL, config.WHISPER_MODEL_AUTO_UPDATE
         )
 
     return {

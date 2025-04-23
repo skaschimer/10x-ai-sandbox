@@ -73,12 +73,8 @@ from open_webui.utils.auth import get_admin_user, get_verified_user
 
 from open_webui.config import (
     ENV,
-    RAG_EMBEDDING_MODEL_AUTO_UPDATE,
-    RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE,
-    RAG_RERANKING_MODEL_AUTO_UPDATE,
-    RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
     UPLOAD_DIR,
-    DEFAULT_LOCALE,
+    config,
 )
 from open_webui.env import (
     SRC_LOG_LEVELS,
@@ -110,7 +106,7 @@ def get_ef(
             ef = SentenceTransformer(
                 get_model_path(embedding_model, auto_update),
                 device=DEVICE_TYPE,
-                trust_remote_code=RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE,
+                trust_remote_code=config.RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE,
             )
         except Exception as e:
             log.debug(f"Error loading SentenceTransformer: {e}")
@@ -143,7 +139,7 @@ def get_rf(
                 rf = sentence_transformers.CrossEncoder(
                     get_model_path(reranking_model, auto_update),
                     device=DEVICE_TYPE,
-                    trust_remote_code=RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
+                    trust_remote_code=config.RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
                 )
             except:
                 log.error("CrossEncoder error")
@@ -1228,7 +1224,7 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
         return search_bing(
             request.app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY,
             request.app.state.config.BING_SEARCH_V7_ENDPOINT,
-            str(DEFAULT_LOCALE),
+            str(config.DEFAULT_LOCALE),
             query,
             request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
             request.app.state.config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST,

@@ -60,7 +60,7 @@ from open_webui.utils.plugin import load_function_module_by_id
 
 from open_webui.tasks import create_task
 
-from open_webui.config import DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+from open_webui.config import config
 from open_webui.env import (
     SRC_LOG_LEVELS,
     GLOBAL_LOG_LEVEL,
@@ -240,7 +240,7 @@ async def chat_completion_tools_handler(
     if request.app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+        template = config.DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
 
     tools_function_calling_prompt = tools_function_calling_generation_template(
         template, tools_specs

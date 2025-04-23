@@ -12,7 +12,7 @@ from open_webui.models.chats import (
 from open_webui.models.tags import TagModel, Tags
 from open_webui.models.folders import Folders
 
-from open_webui.config import ENABLE_ADMIN_CHAT_ACCESS, ENABLE_ADMIN_EXPORT
+from open_webui.config import config
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.env import SRC_LOG_LEVELS
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -78,7 +78,7 @@ async def get_user_chat_list_by_user_id(
     skip: int = 0,
     limit: int = 50,
 ):
-    if not ENABLE_ADMIN_CHAT_ACCESS:
+    if not config.ENABLE_ADMIN_CHAT_ACCESS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
@@ -250,7 +250,7 @@ async def get_all_user_tags(user=Depends(get_verified_user)):
 
 @router.get("/all/db", response_model=list[ChatResponse])
 async def get_all_user_chats_in_db(user=Depends(get_admin_user)):
-    if not ENABLE_ADMIN_EXPORT:
+    if not config.ENABLE_ADMIN_EXPORT:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
@@ -292,9 +292,11 @@ async def get_shared_chat_by_id(share_id: str, user=Depends(get_verified_user)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail=ERROR_MESSAGES.NOT_FOUND
         )
 
-    if user.role == "user" or (user.role == "admin" and not ENABLE_ADMIN_CHAT_ACCESS):
+    if user.role == "user" or (
+        user.role == "admin" and not config.ENABLE_ADMIN_CHAT_ACCESS
+    ):
         chat = Chats.get_chat_by_share_id(share_id)
-    elif user.role == "admin" and ENABLE_ADMIN_CHAT_ACCESS:
+    elif user.role == "admin" and config.ENABLE_ADMIN_CHAT_ACCESS:
         chat = Chats.get_chat_by_id(share_id)
 
     if chat:
