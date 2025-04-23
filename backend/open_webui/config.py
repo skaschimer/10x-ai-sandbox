@@ -160,9 +160,15 @@ class Config(BaseSettings):
         return Field(default=default, **kwargs)
 
     def model_post_init(self, __context: Any) -> None:
-        for key, field in self.model_fields.items():
-            if field.json_schema_extra and field.json_schema_extra.get("persistent"):
-                PersistentConfig(key, field.default)
+        persistent_fields = [
+            key
+            for key, field_info in self.model_fields.items()
+            if field_info.json_schema_extra
+            and field_info.json_schema_extra.get("persistent")
+        ]
+        for key, value in self.model_dump().items():
+            if key in persistent_fields:
+                PersistentConfig(key, value)
 
 
 ####################################
