@@ -121,7 +121,7 @@
 
 		<div class="chat-{message.role} w-full min-w-full markdown-prose">
 			{#if message.files}
-				<div class="mt-2.5 mb-1 w-full flex flex-col justify-end overflow-x-auto gap-1 flex-wrap">
+				<div class="mt-2.5 mb-1 w-full flex flex-col justify-end gap-1 flex-wrap">
 					{#each message.files as file}
 						<div class={($settings?.chatBubble ?? true) ? 'self-end' : ''}>
 							{#if file.type === 'image'}
