@@ -26,7 +26,16 @@ from open_webui.constants import (
 )
 
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+    Request,
+    Query,
+)
 from fastapi.responses import FileResponse, StreamingResponse
 
 
@@ -45,18 +54,26 @@ router = APIRouter()
 
 @router.post("/", response_model=FileModelResponse)
 def upload_file(
-    request: Request, file: UploadFile = File(...), user=Depends(get_verified_user)
+    request: Request,
+    file: UploadFile = File(...),
+    source: str = Query(
+        None, description="source of file upload:'message' or 'knowledge'"
+    ),
+    user=Depends(get_verified_user),
 ):
     log.info(f"file.content_type: {file.content_type}")
     try:
         unsanitized_filename = file.filename
         filename = os.path.basename(unsanitized_filename)
         file_extension = os.path.splitext(filename)[1].lower().lstrip(".")
-        if not (
-            file.content_type in UPLOAD_ALLOWED_FILE_TYPES
-            and file_extension in UPLOAD_ALLOWED_FILE_EXTENSIONS
-        ):
-            raise HTTPException(status_code=400, detail=ERROR_MESSAGES.FILE_TYPE_ERROR)
+        if source == "message":
+            if not (
+                file.content_type in UPLOAD_ALLOWED_FILE_TYPES
+                and file_extension in UPLOAD_ALLOWED_FILE_EXTENSIONS
+            ):
+                raise HTTPException(
+                    status_code=400, detail=ERROR_MESSAGES.FILE_TYPE_ERROR
+                )
 
         # replace filename with uuid
         id = str(uuid.uuid4())

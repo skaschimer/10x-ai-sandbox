@@ -1,9 +1,12 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 import { apiFetch } from '$lib/utils/apiClient';
 
-export const uploadFile = async (file: File) => {
+export const uploadFile = async (file: File, source?: string) => {
 	const data = new FormData();
 	data.append('file', file);
+	if (source) {
+		data.append('source', source);
+	}
 	console.log('data: ', file);
 	return await apiFetch(`${WEBUI_API_BASE_URL}/files/`, {
 		method: 'POST',

@@ -40,11 +40,6 @@
 	import ChevronLeft from '$lib/components/icons/ChevronLeft.svelte';
 	import LockClosed from '$lib/components/icons/LockClosed.svelte';
 	import AccessControlModal from '../common/AccessControlModal.svelte';
-	import {
-		UPLOAD_ALLOWED_FILE_TYPES,
-		UPLOAD_ALLOWED_FILE_EXTENSIONS,
-		FILE_TYPE_ERROR
-	} from '$lib/constants';
 
 	let largeScreen = true;
 
@@ -118,13 +113,7 @@
 	const uploadFileHandler = async (file) => {
 		console.log(file);
 		const fileExtension = file.name.split('.').at(-1)?.toLowerCase();
-		if (
-			!UPLOAD_ALLOWED_FILE_TYPES.includes(file.type) ||
-			!UPLOAD_ALLOWED_FILE_EXTENSIONS.includes(fileExtension)
-		) {
-			toast.error(FILE_TYPE_ERROR);
-			return;
-		}
+
 		const tempItemId = uuidv4();
 		const fileItem = {
 			type: 'file',
@@ -160,7 +149,7 @@
 		}
 
 		try {
-			const uploadedFile = await uploadFile(file).catch((e) => {
+			const uploadedFile = await uploadFile(file, 'knowledge').catch((e) => {
 				knowledge.files = knowledge.files.filter((item) => item.itemId != tempItemId);
 				toast.error(e.message || e.detail || 'Failed to upload file');
 				return null;
@@ -590,7 +579,6 @@
 	id="files-input"
 	bind:files={inputFiles}
 	type="file"
-	accept=".pdf,.doc,.docx,.txt,.rft,.png,.jpg,.jpeg"
 	multiple
 	hidden
 	on:change={async () => {

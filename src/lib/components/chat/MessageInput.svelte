@@ -188,7 +188,7 @@
 
 		try {
 			// During the file upload, file content is automatically extracted.
-			const uploadedFile = await uploadFile(file);
+			const uploadedFile = await uploadFile(file, 'message');
 
 			if (uploadedFile) {
 				console.log('File upload completed:', {
