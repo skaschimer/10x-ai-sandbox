@@ -34,7 +34,7 @@ from fastapi import (
     UploadFile,
     status,
     Request,
-    Query,
+    Form,
 )
 from fastapi.responses import FileResponse, StreamingResponse
 
@@ -56,7 +56,7 @@ router = APIRouter()
 def upload_file(
     request: Request,
     file: UploadFile = File(...),
-    source: str = Query(
+    source: str = Form(
         None, description="source of file upload:'message' or 'knowledge'"
     ),
     user=Depends(get_verified_user),
@@ -66,7 +66,9 @@ def upload_file(
         unsanitized_filename = file.filename
         filename = os.path.basename(unsanitized_filename)
         file_extension = os.path.splitext(filename)[1].lower().lstrip(".")
+        log.debug(f"source:{source}")
         if source == "message":
+            log.debug("sourece is message")
             if not (
                 file.content_type in UPLOAD_ALLOWED_FILE_TYPES
                 and file_extension in UPLOAD_ALLOWED_FILE_EXTENSIONS
