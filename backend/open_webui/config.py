@@ -737,7 +737,7 @@ class RAGConfig(Config):
         "sentence-transformers/all-MiniLM-L6-v2"
     )
     RAG_EMBEDDING_MODEL_AUTO_UPDATE: bool = True
-    RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE: bool = Config.persistent(True)
+    RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE: bool = True
     RAG_EMBEDDING_BATCH_SIZE: int = Config.persistent(1)
     RAG_RERANKING_MODEL: str = Config.persistent("")
     RAG_RERANKING_MODEL_AUTO_UPDATE: bool = True
