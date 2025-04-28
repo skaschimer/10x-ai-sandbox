@@ -1,4 +1,4 @@
-"### Task:
+### Task:
 Respond to the user query using the provided context.
 
 ### Guidelines:
