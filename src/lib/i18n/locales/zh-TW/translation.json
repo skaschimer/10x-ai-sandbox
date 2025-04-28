@@ -659,7 +659,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "哎呀！還有檔案正在上傳。請等候上傳完畢。",
 	"Oops! There was an error in the previous response.": "哎呀！之前的回應有一處錯誤。",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "哎呀！您使用了不支援的方法（僅限前端）。請從後端提供 WebUI。",
-	"Open file": "開啟檔案",
 	"Open in full screen": "全螢幕開啟",
 	"Open new chat": "開啟新的對話",
 	"Open WebUI uses faster-whisper internally.": "Open WebUI 使用内部 faster-whisper。",
