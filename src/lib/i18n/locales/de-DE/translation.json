@@ -660,7 +660,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "Hoppla! Es werden noch Dateien hochgeladen. Bitte warten Sie, bis der Upload abgeschlossen ist.",
 	"Oops! There was an error in the previous response.": "Hoppla! Es gab einen Fehler in der vorherigen Antwort.",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "Hoppla! Sie verwenden eine nicht unterstützte Methode (nur Frontend). Bitte stellen Sie die WebUI vom Backend bereit.",
-	"Open file": "Datei öffnen",
 	"Open in full screen": "Im Vollbildmodus öffnen",
 	"Open new chat": "Neuen Chat öffnen",
 	"Open WebUI uses faster-whisper internally.": "Open WebUI verwendet intern faster-whisper.",

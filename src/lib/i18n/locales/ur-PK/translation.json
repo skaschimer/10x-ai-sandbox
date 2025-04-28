@@ -660,7 +660,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "اوہ! کچھ فائلیں ابھی بھی اپ لوڈ ہو رہی ہیں براہ کرم اپ لوڈ مکمل ہونے کا انتظار کریں",
 	"Oops! There was an error in the previous response.": "اوہ! پچھلے جواب میں ایک غلطی تھی",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "اوہ! آپ ایک غیر معاون طریقہ استعمال کر رہے ہیں (صرف فرنٹ اینڈ) براہ کرم ویب یو آئی کو بیک اینڈ سے پیش کریں",
-	"Open file": "فائل کھولیں",
 	"Open in full screen": "پوری اسکرین میں کھولیں",
 	"Open new chat": "نیا چیٹ کھولیں",
 	"Open WebUI uses faster-whisper internally.": "اوپن ویب یو آئی اندرونی طور پر فاسٹر وِسپر استعمال کرتا ہے",

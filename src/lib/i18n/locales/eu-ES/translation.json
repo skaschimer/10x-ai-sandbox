@@ -660,7 +660,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "Ui! Oraindik fitxategiak kargatzen ari dira. Mesedez, itxaron karga amaitu arte.",
 	"Oops! There was an error in the previous response.": "Ui! Errore bat egon da aurreko erantzunean.",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "Ui! Onartzen ez den metodo bat erabiltzen ari zara (frontend soilik). Mesedez, zerbitzatu WebUI-a backendetik.",
-	"Open file": "Ireki fitxategia",
 	"Open in full screen": "Ireki pantaila osoan",
 	"Open new chat": "Ireki txat berria",
 	"Open WebUI uses faster-whisper internally.": "Open WebUI-k faster-whisper erabiltzen du barnean.",

@@ -660,7 +660,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "Упс! Деякі файли все ще завантажуються. Будь ласка, зачекайте, поки завантаження завершиться.",
 	"Oops! There was an error in the previous response.": "Упс! Сталася помилка в попередній відповіді.",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "Упс! Ви використовуєте непідтримуваний метод (тільки для фронтенду). Будь ласка, обслуговуйте WebUI з бекенду.",
-	"Open file": "Відкрити файл",
 	"Open in full screen": "Відкрити на весь екран",
 	"Open new chat": "Відкрити новий чат",
 	"Open WebUI uses faster-whisper internally.": "Open WebUI використовує faster-whisper внутрішньо.",

@@ -660,7 +660,6 @@
 	"Oops! There are files still uploading. Please wait for the upload to complete.": "",
 	"Oops! There was an error in the previous response.": "",
 	"Oops! You're using an unsupported method (frontend only). Please serve the WebUI from the backend.": "Oups\u00a0! Vous utilisez une méthode non prise en charge (frontend uniquement). Veuillez servir l'interface Web à partir du backend.",
-	"Open file": "",
 	"Open in full screen": "",
 	"Open new chat": "Ouvrir une nouvelle discussion",
 	"Open WebUI uses faster-whisper internally.": "",
