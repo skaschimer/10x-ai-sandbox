@@ -20,14 +20,7 @@ from open_webui.constants import TASKS
 from open_webui.routers.pipelines import process_pipeline_inlet_filter
 from open_webui.utils.task import get_task_model_id
 
-from open_webui.config import (
-    DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE,
-    DEFAULT_TAGS_GENERATION_PROMPT_TEMPLATE,
-    DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE,
-    DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE,
-    DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE,
-    DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE,
-)
+from open_webui.config import config
 from open_webui.env import SRC_LOG_LEVELS
 
 
@@ -155,7 +148,7 @@ async def generate_title(
     if request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE
+        template = config.DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE
 
     content = title_generation_template(
         template,
@@ -230,7 +223,7 @@ async def generate_chat_tags(
     if request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_TAGS_GENERATION_PROMPT_TEMPLATE
+        template = config.DEFAULT_TAGS_GENERATION_PROMPT_TEMPLATE
 
     content = tags_generation_template(
         template, form_data["messages"], {"name": user.name}
@@ -301,7 +294,7 @@ async def generate_queries(
     if (request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE
+        template = config.DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE
 
     content = query_generation_template(
         template, form_data["messages"], {"name": user.name}
@@ -376,7 +369,7 @@ async def generate_autocompletion(
     if (request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
+        template = config.DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
 
     content = autocomplete_generation_template(
         template, prompt, messages, type, {"name": user.name}
@@ -428,7 +421,7 @@ async def generate_emoji(
 
     log.debug(f"generating emoji using model {task_model_id} for user {user.email} ")
 
-    template = DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE
+    template = config.DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE
 
     content = emoji_generation_template(
         template,
@@ -488,7 +481,7 @@ async def generate_moa_response(
 
     log.debug(f"generating MOA model {task_model_id} for user {user.email} ")
 
-    template = DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE
+    template = config.DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE
 
     content = moa_response_generation_template(
         template,

@@ -112,6 +112,7 @@
 
 	const uploadFileHandler = async (file) => {
 		console.log(file);
+		const fileExtension = file.name.split('.').at(-1)?.toLowerCase();
 
 		const tempItemId = uuidv4();
 		const fileItem = {
@@ -148,8 +149,9 @@
 		}
 
 		try {
-			const uploadedFile = await uploadFile(file).catch((e) => {
-				toast.error(e);
+			const uploadedFile = await uploadFile(file, 'knowledge').catch((e) => {
+				knowledge.files = knowledge.files.filter((item) => item.itemId != tempItemId);
+				toast.error(e.message || e.detail || 'Failed to upload file');
 				return null;
 			});
 
@@ -165,11 +167,10 @@
 					return item;
 				});
 				await addFileHandler(uploadedFile.id);
-			} else {
-				toast.error($i18n.t('Failed to upload file.'));
 			}
 		} catch (e) {
-			toast.error(e);
+			knowledge.files = knowledge.files.filter((item) => item.itemId != tempItemId);
+			toast.error(e.message || e.detail || 'Failed to upload file');
 		}
 	};
 

@@ -79,7 +79,7 @@
 
 	{#if !small}
 		<div class="flex flex-col justify-center -space-y-0.5 px-2.5 w-full">
-			<div class=" dark:text-gray-100 text-sm font-medium line-clamp-1 mb-1">
+			<div class=" dark:text-gray-100 text-sm font-medium truncate w-full min-w-0 mb-1">
 				{name}
 			</div>
 

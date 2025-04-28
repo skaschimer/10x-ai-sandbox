@@ -100,8 +100,8 @@ async def set_banners(
     user=Depends(get_admin_user),
 ):
     data = form_data.model_dump()
-    request.app.state.config.BANNERS = data["banners"]
-    return request.app.state.config.BANNERS
+    request.app.state.config.WEBUI_BANNERS = data["banners"]
+    return request.app.state.config.WEBUI_BANNERS
 
 
 @router.get("/banners", response_model=list[BannerModel])
@@ -109,4 +109,4 @@ async def get_banners(
     request: Request,
     user=Depends(get_verified_user),
 ):
-    return request.app.state.config.BANNERS
+    return request.app.state.config.WEBUI_BANNERS

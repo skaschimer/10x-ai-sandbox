@@ -21,7 +21,7 @@ from sqlalchemy.ext.mutable import MutableDict
 
 from open_webui.env import SRC_LOG_LEVELS
 from open_webui.retrieval.vector.main import VectorItem, SearchResult, GetResult
-from open_webui.config import PGVECTOR_DB_URL
+from open_webui.config import config
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
@@ -45,12 +45,12 @@ class PgvectorClient:
     def __init__(self) -> None:
 
         # if no pgvector uri, use the existing database connection
-        if not PGVECTOR_DB_URL:
+        if not config.PGVECTOR_DB_URL:
             from open_webui.internal.db import Session as MainLocalSession
 
             self.session = MainLocalSession
         else:
-            engine = create_engine(PGVECTOR_DB_URL, pool_pre_ping=True)
+            engine = create_engine(config.PGVECTOR_DB_URL, pool_pre_ping=True)
             # save the session factory, not the session it generates
             self.SessionLocal = sessionmaker(
                 autocommit=False, autoflush=False, bind=engine, expire_on_commit=False
