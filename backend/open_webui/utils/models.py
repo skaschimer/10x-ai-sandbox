@@ -18,7 +18,7 @@ from open_webui.utils.access_control import has_access
 
 
 from open_webui.config import (
-    DEFAULT_ARENA_MODEL,
+    config,
 )
 
 from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL
@@ -87,10 +87,10 @@ async def get_all_models(request):
             # Add default arena model
             arena_models = [
                 {
-                    "id": DEFAULT_ARENA_MODEL["id"],
-                    "name": DEFAULT_ARENA_MODEL["name"],
+                    "id": config.DEFAULT_ARENA_MODEL["id"],
+                    "name": config.DEFAULT_ARENA_MODEL["name"],
                     "info": {
-                        "meta": DEFAULT_ARENA_MODEL["meta"],
+                        "meta": config.DEFAULT_ARENA_MODEL["meta"],
                     },
                     "object": "model",
                     "created": int(time.time()),

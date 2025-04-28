@@ -30,10 +30,7 @@ from open_webui.env import (
 )
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse, Response
-from open_webui.config import (
-    OPENID_PROVIDER_URL,
-    ENABLE_OAUTH_SIGNUP,
-)
+from open_webui.config import config
 from pydantic import BaseModel
 from open_webui.utils.misc import parse_duration, validate_email_format
 from open_webui.utils.auth import (
@@ -185,9 +182,9 @@ async def ldap_auth(request: Request, response: Response, form_data: LdapForm):
             raise HTTPException(400, detail="Application account bind failed")
 
         search_success = connection_app.search(
-            search_base=LDAP_SEARCH_BASE,
-            search_filter=f"(&({LDAP_ATTRIBUTE_FOR_USERNAME}={escape_filter_chars(form_data.user.lower())}){LDAP_SEARCH_FILTERS})",
-            attributes=[f"{LDAP_ATTRIBUTE_FOR_USERNAME}", "mail", "cn"],
+            search_base=config.LDAP_SEARCH_BASE,
+            search_filter=f"(&({config.LDAP_ATTRIBUTE_FOR_USERNAME}={escape_filter_chars(form_data.user.lower())}){config.LDAP_SEARCH_FILTERS})",
+            attributes=[f"{config.LDAP_ATTRIBUTE_FOR_USERNAME}", "mail", "cn"],
         )
 
         if not search_success:
@@ -264,7 +261,7 @@ async def ldap_auth(request: Request, response: Response, form_data: LdapForm):
         else:
             raise HTTPException(
                 400,
-                f"User {form_data.user} does not match the record. Search result: {str(entry[f'{LDAP_ATTRIBUTE_FOR_USERNAME}'])}",
+                f"User {form_data.user} does not match the record. Search result: {str(entry[f'{config.LDAP_ATTRIBUTE_FOR_USERNAME}'])}",
             )
     except Exception as e:
         raise HTTPException(400, detail=str(e))
@@ -501,12 +498,12 @@ async def signout(request: Request, response: Response):
     response.delete_cookie("token")
     response.delete_cookie("refresh_token")
 
-    if ENABLE_OAUTH_SIGNUP.value:
+    if config.ENABLE_OAUTH_SIGNUP.value:
         oauth_id_token = request.cookies.get("oauth_id_token")
         if oauth_id_token:
             try:
                 async with ClientSession() as session:
-                    async with session.get(OPENID_PROVIDER_URL.value) as resp:
+                    async with session.get(config.OPENID_PROVIDER_URL.value) as resp:
                         if resp.ok:
                             openid_data = await resp.json()
                             logout_url = openid_data.get("end_session_endpoint")

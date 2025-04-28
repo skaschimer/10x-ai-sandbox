@@ -60,7 +60,7 @@ from open_webui.utils.plugin import load_function_module_by_id
 
 from open_webui.tasks import create_task
 
-from open_webui.config import DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+from open_webui.config import config
 from open_webui.env import (
     SRC_LOG_LEVELS,
     GLOBAL_LOG_LEVEL,
@@ -240,7 +240,7 @@ async def chat_completion_tools_handler(
     if request.app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
     else:
-        template = DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
+        template = config.DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE
 
     tools_function_calling_prompt = tools_function_calling_generation_template(
         template, tools_specs
@@ -526,9 +526,9 @@ async def chat_completion_files_handler(
             files=files,
             queries=queries,
             embedding_function=request.app.state.EMBEDDING_FUNCTION,
-            k=request.app.state.config.TOP_K,
+            k=request.app.state.config.RAG_TOP_K,
             reranking_function=request.app.state.rf,
-            r=request.app.state.config.RELEVANCE_THRESHOLD,
+            r=request.app.state.config.RAG_RELEVANCE_THRESHOLD,
             hybrid_search=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
         )
 
@@ -699,7 +699,7 @@ async def process_chat_payload(request, form_data, metadata, user, model):
         if prompt is None:
             raise Exception("No user message found")
         if (
-            request.app.state.config.RELEVANCE_THRESHOLD == 0
+            request.app.state.config.RAG_RELEVANCE_THRESHOLD == 0
             and context_string.strip() == ""
         ):
             log.debug(
