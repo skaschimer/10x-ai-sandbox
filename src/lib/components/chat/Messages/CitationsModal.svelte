@@ -67,23 +67,17 @@
 						</div>
 
 						{#if document.source?.name}
-							<Tooltip
-								className="w-fit"
-								content={$i18n.t('Open file')}
-								placement="top-start"
-								tippyOptions={{ duration: [500, 0] }}
-							>
-								<div class="text-sm dark:text-gray-400 flex items-center gap-2 w-fit">
-									{document?.metadata?.name ?? document.source.name}
+							<div class="text-sm dark:text-gray-400 flex items-center gap-2 w-fit">
+								{document?.metadata?.name ?? document.source.name}
 
-									{#if document?.metadata?.page}
-										<span class="text-xs text-gray-600 dark:text-gray-400">
-											({$i18n.t('page')}
-											{document.metadata.page + 1})
-										</span>
-									{/if}
-								</div>
-							</Tooltip>
+								{#if document?.metadata?.page}
+									<span class="text-xs text-gray-600 dark:text-gray-400">
+										({$i18n.t('page')}
+										{document.metadata.page + 1})
+									</span>
+								{/if}
+							</div>
+
 							{#if showRelevance}
 								<div class="text-sm font-medium dark:text-gray-300 mt-2">
 									{$i18n.t('Relevance')}
