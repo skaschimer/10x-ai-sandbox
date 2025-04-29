@@ -348,7 +348,7 @@ class OAuthManager:
             secure=WEBUI_SESSION_COOKIE_SECURE,
         )
 
-        if config.ENABLE_OAUTH_SIGNUP.value:
+        if config.ENABLE_OAUTH_SIGNUP:
             oauth_id_token = token.get("id_token")
             response.set_cookie(
                 key="oauth_id_token",
