@@ -498,12 +498,12 @@ async def signout(request: Request, response: Response):
     response.delete_cookie("token")
     response.delete_cookie("refresh_token")
 
-    if config.ENABLE_OAUTH_SIGNUP.value:
+    if config.ENABLE_OAUTH_SIGNUP:
         oauth_id_token = request.cookies.get("oauth_id_token")
         if oauth_id_token:
             try:
                 async with ClientSession() as session:
-                    async with session.get(config.OPENID_PROVIDER_URL.value) as resp:
+                    async with session.get(config.OPENID_PROVIDER_URL) as resp:
                         if resp.ok:
                             openid_data = await resp.json()
                             logout_url = openid_data.get("end_session_endpoint")
