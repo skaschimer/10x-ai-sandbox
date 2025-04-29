@@ -15,7 +15,7 @@
 	let headingId = 'terms-heading';
 
 	async function acceptTerms() {
-		await settings.set({ ...$settings, ...{ acceptedTermsVersion: TERMS_VERSION } });
+		settings.set({ ...$settings, ...{ acceptedTermsVersion: TERMS_VERSION } });
 		await updateUserSettings({ ui: $settings });
 		show = false;
 	}
@@ -51,8 +51,8 @@
 				</p>
 				<ul class="terms-list list-none p-0">
 					<li>
-						All prompts and responses will be logged. Your data will be protected and used only to
-						improve and further refine Chat.
+						All prompts, document uploads, and responses will be logged. Your data will be protected
+						and used only to improve and further refine Chat.
 					</li>
 					<li>
 						GSA's <a
@@ -65,8 +65,8 @@
 							class="underline"
 							href="https://insite.gsa.gov/directives-library/use-of-artificial-intelligence-at-gsa"
 							>AI Directive</a
-						> prohibit using Chat inappropriately or for harmful purposes. Do not use CUI or PII in your
-						prompts.
+						> prohibit using Chat inappropriately or for harmful purposes. Do not use PII in your prompts
+						or documents.
 					</li>
 					<li>
 						Chat may generate incorrect or misleading information. Please carefully review its
