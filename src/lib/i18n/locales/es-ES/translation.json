@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Puede personalizar sus interacciones con LLMs añadiendo memorias a través del botón 'Gestionar' debajo, haciendo que sean más útiles y personalizados para usted.",
 	"You cannot upload an empty file.": "",
-	"You do not have permission to upload files.": "",
 	"You have no archived conversations.": "No tiene conversaciones archivadas.",
 	"You have shared this chat": "Usted ha compartido esta conversación",
 	"You're a helpful assistant.": "Usted es un asistente útil.",

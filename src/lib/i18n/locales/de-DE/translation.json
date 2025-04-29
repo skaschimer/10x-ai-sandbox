@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "Sie können nur mit maximal {{maxCount}} Datei(en) gleichzeitig chatten.",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Personalisieren Sie Interaktionen mit LLMs, indem Sie über die Schaltfläche \"Verwalten\" Erinnerungen hinzufügen.",
 	"You cannot upload an empty file.": "Sie können keine leere Datei hochladen.",
-	"You do not have permission to upload files.": "Sie haben keine Berechtigung zum Hochladen von Dateien.",
 	"You have no archived conversations.": "Du hast keine archivierten Unterhaltungen.",
 	"You have shared this chat": "Sie haben diese Unterhaltung geteilt",
 	"You're a helpful assistant.": "Du bist ein hilfreicher Assistent.",

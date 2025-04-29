@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "Одновременно вы можете общаться только с максимальным количеством файлов {{maxCount}}.",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Вы можете персонализировать свое взаимодействие с LLMs, добавив воспоминания с помощью кнопки \"Управлять\" ниже, что сделает их более полезными и адаптированными для вас.",
 	"You cannot upload an empty file.": "Вы не можете загрузить пустой файл.",
-	"You do not have permission to upload files.": "У вас нет разрешения на загрузку файлов.",
 	"You have no archived conversations.": "У вас нет архивированных бесед.",
 	"You have shared this chat": "Вы поделились этим чатом",
 	"You're a helpful assistant.": "Вы полезный ассистент.",

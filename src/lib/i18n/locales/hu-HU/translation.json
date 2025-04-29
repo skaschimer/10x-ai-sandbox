@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "Egyszerre maximum {{maxCount}} fájllal tud csevegni.",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Az LLM-ekkel való interakcióit személyre szabhatja emlékek hozzáadásával a lenti 'Kezelés' gomb segítségével, így azok még hasznosabbak és személyre szabottabbak lesznek.",
 	"You cannot upload an empty file.": "Nem tölthet fel üres fájlt.",
-	"You do not have permission to upload files.": "",
 	"You have no archived conversations.": "Nincsenek archivált beszélgetései.",
 	"You have shared this chat": "Megosztotta ezt a beszélgetést",
 	"You're a helpful assistant.": "Ön egy segítőkész asszisztens.",

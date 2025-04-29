@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "Môžete komunikovať len s maximálne {{maxCount}} súbor(ami) naraz.",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Môžete personalizovať svoje interakcie s LLM pridaním spomienok prostredníctvom tlačidla 'Spravovať' nižšie, čo ich urobí pre vás užitočnejšími a lepšie prispôsobenými.",
 	"You cannot upload an empty file.": "Nemôžete nahrať prázdny súbor.",
-	"You do not have permission to upload files.": "",
 	"You have no archived conversations.": "Nemáte žiadne archivované konverzácie.",
 	"You have shared this chat": "Zdieľali ste tento chat.",
 	"You're a helpful assistant.": "Ste užitočný asistent.",
