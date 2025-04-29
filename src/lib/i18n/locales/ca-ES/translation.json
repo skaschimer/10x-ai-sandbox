@@ -1042,7 +1042,6 @@
 	"You can only chat with a maximum of {{maxCount}} file(s) at a time.": "Només pots xatejar amb un màxim de {{maxCount}} fitxers alhora.",
 	"You can personalize your interactions with LLMs by adding memories through the 'Manage' button below, making them more helpful and tailored to you.": "Pots personalitzar les teves interaccions amb els models de llenguatge afegint memòries mitjançant el botó 'Gestiona' que hi ha a continuació, fent-les més útils i adaptades a tu.",
 	"You cannot upload an empty file.": "No es pot pujar un ariux buit.",
-	"You do not have permission to upload files.": "No tens permisos per pujar arxius.",
 	"You have no archived conversations.": "No tens converses arxivades.",
 	"You have shared this chat": "Has compartit aquest xat",
 	"You're a helpful assistant.": "Ets un assistent útil.",
