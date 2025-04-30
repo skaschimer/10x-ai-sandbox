@@ -886,6 +886,7 @@ async def get_app_config(request: Request, response: Response):
                     "enable_response_prompt_edit": config.ENABLE_RESPONSE_PROMPT_EDIT,
                     "enable_response_continue": config.ENABLE_RESPONSE_CONTINUE,
                     "enable_rag_hybrid_search": app.state.config.ENABLE_RAG_HYBRID_SEARCH,
+                    "enable_screen_capture": config.ENABLE_SCREEN_CAPTURE,
                 }
                 if user is not None
                 else {}

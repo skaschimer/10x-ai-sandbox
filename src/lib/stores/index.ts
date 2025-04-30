@@ -222,6 +222,7 @@ type Config = {
 		enable_response_prompt_edit: boolean;
 		enable_response_continue: boolean;
 		enable_rag_hybrid_search: boolean;
+		enable_screen_capture: boolean;
 	};
 	oauth: {
 		providers: {

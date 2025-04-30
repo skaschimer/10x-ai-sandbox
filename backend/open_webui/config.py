@@ -571,6 +571,7 @@ class WebUIConfig(Config):
     ENABLE_MODEL_SELECTOR_SEARCH: bool = False
     ENABLE_RESPONSE_PROMPT_EDIT: bool = True
     ENABLE_RESPONSE_CONTINUE: bool = True
+    ENABLE_SCREEN_CAPTURE: bool = False
     # For production, you should only need one host as
     # fastapi serves the svelte-kit built frontend and backend from the same host and port.
     # To test CORS_ALLOW_ORIGIN locally, you can set something like
