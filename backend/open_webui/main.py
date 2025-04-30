@@ -696,12 +696,44 @@ async def get_base_models(request: Request, user=Depends(get_admin_user)):
     return {"data": models}
 
 
+@app.get("/api/redis-test")
+async def test_redis():
+    """Test Redis connection and operations."""
+    from open_webui.tasks import redis_client
+
+    if not redis_client:
+        return {"status": "error", "message": "Redis client is not available"}
+
+    try:
+        # Test basic operations
+        redis_client.set("test-key", "test-value")
+        value = redis_client.get("test-key")
+
+        # List all task keys
+        task_keys = redis_client.keys("task:*")
+
+        return {
+            "status": "ok",
+            "redis_connected": True,
+            "test_value": value.decode("utf-8") if value else None,
+            "task_keys": [k.decode("utf-8") for k in task_keys],
+            "pod_name": os.environ.get("HOSTNAME", "unknown"),
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "pod_name": os.environ.get("HOSTNAME", "unknown"),
+        }
+
+
 @app.post("/api/chat/completions")
 async def chat_completion(
     request: Request,
     form_data: dict,
     user=Depends(get_verified_user),
 ):
+    log.info(f"Starting chat completion")
     if not request.app.state.MODELS:
         await get_all_models(request)
 
@@ -784,10 +816,22 @@ async def chat_action(
 
 @app.post("/api/tasks/stop/{task_id}")
 async def stop_task_endpoint(task_id: str, user=Depends(get_verified_user)):
+    log.info(f"Received stop request for task {task_id}")
+
+    from open_webui.tasks import tasks
+
+    task = tasks.get(task_id)
+
+    if task:
+        log.critical(f"Found task {task_id} directly in endpoint")
+        task.cancel()
+        return {"status": True, "message": f"Task {task_id} cancelled directly"}
+
     try:
         result = await stop_task(task_id)  # Use the function from tasks.py
         return result
     except ValueError as e:
+        log.warning(f"Error stopping task {task_id}: {str(e)}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 

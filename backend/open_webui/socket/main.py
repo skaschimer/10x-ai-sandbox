@@ -3,6 +3,7 @@ import socketio
 import logging
 import sys
 import time
+import os
 
 from open_webui.models.users import Users, UserNameResponse
 from open_webui.models.channels import Channels
@@ -250,6 +251,47 @@ async def channel_events(sid, data):
             },
             room=room,
         )
+
+
+@sio.on("stop_task_request")
+async def handle_stop_task_request(sid, data):
+    """
+    Handle a request to stop a task, forwarded from another pod.
+    """
+    task_id = data.get("task_id")
+    pod_name = data.get("pod")
+
+    current_pod = os.environ.get("HOSTNAME", "unknown")
+    log.critical(
+        f"Received stop_task_request for task {task_id} on pod {pod_name}, current pod is {current_pod}"
+    )
+
+    # only process if this is the target pod
+    if pod_name == current_pod:
+        # import tasks module
+        from open_webui.tasks import tasks
+
+        task = tasks.get(task_id)
+        if task:
+            log.info(f"Found task {task_id} locally, stopping it")
+            task.cancel()
+
+            # send confirmation back
+            await sio.emit(
+                "task_stopped", {"task_id": task_id, "pod": current_pod, "status": True}
+            )
+
+            return {"status": True, "message": "Task stopped"}
+        else:
+            log.warning(
+                f"Task {task_id} not found locally on pod {current_pod} despite Redis record"
+            )
+    else:
+        log.info(
+            f"This pod ({current_pod}) is not the target pod ({pod_name}) for task {task_id}"
+        )
+
+    return {"status": False, "message": "Not the target pod or task not found"}
 
 
 @sio.on("user-list")
