@@ -169,17 +169,12 @@ async def connect(sid, environ, auth):
 @sio.on("user-join")
 async def user_join(sid, data):
 
-    auth = data["auth"] if "auth" in data else None
-    if not auth or "token" not in auth:
-        return
-    try:
-        data = decode_token(auth["token"])
-    except Exception:
-        return
-    if data is None or "id" not in data:
+    user = data["user"] if "user" in data else None
+    if not user or "id" not in user:
         return
 
-    user = Users.get_user_by_id(data["id"])
+    user = Users.get_user_by_id(user["id"])
+
     if not user:
         return
 

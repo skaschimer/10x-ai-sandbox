@@ -214,8 +214,7 @@
 
 				if (sessionUser) {
 					// Save Session User to Store
-					$socket.emit('user-join', { auth: { token: sessionUser.token } });
-
+					$socket.emit('user-join', { user: { id: sessionUser.id } });
 					$socket?.on('chat-events', chatEventHandler);
 					$socket?.on('channel-events', channelEventHandler);
 
