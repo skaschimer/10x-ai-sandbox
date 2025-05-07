@@ -380,6 +380,30 @@
 		window.addEventListener('message', onMessageHandler);
 		$socket?.on('chat-events', chatEventHandler);
 
+		$socket?.on('task_stopped', (data) => {
+			console.log('Received task_stopped event:', data);
+
+			// check if this is for current task
+			if (data.task_id === taskId) {
+				console.log('Handling task stop for current task');
+
+				// Update the response message to mark it as complete
+				const responseMessage = history.messages[history.currentId];
+				if (responseMessage) {
+					responseMessage.done = true;
+					history.messages[history.currentId] = responseMessage;
+
+					// clear task id
+					taskId = null;
+
+					// force UI update
+					history = { ...history };
+
+					toast.success($i18n.t('Response generation stopped'));
+				}
+			}
+		});
+
 		if (!$chatId) {
 			chatIdUnsubscriber = chatId.subscribe(async (value) => {
 				if (!value) {
