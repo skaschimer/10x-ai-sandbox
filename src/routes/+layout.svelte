@@ -204,30 +204,24 @@
 			if ($config) {
 				await setupSocket($config.features?.enable_websocket ?? true);
 
-				if (localStorage.token) {
-					// Get Session User Info
-					const sessionUser = await getSessionUser().catch((error) => {
-						toast.error(error);
-						return null;
-					});
-
-					if (sessionUser) {
-						// Save Session User to Store
-						$socket.emit('user-join', { auth: { token: sessionUser.token } });
-
-						$socket?.on('chat-events', chatEventHandler);
-						$socket?.on('channel-events', channelEventHandler);
-
-						await user.set(sessionUser);
-						await config.set(await getBackendConfig());
-					} else {
-						// Redirect Invalid Session User to /auth Page
-						localStorage.removeItem('token');
+				// Get Session User Info
+				const sessionUser = await getSessionUser().catch(async (error) => {
+					if ($page.url.pathname !== '/auth') {
 						await goto('/auth');
 					}
+					return null;
+				});
+
+				if (sessionUser) {
+					// Save Session User to Store
+					$socket.emit('user-join', { user: { id: sessionUser.id } });
+					$socket?.on('chat-events', chatEventHandler);
+					$socket?.on('channel-events', channelEventHandler);
+
+					await user.set(sessionUser);
+					await config.set(await getBackendConfig());
 				} else {
-					// Don't redirect if we're already on the auth page
-					// Needed because we pass in tokens from OAuth logins via URL fragments
+					// Redirect Invalid Session User to /auth Page
 					if ($page.url.pathname !== '/auth') {
 						await goto('/auth');
 					}

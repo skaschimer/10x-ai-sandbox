@@ -416,7 +416,7 @@
 		});
 
 		if (res) {
-			$socket.emit('join-channels', { auth: { token: $user.token } });
+			$socket.emit('join-channels', { user: { id: $user.id } });
 			await initChannels();
 			showCreateChannel = false;
 		}
