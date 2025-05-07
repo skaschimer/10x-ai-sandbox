@@ -5,13 +5,13 @@ import logging
 from typing import Dict
 from uuid import uuid4
 import redis
+from open_webui.env import REDIS_URL
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 # Get environment variables or use defaults
-REDIS_URL = os.environ.get("WEBSOCKET_REDIS_URL", "redis://:@redis:6379/0")
 POD_NAME = os.environ.get("HOSTNAME", f"pod-{uuid4()}")
 
 # Connect to Redis
@@ -27,42 +27,6 @@ except Exception as e:
 
 # A dictionary to keep track of active tasks
 tasks: Dict[str, asyncio.Task] = {}
-
-
-def test_redis_connection():
-    """Test the Redis connection and print debugging information."""
-    if redis_client:
-        try:
-            print(f"Testing Redis connection to {REDIS_URL}")
-            log.critical(f"Testing Redis connection to {REDIS_URL}")
-
-            # Try pinging
-            ping_result = redis_client.ping()
-            print(f"Redis ping result: {ping_result}")
-            log.critical(f"Redis ping result: {ping_result}")
-
-            # Try setting and getting a value
-            test_key = f"test:connection:{POD_NAME}"
-            redis_client.set(test_key, "test_value", ex=60)
-            test_value = redis_client.get(test_key)
-            print(f"Redis get test value: {test_value}")
-            log.critical(f"Redis get test value: {test_value}")
-
-            return True
-        except Exception as e:
-            print(f"Redis connection test failed: {e}")
-            log.critical(f"Redis connection test failed: {e}")
-            return False
-    else:
-        print("Redis client is None")
-        log.critical("Redis client is None")
-        return False
-
-
-# Call this function when the module loads
-redis_connected = test_redis_connection()
-print(f"Redis connection status: {redis_connected}")
-log.critical(f"Redis connection status: {redis_connected}")
 
 
 def cleanup_task(task_id: str):
