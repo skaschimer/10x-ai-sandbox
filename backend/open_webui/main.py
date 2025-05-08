@@ -8,6 +8,7 @@ import shutil
 import sys
 import time
 import random
+import threading
 
 from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
@@ -145,7 +146,7 @@ from open_webui.utils.auth import (
 from open_webui.utils.oauth import oauth_manager
 from open_webui.utils.security_headers import SecurityHeadersMiddleware
 
-from open_webui.tasks import stop_task, list_tasks  # Import from tasks.py
+from open_webui.tasks import stop_task, task_channel_listener
 
 if SAFE_MODE:
     print("SAFE MODE ENABLED")
@@ -189,6 +190,7 @@ async def lifespan(app: FastAPI):
     if RESET_CONFIG_ON_START:
         reset_config()
 
+    threading.Thread(target=task_channel_listener, daemon=True).start()
     asyncio.create_task(periodic_usage_pool_cleanup())
     yield
 
@@ -791,9 +793,13 @@ async def stop_task_endpoint(task_id: str, user=Depends(get_verified_user)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@app.get("/api/tasks")
-async def list_tasks_endpoint(user=Depends(get_verified_user)):
-    return {"tasks": list_tasks()}  # Use the function from tasks.py
+# This endpoint is currently not used, so it's disabled. Also note that most
+# task functions in tasks.py are currently designed for a single app instance.
+# They will need to be updated for multi-instance support if this endpoint is
+# enabled.
+# @app.get("/api/tasks")
+# async def list_tasks_endpoint(user=Depends(get_verified_user)):
+#     return {"tasks": list_tasks()}  # Use the function from tasks.py
 
 
 ##################################
