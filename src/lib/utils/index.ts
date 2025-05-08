@@ -44,19 +44,16 @@ export const replaceTokens = (content, sourceIds, char, user) => {
 
 	// Remove sourceIds from the content and replace them with <source_id>...</source_id>
 	if (Array.isArray(sourceIds)) {
-
-				const sourceIdMap = new Map(
-					sourceIds.map(id => [id.toLowerCase(), id])
-				);
-				const bracketPattern = /\[(.*?)\]/g;
-				content = content.replace(bracketPattern, (match, captured) => {			
-					const originalSourceId = sourceIdMap.get(captured.toLowerCase());
-					if (originalSourceId) {
-						return `<source_id data="${originalSourceId}" />`;
-					}
-					return match;
-				});
+		const sourceIdMap = new Map(sourceIds.map((id) => [id.toLowerCase(), id]));
+		const bracketPattern = /\[(.*?)\]/g;
+		content = content.replace(bracketPattern, (match, captured) => {
+			const originalSourceId = sourceIdMap.get(captured.toLowerCase());
+			if (originalSourceId) {
+				return `<source_id data="${originalSourceId}" />`;
 			}
+			return match;
+		});
+	}
 
 	return content;
 };
