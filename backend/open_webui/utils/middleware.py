@@ -1070,9 +1070,9 @@ async def process_chat_response(
                     )
 
                 raise
-
-            if response.background is not None:
-                await response.background()
+            finally:
+                if response.background is not None:
+                    await response.background()
 
         # background_tasks.add_task(post_response_handler, response, events)
         task_id, _ = create_task(post_response_handler(response, events))
