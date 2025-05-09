@@ -325,6 +325,8 @@
 					eventConfirmationMessage = data.message;
 					eventConfirmationInputPlaceholder = data.placeholder;
 					eventConfirmationInputValue = data?.value ?? '';
+				} else if (type === 'task-cancelled') {
+					console.log('Stopped response generation');
 				} else {
 					console.log('Unknown message type', data);
 				}
