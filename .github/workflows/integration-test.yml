@@ -15,10 +15,10 @@ jobs:
     name: Run Cypress Integration Tests
     runs-on: ubuntu-latest
     env:
-      PUBLIC_DATADOG_APP_ID: ${{ secrets.DATADOG_APP_ID }}
-      PUBLIC_DATADOG_CLIENT_TOKEN:  ${{ secrets.DATADOG_CLIENT_TOKEN }}
-      PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN: ${{ secrets.DATADOG_BROWSERLOGS_CLIENT_TOKEN }}
-      PUBLIC_DATADOG_SERVICE:  ${{ secrets.DATADOG_SERVICE }}
+      PUBLIC_DATADOG_APP_ID: ${{ vars.PUBLIC_DATADOG_APP_ID }}
+      PUBLIC_DATADOG_CLIENT_TOKEN: ${{ vars.PUBLIC_DATADOG_CLIENT_TOKEN }}
+      PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN: ${{ vars.PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN }}
+      PUBLIC_DATADOG_SERVICE: ${{ vars.PUBLIC_DATADOG_SERVICE }}
 
     steps:
       - name: Maximize build space
@@ -151,9 +151,9 @@ jobs:
 
       - name: Test backend with Postgres+Redis
         env:
-          WEBUI_SECRET_KEY: secret-key  # pragma: allowlist secret
+          WEBUI_SECRET_KEY: secret-key # pragma: allowlist secret
           GLOBAL_LOG_LEVEL: debug
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres  # pragma: allowlist secret
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres # pragma: allowlist secret
           PGVECTOR_DB_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/postgres # pragma: allowlist secret
           REDIS_URL: redis://localhost:6379
           DATABASE_POOL_SIZE: 10
