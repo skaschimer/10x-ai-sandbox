@@ -1054,7 +1054,9 @@ async def process_chat_response(
 
                 await background_tasks_handler()
             except asyncio.CancelledError:
-                print("Task was cancelled!")
+                log.info(
+                    f"Task '{task_id}' was cancelled, saving messages up to this point"
+                )
                 await event_emitter({"type": "task-cancelled"})
 
                 if not ENABLE_REALTIME_CHAT_SAVE:
@@ -1066,6 +1068,8 @@ async def process_chat_response(
                             "content": content,
                         },
                     )
+
+                raise
 
             if response.background is not None:
                 await response.background()
