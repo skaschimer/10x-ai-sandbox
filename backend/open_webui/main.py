@@ -793,15 +793,6 @@ async def stop_task_endpoint(task_id: str, user=Depends(get_verified_user)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-# This endpoint is currently not used, so it's disabled. Also note that most
-# task functions in tasks.py are currently designed for a single app instance.
-# They will need to be updated for multi-instance support if this endpoint is
-# enabled.
-# @app.get("/api/tasks")
-# async def list_tasks_endpoint(user=Depends(get_verified_user)):
-#     return {"tasks": list_tasks()}  # Use the function from tasks.py
-
-
 ##################################
 #
 # Config Endpoints
