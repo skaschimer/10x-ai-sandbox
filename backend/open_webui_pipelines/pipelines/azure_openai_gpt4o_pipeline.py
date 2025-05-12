@@ -82,7 +82,7 @@ class Pipeline:
             "logit_bias",
             "user",
             "function_call",
-            "funcions",
+            "functions",
             "tools",
             "tool_choice",
             "top_p",
