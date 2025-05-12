@@ -27,16 +27,16 @@ redis_client = redis.StrictRedis.from_url(REDIS_URL)
 if not redis_client:
     log.fatal("Failed to connect to Redis")
 
-pubsub = redis_client.pubsub()
-pubsub.subscribe(CHANNEL_NAME)
-log.info(f"{INSTANCE_NAME} subscribed to Redis pub/sub channel: {CHANNEL_NAME}")
-
 
 def task_channel_listener():
     """
     Listen for task-related messages on the Redis pub/sub channel. This is a
     blocking function, so it should be run in a separate thread.
     """
+    pubsub = redis_client.pubsub()
+    pubsub.subscribe(CHANNEL_NAME)
+    log.info(f"{INSTANCE_NAME} subscribed to Redis pub/sub channel: {CHANNEL_NAME}")
+
     for message in pubsub.listen():
         log.info(f"Received message: {message}")
         if message["type"] != "message":
@@ -107,8 +107,10 @@ async def stop_task(task_id: str):
         return {"status": True, "message": f"Task stopped locally: {task_id}."}
     else:
         # Otherwise, inform other instances of the stop request
-        redis_client.publish(CHANNEL_NAME, f"stop:{task_id}")
-        log.info(f"Task {task_id} stop request published to other instances.")
+        subscriber_count = redis_client.publish(CHANNEL_NAME, f"stop:{task_id}")
+        log.info(
+            f"Task {task_id} stop request published to other instances. {subscriber_count} subscriber(s) notified."
+        )
         return {
             "status": True,
             "message": f"Initiated stop request for task: {task_id}.",
