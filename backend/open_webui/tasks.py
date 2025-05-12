@@ -38,15 +38,15 @@ def task_channel_listener():
     log.info(f"{INSTANCE_NAME} subscribed to Redis pub/sub channel: {CHANNEL_NAME}")
 
     for message in pubsub.listen():
-        log.info(f"Received message: {message}")
+        log.debug(f"Received message: {message}")
         if message["type"] != "message":
-            log.info(f"Message type is not 'message', ignoring: {message['type']}")
+            log.debug(f"Message type is not 'message', ignoring: {message['type']}")
             continue
 
         message_data = message["data"].decode("utf-8")
         command, task_id = message_data.split(":", 1)
-        log.info(f"{INSTANCE_NAME} evaluating command: {command}, task ID: {task_id}")
-        log.info(f"{INSTANCE_NAME} local tasks: {tasks.keys()}")
+        log.debug(f"{INSTANCE_NAME} evaluating command: {command}, task ID: {task_id}")
+        log.debug(f"{INSTANCE_NAME} local tasks: {tasks.keys()}")
 
         # If this is our task, handle the command.
         if command == "stop" and task_id in tasks:
@@ -54,7 +54,7 @@ def task_channel_listener():
 
 
 def cancel_task(task_id: str):
-    log.info(f"Stopping task {task_id} on instance {INSTANCE_NAME}")
+    log.debug(f"Stopping task {task_id} on instance {INSTANCE_NAME}")
     try:
         tasks[task_id].cancel()
     except Exception as e:
@@ -99,16 +99,16 @@ async def stop_task(task_id: str):
     """
     Handle a request to cancel a running task.
     """
-    log.info(f"Instance {INSTANCE_NAME} received stop request for task {task_id}")
+    log.debug(f"Instance {INSTANCE_NAME} received stop request for task {task_id}")
     if task_id in tasks:
         # It's a local task, stop it locally
         cancel_task(task_id)
-        log.info(f"Task {task_id} stopped locally.")
+        log.debug(f"Task {task_id} stopped locally.")
         return {"status": True, "message": f"Task stopped locally: {task_id}."}
     else:
         # Otherwise, inform other instances of the stop request
         subscriber_count = redis_client.publish(CHANNEL_NAME, f"stop:{task_id}")
-        log.info(
+        log.debug(
             f"Task {task_id} stop request published to other instances. {subscriber_count} subscriber(s) notified."
         )
         return {
