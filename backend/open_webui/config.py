@@ -362,8 +362,6 @@ if CUSTOM_NAME:
 
 class StorageProviderConfig(Config):
     STORAGE_PROVIDER: str = Config.persistent("")  # local (default), s3
-    S3_ACCESS_KEY_ID: Optional[str] = Config.persistent(None)
-    S3_SECRET_ACCESS_KEY: Optional[str] = Config.persistent(None)
     S3_REGION_NAME: Optional[str] = Config.persistent(None)
     S3_BUCKET_NAME: Optional[str] = Config.persistent(None)
     S3_ENDPOINT_URL: Optional[str] = Config.persistent(None)
