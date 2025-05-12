@@ -122,4 +122,4 @@ class Pipeline:
 
         except Exception as e:
             text = r.text if r else ""
-            raise f"Error azure gpt4o pipeline: {e} {text}"
+            raise Exception(f"Error azure gpt4o pipeline: {e} {text}")
