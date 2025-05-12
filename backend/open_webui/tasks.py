@@ -38,11 +38,15 @@ def task_channel_listener():
     blocking function, so it should be run in a separate thread.
     """
     for message in pubsub.listen():
+        log.info(f"Received message: {message}")
         if message["type"] != "message":
+            log.info(f"Message type is not 'message', ignoring: {message['type']}")
             continue
 
         message_data = message["data"].decode("utf-8")
         command, task_id = message_data.split(":", 1)
+        log.info(f"{INSTANCE_NAME} evaluating command: {command}, task ID: {task_id}")
+        log.info(f"{INSTANCE_NAME} local tasks: {tasks.keys()}")
 
         # If this is our task, handle the command.
         if command == "stop" and task_id in tasks:
