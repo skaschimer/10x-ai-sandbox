@@ -95,13 +95,16 @@ async def stop_task(task_id: str):
     """
     Handle a request to cancel a running task.
     """
+    log.info(f"Instance {INSTANCE_NAME} received stop request for task {task_id}")
     if task_id in tasks:
         # It's a local task, stop it locally
         cancel_task(task_id)
+        log.info(f"Task {task_id} stopped locally.")
         return {"status": True, "message": f"Task stopped locally: {task_id}."}
     else:
         # Otherwise, inform other instances of the stop request
         redis_client.publish(CHANNEL_NAME, f"stop:{task_id}")
+        log.info(f"Task {task_id} stop request published to other instances.")
         return {
             "status": True,
             "message": f"Initiated stop request for task: {task_id}.",
