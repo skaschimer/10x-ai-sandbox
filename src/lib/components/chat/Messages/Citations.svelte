@@ -108,7 +108,7 @@
 			<div class="flex text-xs font-medium">
 				{#each citations as citation, idx}
 					<button
-						id={`source-${citation.metadata?.[0]?.name ?? citation.source.name}`}
+						id={`source-${citation.source.name}`}
 						class="no-toggle outline-none flex dark:text-gray-300 p-1 bg-white dark:bg-gray-900 rounded-xl max-w-96"
 						on:click={() => {
 							showCitationModal = true;

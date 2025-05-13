@@ -134,7 +134,6 @@
 			acc.push(...ids);
 
 			// remove duplicates
-			// return acc.filter((item, index) => acc.indexOf(item) === index);
 			return [...new Set(acc)];
 		}, [])}
 		{onSourceClick}

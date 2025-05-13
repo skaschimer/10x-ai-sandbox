@@ -680,23 +680,7 @@
 										save={!readOnly}
 										{model}
 										onSourceClick={(e) => {
-											console.log('ww deubug source e:', e);
-											/*
-											let sourceButton = document.getElementById(`source-${e}`);
-											if(! sourceButton){
-												const sourceButtons = document.querySelectorAll(`[id="source-${e}"]`);
-												console.log('ww debug source buttons', sourceButtons)
-												if (sourceButtons.length >0){
-													sourceButton = sourceButtons[0];
-												}
-											}
-
-											if (sourceButton) {
-												
-												sourceButton.click();
-											}
-											*/
-
+											// console.log('deubug sourceId:', e);
 											if (citationsComponent) {
 												citationsComponent.showCitationById(e);
 											}
