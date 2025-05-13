@@ -17,6 +17,14 @@
 	let selectedCitation: any = null;
 	let isCollapsibleOpen = false;
 
+	export function showCitationById(id: string) {
+		const citation = citations.find((c) => c.source.name === id);
+		if (citation) {
+			showCitationModal = true;
+			selectedCitation = citation;
+		}
+	}
+
 	function calculateShowRelevance(sources: any[]) {
 		const distances = sources.flatMap((citation) => citation.distances ?? []);
 		const inRange = distances.filter((d) => d !== undefined && d >= -1 && d <= 1).length;
@@ -100,7 +108,7 @@
 			<div class="flex text-xs font-medium">
 				{#each citations as citation, idx}
 					<button
-						id={`source-${citation.source.name}`}
+						id={`source-${citation.metadata?.[0]?.name ?? citation.source.name}`}
 						class="no-toggle outline-none flex dark:text-gray-300 p-1 bg-white dark:bg-gray-900 rounded-xl max-w-96"
 						on:click={() => {
 							showCitationModal = true;
