@@ -17,6 +17,14 @@
 	let selectedCitation: any = null;
 	let isCollapsibleOpen = false;
 
+	export function showCitationById(id: string) {
+		const citation = citations.find((c) => c.source.name === id);
+		if (citation) {
+			showCitationModal = true;
+			selectedCitation = citation;
+		}
+	}
+
 	function calculateShowRelevance(sources: any[]) {
 		const distances = sources.flatMap((citation) => citation.distances ?? []);
 		const inRange = distances.filter((d) => d !== undefined && d >= -1 && d <= 1).length;

@@ -116,29 +116,25 @@
 		{model}
 		{save}
 		sourceIds={(sources ?? []).reduce((acc, s) => {
-			let ids = [];
+			const ids = [];
 			s.document.forEach((document, index) => {
 				const metadata = s.metadata?.[index];
 				const id = metadata?.source ?? 'N/A';
 
 				if (metadata?.name) {
 					ids.push(metadata.name);
-					return ids;
 				}
-
 				if (id.startsWith('http://') || id.startsWith('https://')) {
 					ids.push(id);
 				} else {
 					ids.push(s?.source?.name ?? id);
 				}
-
-				return ids;
 			});
 
-			acc = [...acc, ...ids];
+			acc.push(...ids);
 
 			// remove duplicates
-			return acc.filter((item, index) => acc.indexOf(item) === index);
+			return [...new Set(acc)];
 		}, [])}
 		{onSourceClick}
 		on:update={(e) => {

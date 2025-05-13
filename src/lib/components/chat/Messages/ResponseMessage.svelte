@@ -139,6 +139,8 @@
 
 	let showRateComment = false;
 
+	let citationsComponent: any;
+
 	const copyToClipboard = async (text) => {
 		const res = await _copyToClipboard(text);
 		if (res) {
@@ -678,11 +680,9 @@
 										save={!readOnly}
 										{model}
 										onSourceClick={(e) => {
-											console.log(e);
-											const sourceButton = document.getElementById(`source-${e}`);
-
-											if (sourceButton) {
-												sourceButton.click();
+											// console.log('deubug sourceId:', e);
+											if (citationsComponent) {
+												citationsComponent.showCitationById(e);
 											}
 										}}
 										onAddMessages={({ modelId, parentId, messages }) => {
@@ -718,7 +718,10 @@
 								{/if}
 
 								{#if (message?.sources || message?.citations) && (model?.info?.meta?.capabilities?.citations ?? true)}
-									<Citations sources={message?.sources ?? message?.citations} />
+									<Citations
+										sources={message?.sources ?? message?.citations}
+										bind:this={citationsComponent}
+									/>
 								{/if}
 
 								{#if message.code_executions}
