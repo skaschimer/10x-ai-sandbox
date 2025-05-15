@@ -134,7 +134,7 @@
 									type={file.type}
 									size={file?.size}
 									colorClassName="bg-white dark:bg-gray-850"
-									className="max-w-full w-full overflow-hidde"
+									className="max-w-full"
 								/>
 							{/if}
 						</div>
