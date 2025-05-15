@@ -23,7 +23,14 @@ INSTANCE_NAME = os.environ.get("HOSTNAME", f"instance-{uuid4()}")
 CHANNEL_NAME = "tasks"
 
 # Connect to Redis
-redis_client = redis.StrictRedis.from_url(REDIS_URL)
+redis_client = redis.StrictRedis.from_url(
+    REDIS_URL,
+    socket_timeout=None,
+    socket_keepalive=True,
+    health_check_interval=10,
+    retry_on_timeout=True,
+)
+
 if not redis_client:
     log.fatal("Failed to connect to Redis")
 
