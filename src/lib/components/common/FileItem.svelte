@@ -79,7 +79,7 @@
 
 	{#if !small}
 		<div class="flex flex-col justify-center -space-y-0.5 px-2.5 w-full">
-			<div class=" dark:text-gray-100 text-sm font-medium truncate w-full min-w-0 mb-1">
+			<div class=" dark:text-gray-100 text-sm font-medium truncate max-w-[200px] min-w-0 mb-1">
 				{name}
 			</div>
 
@@ -107,7 +107,7 @@
 							<Spinner className="size-4" />
 						</div>
 					{/if}
-					<div class="font-medium line-clamp-1 flex-1">{name}</div>
+					<div class="font-medium truncate max-w-[180px] min-w-0">{name}</div>
 					<div class="text-gray-600 dark:text-gray-500 text-xs capitalize shrink-0">
 						{formatFileSize(size)}
 					</div>
