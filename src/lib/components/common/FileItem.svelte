@@ -31,7 +31,7 @@
 	<FileItemModal bind:show={showModal} bind:item {edit} />
 {/if}
 
-<div class="relative group">
+<div class="relative">
 	<button
 		class="p-1.5 {className} flex items-center gap-1 {colorClassName} {small
 			? 'rounded-xl'
@@ -118,7 +118,8 @@
 	</button>
 	{#if dismissible}
 		<button
-			class="absolute -top-1 -right-1 bg-gray-400 text-white border border-white rounded-full group-hover:visible invisible transition"
+			aria-label="Remove {name}"
+			class="absolute -top-1 -right-1 bg-gray-400 text-white border border-white rounded-full transition"
 			type="button"
 			on:click|stopPropagation={() => {
 				dispatch('dismiss');
