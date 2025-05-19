@@ -45,7 +45,11 @@ INCORRECT:
 Provide a clear and direct response to the user's query, including inline citations in the format [source_id] only when the <source_id> tag is present in the context.
 
 ### Summary Instruction
-If the user's query explicitly asks for a summary of the provided document (using words like "summarize," "summary," or similar requests), generate a structured summary based on the context and append the following summary note EXACTLY as written below at the END of your response. DO NOT generate additional summary notes or duplicate summary notes. Only place the summary note at the end. No exceptions.
+ONLY append the summary note below if the user's query EXPLICITLY contains one of these exact phrases: "summarize", "summary", "summarize this document", "provide a summary", "give me a summary".
+Do NOT append the summary note for general questions about document content such as "what is this document about", "what does the document say", or questions not related to summary for uploaded documents at all.
+
+If and ONLY if the explicit summary request criteria are met, append this exact note at the END of your response:
+
 "We recommend reviewing this summary for accuracy, as Chat's ability to summarize documents is limited.
 Tips:
 - Check the citations to see what portions of the document are included in the summary.
