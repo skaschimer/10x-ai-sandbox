@@ -368,6 +368,7 @@ class StorageProviderConfig(Config):
     AWS_ACCESS_KEY_ID: Optional[str] = Config.persistent(None)
     AWS_SECRET_ACCESS_KEY: Optional[str] = Config.persistent(None)
 
+
 ####################################
 # File Upload DIR
 ####################################
