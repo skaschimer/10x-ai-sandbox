@@ -34,8 +34,8 @@ class StorageProvider:
             "s3",
             region_name=config.S3_REGION_NAME,
             endpoint_url=config.S3_ENDPOINT_URL,
-            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+            aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
         )
         self.bucket_name = config.S3_BUCKET_NAME
 
