@@ -365,8 +365,8 @@ class StorageProviderConfig(Config):
     S3_REGION_NAME: Optional[str] = Config.persistent(None)
     S3_BUCKET_NAME: Optional[str] = Config.persistent(None)
     S3_ENDPOINT_URL: Optional[str] = Config.persistent(None)
-    AWS_ACCESS_KEY_ID: Optional[str] = Config.persistent(None)
-    AWS_SECRET_ACCESS_KEY: Optional[str] = Config.persistent(None)
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
 
 
 ####################################

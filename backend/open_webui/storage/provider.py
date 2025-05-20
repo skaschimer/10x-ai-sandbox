@@ -2,10 +2,12 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 import shutil
+import logging
 
 
 from typing import BinaryIO, Tuple, Optional, Union
 
+from open_webui.env import SRC_LOG_LEVELS
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.config import (
     config,
@@ -16,6 +18,9 @@ from open_webui.config import (
 import boto3
 from botocore.exceptions import ClientError
 from typing import BinaryIO, Tuple, Optional
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
 class StorageProvider:
@@ -30,14 +35,29 @@ class StorageProvider:
 
     def _initialize_s3(self) -> None:
         """Initializes the S3 client and bucket name if using S3 storage."""
-        self.s3_client = boto3.client(
-            "s3",
-            region_name=config.S3_REGION_NAME,
-            endpoint_url=config.S3_ENDPOINT_URL,
-            aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
-        )
-        self.bucket_name = config.S3_BUCKET_NAME
+        aws_access_key_id = config.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = config.AWS_SECRET_ACCESS_KEY
+
+        if not aws_access_key_id:
+            log.error("AWS_ACCESS_KEY_ID is not set in config")
+            return
+
+        if not aws_secret_access_key:
+            log.error("AWS_SECRET_ACCESS_KEY is not set in config")
+            return
+        try:
+            self.s3_client = boto3.client(
+                "s3",
+                region_name=config.S3_REGION_NAME,
+                endpoint_url=config.S3_ENDPOINT_URL,
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+            )
+            self.bucket_name = config.S3_BUCKET_NAME
+            log.info("s3 client initialized successfully")
+        except Exception as e:
+            log.error(f"Failed to initialize s3 client: {str(e)}")
+            self.s3_client = None
 
     def _upload_to_s3(self, file_path: str, filename: str) -> Tuple[bytes, str]:
         """Handles uploading of the file to S3 storage."""
