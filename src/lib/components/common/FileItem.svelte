@@ -9,7 +9,7 @@
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
 
-	export let className = 'w-60';
+	export let className = 'w-70';
 	export let colorClassName = 'bg-white dark:bg-gray-850 border border-gray-50 dark:border-white/5';
 	export let url: string | null = null;
 
