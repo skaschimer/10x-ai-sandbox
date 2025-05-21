@@ -190,6 +190,14 @@ async def lifespan(app: FastAPI):
     if RESET_CONFIG_ON_START:
         reset_config()
 
+    if "AWS_ACCESS_KEY_ID" in os.environ:
+        config.AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+        log.info("Loaded AWS_ACCESS_KEY_ID from pod env")
+
+    if "AWS_SECRET_ACCESS_KEY" in os.environ:
+        config.AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+        log.info("Loaded AWS_SECRET_ACCESS_KEY from pod env")
+
     threading.Thread(target=task_channel_listener, daemon=True).start()
     asyncio.create_task(periodic_usage_pool_cleanup())
     yield
