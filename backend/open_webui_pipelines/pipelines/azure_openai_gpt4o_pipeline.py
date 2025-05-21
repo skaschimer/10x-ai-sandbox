@@ -22,12 +22,11 @@ class Pipeline:
         backslashes.
         """
 
-        # self.id = "azure_openai_gpt4o_pipeline"
         self.name = "OpenAI ChatGPT 4o"
         self.valves = self.Valves(
             **{
                 "AZURE_AMPERE_GPT4O_API_KEY": os.getenv(
-                    "AZURE_OPENAI_GPT4O_API_KEY", "your-azure-openai-api-key-here"
+                    "AZURE_AMPERE_GPT4O_API_KEY", "your-azure-openai-api-key-here"
                 ),
                 "AZURE_AMPERE_GPT4O_URL": os.getenv(
                     "AZURE_AMPERE_GPT4O_URL", "your-azure-openai-api-key-here"
