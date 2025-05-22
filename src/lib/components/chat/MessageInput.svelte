@@ -555,11 +555,12 @@
 									<div class="mx-1 mt-2.5 mb-1 flex flex-wrap gap-2">
 										{#each files as file, fileIdx}
 											{#if file.type === 'image'}
-												<div class=" relative group">
+												<div class=" relative">
 													<div class="relative">
 														<Image
 															src={file.url}
-															alt="input"
+															alt="View the uploaded image"
+															className="w-full"
 															imageClassName=" h-16 w-16 rounded-xl object-cover"
 														/>
 														{#if atSelectedModel ? visionCapableModels.length === 0 : selectedModels.length !== visionCapableModels.length}
@@ -590,7 +591,8 @@
 													</div>
 													<div class=" absolute -top-1 -right-1">
 														<button
-															class=" bg-gray-400 text-white border border-white rounded-full group-hover:visible invisible transition"
+															aria-label="Remove the uploaded image"
+															class=" bg-gray-400 text-white border border-white rounded-full transition"
 															type="button"
 															on:click={() => {
 																files.splice(fileIdx, 1);
@@ -598,6 +600,7 @@
 															}}
 														>
 															<svg
+																aria-hidden="true"
 																xmlns="http://www.w3.org/2000/svg"
 																viewBox="0 0 20 20"
 																fill="currentColor"
