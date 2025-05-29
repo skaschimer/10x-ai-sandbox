@@ -22,6 +22,7 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from requests import HTTPError
 import tiktoken
 
 
@@ -1246,8 +1247,8 @@ def process_web_search(
         web_results = search_web(
             request, request.app.state.config.RAG_WEB_SEARCH_ENGINE, form_data.query
         )
-    except Exception as e:
-        log.exception(e)
+    except HTTPError as e:
+        log.error(f"Error during web search: {e.response.json()}")
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
