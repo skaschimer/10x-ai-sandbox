@@ -469,7 +469,7 @@ async def chat_web_search_handler(
                 }
             )
     except Exception as e:
-        log.exception(e)
+        log.error(f"Error during web search: {e}")
         await event_emitter(
             {
                 "type": "status",
