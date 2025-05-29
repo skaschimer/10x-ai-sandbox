@@ -42,13 +42,24 @@
 
 5. **Install deps, build and run**:
 
-   - It is recommended to run against the stock pgvector postgres container, which can be run like so:
+   - Set up pgvector postgres container:
 
    ```bash
-   docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 pgvector/pgvector:pg15
+   docker run --name pgvector_postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5432:5432 pgvector/pgvector:pg15
    ```
 
-   - Make sure you've got the .env file set up, then install, build and run with hot reloading:
+   - Set up Redis:
+
+   ```bash
+   docker run -d -p 6379:6379 redis
+   ```
+
+   - Set up .env file:
+
+     - Create a .env file in the project root
+     - Contact dev team members for the shared .env values sheet.
+
+   - Install, build and run with hot reloading:
 
    ```bash
    rm ./backend/data/webui.db || true && \
