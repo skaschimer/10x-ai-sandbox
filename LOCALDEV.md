@@ -54,9 +54,10 @@
    docker run -d -p 6379:6379 redis
    ```
 
-   - Set up .env file: 
-      * Create a .env file in the project root
-      * Contact dev team members for the shared .env values sheet. 
+   - Set up .env file:
+
+     - Create a .env file in the project root
+     - Contact dev team members for the shared .env values sheet.
 
    - Install, build and run with hot reloading:
 
