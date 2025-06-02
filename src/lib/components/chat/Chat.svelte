@@ -180,6 +180,7 @@
 			return;
 		}
 		sessionStorage.selectedModels = JSON.stringify(selectedModels);
+
 		// console.log('saveSessionSelectedModels', selectedModels, sessionStorage.selectedModels);
 	};
 
@@ -628,15 +629,21 @@
 	//////////////////////////
 
 	const initNewChat = async () => {
-		// never use the sessionStorage selected model for new chats
-		if (sessionStorage.selectedModels) {
-			selectedModels = JSON.parse(sessionStorage.selectedModels);
-			sessionStorage.removeItem('selectedModels');
-		}
+		// Debug: Log current context
+		console.log('Current Page URL:', $page.url.toString());
+		console.log('URL Models Param:', $page.url.searchParams.get('models'));
+		console.log('URL Single Model Param:', $page.url.searchParams.get('model'));
 
+		// Debug: Log storage contents
+		console.log('localStorage userSelectedModels:', localStorage.getItem('userSelectedModels'));
+		console.log('sessionStorage selectedModels:', sessionStorage.selectedModels);
+
+		let selectedModels = [];
 		if ($page.url.searchParams.get('models')) {
+			console.log('URL search params call- getmodles');
 			selectedModels = $page.url.searchParams.get('models')?.split(',');
 		} else if ($page.url.searchParams.get('model')) {
+			console.log('URL search params call- get single model');
 			const urlModels = $page.url.searchParams.get('model')?.split(',');
 
 			if (urlModels.length === 1) {
@@ -660,26 +667,30 @@
 			} else {
 				selectedModels = urlModels;
 			}
-		} else {
-			if (sessionStorage.selectedModels) {
-				selectedModels = JSON.parse(sessionStorage.selectedModels);
-				sessionStorage.removeItem('selectedModels');
-			} else {
-				if ($config?.default_models) {
-					// console.log($config?.default_models.split(',') ?? '');
-					selectedModels = $config?.default_models.split(',');
-				}
-			}
+		} else if (sessionStorage.selectedModels) {
+			console.log('default models- session storage is been called');
+			selectedModels = JSON.parse(sessionStorage.selectedModels);
+		} else if ($settings?.model && $settings.models.length > 0) {
+			console.log('default models- user selected models get called');
+			selectedModels = $settings.models.filter((id) => id.trim());
+		} else if ($config?.default_models) {
+			console.log('default models- config default model is been called');
+			selectedModels = $config?.default_models.split(',');
 		}
-
 		selectedModels = selectedModels.filter((modelId) => $models.map((m) => m.id).includes(modelId));
+
 		if (selectedModels.length === 0 || (selectedModels.length === 1 && selectedModels[0] === '')) {
+			console.log('default models- fall back to set to 1st availabe models');
 			if ($models.length > 0) {
 				selectedModels = [$models[0].id];
 			} else {
 				selectedModels = [''];
 			}
 		}
+
+		sessionStorage.selectedModels = JSON.stringify(selectedModels);
+
+		console.log('current seltect models:', selectedModels);
 
 		await showControls.set(false);
 		await showCallOverlay.set(false);
@@ -743,6 +754,8 @@
 		selectedModels = selectedModels.map((modelId) =>
 			$models.map((m) => m.id).includes(modelId) ? modelId : ''
 		);
+
+		console.log('selected Models after mapping:', selectedModels);
 
 		const userSettings = await getUserSettings();
 
