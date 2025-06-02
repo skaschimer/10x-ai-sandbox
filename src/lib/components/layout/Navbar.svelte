@@ -40,6 +40,7 @@
 
 	let showShareChatModal = false;
 	let showDownloadChatModal = false;
+	export let modelSelectorKey = 0;
 </script>
 
 <ShareChatModal bind:show={showShareChatModal} chatId={$chatId} />
@@ -77,7 +78,9 @@
 			"
 			>
 				{#if showModelSelector}
-					<ModelSelector bind:selectedModels showSetDefault={!shareEnabled} />
+					{#key modelSelectorKey}
+						<ModelSelector bind:selectedModels showSetDefault={!shareEnabled} />
+					{/key}
 				{/if}
 			</div>
 

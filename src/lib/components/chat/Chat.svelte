@@ -112,6 +112,8 @@
 	let selectedModelIds = [];
 	$: selectedModelIds = atSelectedModel !== undefined ? [atSelectedModel.id] : selectedModels;
 
+	let modelSelectorKey = 0;
+
 	let selectedToolIds = [];
 	let webSearchEnabled = false;
 
@@ -170,6 +172,26 @@
 			}
 		})();
 	}
+	$: if (!chatIdProp && $models.length > 0) {
+		restoreSelectedModelFromSession();
+	}
+	const restoreSelectedModelFromSession = async () => {
+		const needsRestore =
+			selectedModels == undefined ||
+			selectedModels.length === 0 ||
+			(selectedModels.length === 1 && selectedModels[0] === '');
+		if (!needsRestore) return;
+		let modelsToSet = [];
+		if (sessionStorage.selectedModels) {
+			const storedModels = JSON.parse(sessionStorage.selectedModels);
+			modelsToSet = storedModels.filter((modelId) => $models.map((m) => m.id).includes(modelId));
+		}
+		if (modelsToSet.length > 0) {
+			selectedModels = modelsToSet;
+			await tick();
+			modelSelectorKey = Date.now();
+		}
+	};
 
 	$: if (selectedModels && chatIdProp !== '') {
 		saveSessionSelectedModels();
@@ -637,8 +659,9 @@
 		// Debug: Log storage contents
 		console.log('localStorage userSelectedModels:', localStorage.getItem('userSelectedModels'));
 		console.log('sessionStorage selectedModels:', sessionStorage.selectedModels);
+		//console.log('selected models:', selectedModels)
 
-		let selectedModels = [];
+		selectedModels = [];
 		if ($page.url.searchParams.get('models')) {
 			console.log('URL search params call- getmodles');
 			selectedModels = $page.url.searchParams.get('models')?.split(',');
@@ -1934,6 +1957,7 @@
 			bind:selectedModels
 			shareEnabled={!!history.currentId}
 			{initNewChat}
+			{modelSelectorKey}
 		/>
 
 		<PaneGroup direction="horizontal" class="w-full h-full">
