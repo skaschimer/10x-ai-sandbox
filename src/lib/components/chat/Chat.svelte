@@ -112,6 +112,8 @@
 	let selectedModelIds = [];
 	$: selectedModelIds = atSelectedModel !== undefined ? [atSelectedModel.id] : selectedModels;
 
+	let modelSelectorKey = 0;
+
 	let selectedToolIds = [];
 	let webSearchEnabled = false;
 
@@ -170,6 +172,26 @@
 			}
 		})();
 	}
+	$: if (!chatIdProp && $models.length > 0) {
+		restoreSelectedModelFromSession();
+	}
+	const restoreSelectedModelFromSession = async () => {
+		const needsRestore =
+			selectedModels == undefined ||
+			selectedModels.length === 0 ||
+			(selectedModels.length === 1 && selectedModels[0] === '');
+		if (!needsRestore) return;
+		let modelsToSet = [];
+		if (sessionStorage.selectedModels) {
+			const storedModels = JSON.parse(sessionStorage.selectedModels);
+			modelsToSet = storedModels.filter((modelId) => $models.map((m) => m.id).includes(modelId));
+		}
+		if (modelsToSet.length > 0) {
+			selectedModels = modelsToSet;
+			await tick();
+			modelSelectorKey = Date.now();
+		}
+	};
 
 	$: if (selectedModels && chatIdProp !== '') {
 		saveSessionSelectedModels();
@@ -180,6 +202,7 @@
 			return;
 		}
 		sessionStorage.selectedModels = JSON.stringify(selectedModels);
+
 		// console.log('saveSessionSelectedModels', selectedModels, sessionStorage.selectedModels);
 	};
 
@@ -628,15 +651,13 @@
 	//////////////////////////
 
 	const initNewChat = async () => {
-		// never use the sessionStorage selected model for new chats
-		if (sessionStorage.selectedModels) {
-			selectedModels = JSON.parse(sessionStorage.selectedModels);
-			sessionStorage.removeItem('selectedModels');
-		}
-
+		console.log('sessionStorage selectedModels:', sessionStorage.selectedModels);
+		selectedModels = [];
 		if ($page.url.searchParams.get('models')) {
+			console.log('URL search params call- getmodles');
 			selectedModels = $page.url.searchParams.get('models')?.split(',');
 		} else if ($page.url.searchParams.get('model')) {
+			console.log('URL search params call- get single model');
 			const urlModels = $page.url.searchParams.get('model')?.split(',');
 
 			if (urlModels.length === 1) {
@@ -660,19 +681,15 @@
 			} else {
 				selectedModels = urlModels;
 			}
-		} else {
-			if (sessionStorage.selectedModels) {
-				selectedModels = JSON.parse(sessionStorage.selectedModels);
-				sessionStorage.removeItem('selectedModels');
-			} else {
-				if ($config?.default_models) {
-					// console.log($config?.default_models.split(',') ?? '');
-					selectedModels = $config?.default_models.split(',');
-				}
-			}
+		} else if (sessionStorage.selectedModels) {
+			selectedModels = JSON.parse(sessionStorage.selectedModels);
+		} else if ($settings?.model && $settings.models.length > 0) {
+			selectedModels = $settings.models.filter((id) => id.trim());
+		} else if ($config?.default_models) {
+			selectedModels = $config?.default_models.split(',');
 		}
-
 		selectedModels = selectedModels.filter((modelId) => $models.map((m) => m.id).includes(modelId));
+
 		if (selectedModels.length === 0 || (selectedModels.length === 1 && selectedModels[0] === '')) {
 			if ($models.length > 0) {
 				selectedModels = [$models[0].id];
@@ -680,7 +697,6 @@
 				selectedModels = [''];
 			}
 		}
-
 		await showControls.set(false);
 		await showCallOverlay.set(false);
 		await showOverview.set(false);
@@ -1921,6 +1937,7 @@
 			bind:selectedModels
 			shareEnabled={!!history.currentId}
 			{initNewChat}
+			{modelSelectorKey}
 		/>
 
 		<PaneGroup direction="horizontal" class="w-full h-full">
