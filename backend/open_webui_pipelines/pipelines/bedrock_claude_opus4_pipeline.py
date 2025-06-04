@@ -21,14 +21,14 @@ logger.addHandler(handler)
 class Pipeline:
     class Valves(BaseModel):
         AWS_REGION: Optional[str]
-        BEDROCK_CLAUDE_ARN: Optional[str]
+        BEDROCK_CLAUDE_OPUS_4_ARN: Optional[str]
 
     def __init__(self):
         self.name = "Claude Opus 4"
         self.valves = self.Valves(
             **{
                 "AWS_REGION": os.getenv("AWS_REGION", "us-east-1"),
-                "BEDROCK_CLAUDE_ARN": os.getenv("BEDROCK_CLAUDE_OPUS_4_ARN", None),
+                "BEDROCK_CLAUDE_OPUS_4_ARN": os.getenv("BEDROCK_CLAUDE_OPUS_4_ARN", None),
             }
         )
         self.bedrock_client = bedrock_client
@@ -45,7 +45,7 @@ class Pipeline:
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
 
-        model_id = self.valves.BEDROCK_CLAUDE_ARN
+        model_id = self.valves.BEDROCK_CLAUDE_OPUS_4_ARN
 
         if "messages" in body:
             # remove messages with system role and insert content into body
