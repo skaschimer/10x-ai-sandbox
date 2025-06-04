@@ -28,7 +28,9 @@ class Pipeline:
         self.valves = self.Valves(
             **{
                 "AWS_REGION": os.getenv("AWS_REGION", "us-east-1"),
-                "BEDROCK_CLAUDE_OPUS_4_ARN": os.getenv("BEDROCK_CLAUDE_OPUS_4_ARN", None),
+                "BEDROCK_CLAUDE_OPUS_4_ARN": os.getenv(
+                    "BEDROCK_CLAUDE_OPUS_4_ARN", None
+                ),
             }
         )
         self.bedrock_client = bedrock_client
