@@ -98,7 +98,7 @@ class Pipeline:
             )
 
         if "anthropic_version" not in filtered_body:
-            filtered_body["anthropic_version"] = "bedrock-2025-05-14"
+            filtered_body["anthropic_version"] = "bedrock-2023-05-31"
 
         if "max_tokens" not in filtered_body:
             filtered_body["max_tokens"] = 4000

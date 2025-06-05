@@ -104,7 +104,7 @@ class Pipeline:
             print(
                 f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
             )
-
+        r = None
         try:
             r = requests.post(
                 url=url,
