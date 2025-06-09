@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import json
-import logging
+import structlog
 import mimetypes
 import os
 import shutil
@@ -46,6 +46,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response, StreamingResponse
+
+from open_webui.middleware.logs import StructlogContextMiddleware
 
 
 from open_webui.socket.main import (
@@ -148,13 +150,16 @@ from open_webui.utils.security_headers import SecurityHeadersMiddleware
 
 from open_webui.tasks import stop_task, task_channel_listener
 
+from open_webui.utils.logs import setup_logging
+
+
+setup_logging(json_logs=False, log_level=GLOBAL_LOG_LEVEL)
+
+log = structlog.get_logger(__name__)
+
 if SAFE_MODE:
     print("SAFE MODE ENABLED")
     Functions.deactivate_all_functions()
-
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
 
 class SPAStaticFiles(StaticFiles):
@@ -548,6 +553,7 @@ class RedirectMiddleware(BaseHTTPMiddleware):
 # Add the middleware to the app
 app.add_middleware(RedirectMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(StructlogContextMiddleware)
 
 
 @app.middleware("http")
