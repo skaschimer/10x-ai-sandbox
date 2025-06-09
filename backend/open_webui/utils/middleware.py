@@ -1,5 +1,5 @@
 import time
-import logging
+import structlog
 import sys
 
 import asyncio
@@ -70,9 +70,7 @@ from open_webui.env import (
 from open_webui.constants import TASKS
 
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
+log = structlog.get_logger(__name__)
 
 
 async def chat_completion_filter_functions_handler(request, body, model, extra_params):
@@ -1055,7 +1053,8 @@ async def process_chat_response(
                 await background_tasks_handler()
             except asyncio.CancelledError:
                 log.info(
-                    f"Task '{task_id}' was cancelled, saving messages up to this point"
+                    "Task was cancelled, saving messages up to this point",
+                    task_id=task_id,
                 )
                 await event_emitter({"type": "task-cancelled"})
 
