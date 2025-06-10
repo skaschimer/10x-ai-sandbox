@@ -37,8 +37,9 @@ class Pipeline:
         try:
             return json.loads(json_str)
         except Exception as e:
-            print(
-                f"error:\n{e}\nThis error occured parsing vertex api key json, attempting to recover..."
+            logger.exception(
+                "Error occured parsing vertex api key json, attempting to recover...",
+                exc_info=e,
             )
 
         json_str = json_str.strip()
@@ -78,7 +79,7 @@ class Pipeline:
     async def on_startup(self) -> None:
         """This function is called when the server is started."""
 
-        print(f"on_startup:{__name__}")
+        logger.info("on_startup")
         credentials = None
         try:
             # key_json = self.valves.VERTEX_API_KEY_JSON
@@ -88,13 +89,15 @@ class Pipeline:
                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
             )
         except KeyError:
-            print("Error: VERTEX_API_KEY_JSON environment variable not set.")
+            logger.error("Error: VERTEX_API_KEY_JSON environment variable not set.")
             raise
         except json.JSONDecodeError:
-            print("Error: VERTEX_API_KEY_JSON contains invalid JSON.")
+            logger.error("Error: VERTEX_API_KEY_JSON contains invalid JSON.")
             raise
         except Exception as e:
-            print(f"Unexpected error initializing vertex AI client: {e}")
+            logger.exception(
+                "Unexpected error initializing vertex AI client", exc_info=e
+            )
             raise
 
         if credentials:
@@ -108,15 +111,15 @@ class Pipeline:
                 "Please respond with 'hi' and nothing else.", stream=False
             )
             if "hi" in response.text.lower():
-                print("Vertex AI client initialized successfully.")
+                logger.debug("Vertex AI client initialized successfully.")
 
     async def on_shutdown(self) -> None:
         """This function is called when the server is stopped."""
-        print(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
 
     async def on_valves_updated(self) -> None:
         """This function is called when the valves are updated."""
-        print(f"on_valves_updated:{__name__}")
+        logger.info("on_valves_updated")
         try:
             key_json = self.valves.VERTEX_API_KEY_JSON
             key_info = json.loads(key_json)
@@ -125,10 +128,10 @@ class Pipeline:
                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
             )
         except KeyError:
-            print("Error: VERTEX_API_KEY_JSON environment variable not set.")
+            logger.error("Error: VERTEX_API_KEY_JSON environment variable not set.")
             raise
         except json.JSONDecodeError:
-            print("Error: VERTEX_API_KEY_JSON contains invalid JSON.")
+            logger.error("Error: VERTEX_API_KEY_JSON contains invalid JSON.")
             raise
 
         vertexai.init(
@@ -147,7 +150,7 @@ class Pipeline:
             )
 
             if credentials.expired:
-                print("Vertex credentials have expired")
+                logger.warning("Vertex credentials have expired")
                 vertexai.init(
                     project=self.valves.GOOGLE_PROJECT_ID,
                     location=self.valves.GOOGLE_CLOUD_REGION,
@@ -157,7 +160,7 @@ class Pipeline:
             if not model_id.startswith("gemini-"):
                 return f"Error: Invalid model name format: {model_id}"
 
-            print(f"Pipe function called for model: {model_id}")
+            logger.info("Pipe function called", model=model_id)
 
             system_message = next(
                 (msg["content"] for msg in messages if msg["role"] == "system"), None
@@ -204,13 +207,13 @@ class Pipeline:
                 return response.text
 
         except Exception as e:
-            print(f"Error generating content: {e}")
+            logger.exception("Error generating content", exc_info=e)
             return f"An error occurred: {str(e)}"
 
     def stream_response(self, response):
         for chunk in response:
             if chunk.text:
-                # print(f"===Chunk===\n{chunk.text}")
+                logger.debug("chunk", chunk=chunk.text)
                 yield chunk.text
 
     def build_conversation_history(self, messages: List[dict]) -> List[Content]:
