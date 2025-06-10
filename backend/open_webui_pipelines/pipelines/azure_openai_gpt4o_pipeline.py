@@ -2,6 +2,10 @@ from typing import List, Union, Generator, Iterator
 from pydantic import BaseModel
 import requests
 import os
+import structlog
+
+
+logger = structlog.get_logger(__name__)
 
 
 class Pipeline:
@@ -21,6 +25,7 @@ class Pipeline:
         It cannot contain spaces, special characters, slashes, or
         backslashes.
         """
+        logger.info("Initializing pipeline")
 
         self.name = "OpenAI ChatGPT 4o"
         self.valves = self.Valves(

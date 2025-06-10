@@ -3,6 +3,7 @@ import json
 from typing import Iterator, List, Union
 import base64
 
+import structlog
 import vertexai
 from google.oauth2 import service_account
 from pydantic import BaseModel, Field
@@ -15,6 +16,8 @@ from vertexai.generative_models import (
     Part,
     Image,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 class Pipeline:
@@ -44,6 +47,7 @@ class Pipeline:
         return json.loads(json_str)
 
     def __init__(self):
+        logger.info("Initializing pipeline")
         self.type = "manifold"
         self.name = "Google "
 
