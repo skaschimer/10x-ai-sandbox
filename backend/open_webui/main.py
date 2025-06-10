@@ -153,7 +153,7 @@ from open_webui.tasks import stop_task, task_channel_listener
 from open_webui.utils.logs import setup_logging
 
 
-setup_logging(json_logs=False, log_level=GLOBAL_LOG_LEVEL)
+setup_logging(log_level=GLOBAL_LOG_LEVEL)
 
 log = structlog.get_logger(__name__)
 

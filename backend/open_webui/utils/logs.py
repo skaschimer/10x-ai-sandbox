@@ -10,7 +10,10 @@ def drop_extra_keys(_, __, event_dict: EventDict) -> EventDict:
     return event_dict
 
 
-def setup_logging(json_logs: bool = False, log_level: str = "INFO"):
+def setup_logging(log_level="INFO"):
+    # If we're on a console (aka local dev), output easily readable logs, not JSON
+    json_logs = not sys.stderr.isatty()
+
     shared_processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
