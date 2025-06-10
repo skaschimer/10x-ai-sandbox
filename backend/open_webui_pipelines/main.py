@@ -35,13 +35,12 @@ if not os.path.exists(PIPELINES_DIR):
     os.makedirs(PIPELINES_DIR)
 
 
-logger = logging.getLogger("pipelines")
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+import structlog
+from utils.logs import setup_logging
+
+setup_logging()
+
+logger = structlog.get_logger("pipelines")
 
 
 PIPELINES = {}
@@ -122,7 +121,7 @@ async def load_module_from_path(module_name, module_path):
 
     try:
         spec.loader.exec_module(module)
-        print(f"Loaded module: {module.__name__}")
+        logger.info(f"Loaded module: {module.__name__}")
         if hasattr(module, "Pipeline"):
             return module.Pipeline()
         else:
@@ -154,14 +153,14 @@ async def load_modules_from_directory(directory):
             subfolder_path = os.path.join(directory, module_name)
             if not os.path.exists(subfolder_path):
                 os.makedirs(subfolder_path)
-                logger.debug(f"Created subfolder: {subfolder_path}")
+                logger.debug("Created subfolder", path=subfolder_path)
 
             # Create a valves.json file if it doesn't exist
             valves_json_path = os.path.join(subfolder_path, "valves.json")
             if not os.path.exists(valves_json_path):
                 with open(valves_json_path, "w") as f:
                     json.dump({}, f)
-                logger.debug(f"Created valves.json in: {subfolder_path}")
+                logger.debug("Created valves.json", path=subfolder_path)
 
             pipeline = await load_module_from_path(module_name, module_path)
             if pipeline:
@@ -179,15 +178,15 @@ async def load_modules_from_directory(directory):
                             valves = ValvesModel(**combined_valves)
                             pipeline.valves = valves
 
-                            logger.info(f"Updated valves for module: {module_name}")
+                            logger.info("Updated valves for module", module=module_name)
 
                 pipeline_id = pipeline.id if hasattr(pipeline, "id") else module_name
                 PIPELINE_MODULES[pipeline_id] = pipeline
                 PIPELINE_NAMES[pipeline_id] = module_name
-                logger.info(f"Loaded module: {module_name}")
+                logger.info("Loaded module", module=module_name)
             else:
-                logger.warning(f"No Pipeline class found in {module_name}")
 
+                logger.warning("No Pipeline class found", module=module_name)
     global PIPELINES
     PIPELINES = get_all_pipelines()
 
@@ -677,11 +676,11 @@ async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
                     body=form_data.model_dump(),
                 )
 
-                logger.debug(f"stream:true:{res}")
+                logger.debug("stream:true", res=res)
 
                 if isinstance(res, str):
                     message = stream_message_template(form_data.model, res)
-                    logger.debug(f"stream_content:str:{message}")
+                    logger.debug("stream_content:str", message=message)
                     yield f"data: {json.dumps(message)}\n\n"
 
                 if isinstance(res, Iterator):
@@ -695,7 +694,7 @@ async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
                         except:
                             pass
 
-                        logger.debug(f"stream_content:Generator:{line}")
+                        logger.debug("stream_content:Generator", line=line)
 
                         if line.startswith("data:"):
                             yield f"{line}\n\n"
@@ -730,7 +729,7 @@ async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
                 messages=messages,
                 body=form_data.model_dump(),
             )
-            logger.debug(f"stream:false:{res}")
+            logger.debug("stream:false", res=res)
 
             if isinstance(res, dict):
                 return res
@@ -747,7 +746,7 @@ async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
                     for stream in res:
                         message = f"{message}{stream}"
 
-                logger.debug(f"stream:false:{message}")
+                logger.debug("stream:false", message=message)
                 return {
                     "id": f"{form_data.model}-{str(uuid.uuid4())}",
                     "object": "chat.completion",
