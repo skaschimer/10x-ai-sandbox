@@ -97,11 +97,11 @@ def create_task(coroutine):
             if task.cancelled():
                 log.info("Task cancelled", instance=INSTANCE_NAME, task_id=task_id)
             elif task.exception():
-                log.error(
+                log.exception(
                     "Task raised an exception",
                     instance=INSTANCE_NAME,
                     task_id=task_id,
-                    exception=task.exception(),
+                    exc_info=task.exception(),
                 )
             else:
                 log.info(
