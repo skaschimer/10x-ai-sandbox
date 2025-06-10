@@ -121,7 +121,7 @@ async def load_module_from_path(module_name, module_path):
 
     try:
         spec.loader.exec_module(module)
-        logger.info(f"Loaded module: {module.__name__}")
+        logger.info("Loaded module", module=module.__name__)
         if hasattr(module, "Pipeline"):
             return module.Pipeline()
         else:
