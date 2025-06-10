@@ -28,11 +28,11 @@ class Pipeline:
         self.bedrock_client = bedrock_client
 
     async def on_startup(self):
-        logger.info(f"on_startup:{__name__}")
+        logger.info("on_startup")
         pass
 
     async def on_shutdown(self):
-        logger.info(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
         pass
 
     def pipe(
