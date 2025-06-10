@@ -45,18 +45,18 @@ class Pipeline:
 
     async def on_startup(self):
         # This function is called when the server is started.
-        print(f"on_startup:{__name__}")
+        logger.info("on_startup")
         pass
 
     async def on_shutdown(self):
         # This function is called when the server is stopped.
-        print(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
         pass
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
     ) -> Union[str, Generator, Iterator]:
-        print(f"pipe:{__name__}")
+        logger.info("pipe")
 
         headers = {
             "api-key": self.valves.AZURE_DOUDNA_GPT4O_MINI_API_KEY,
@@ -106,8 +106,8 @@ class Pipeline:
 
         # log fields that were filtered out as a single line
         if len(body) != len(filtered_body):
-            print(
-                f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
+            logger.info(
+                "Dropped params", params=(set(body.keys()) - set(filtered_body.keys()))
             )
 
         r = None

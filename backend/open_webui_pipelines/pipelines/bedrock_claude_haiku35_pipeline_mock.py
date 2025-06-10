@@ -10,6 +10,10 @@ from botocore.exceptions import BotoCoreError
 
 import random
 import re
+import structlog
+
+
+logger = structlog.get_logger(__name__)
 
 paterson = "I am load-testing bot, I only have one response. Please enjoy this poem by William Carlos Williams.\n\nPaterson lies in the valley under the Passaic Falls\nits spent waters forming the outline of his back. He\nlies on his right side, head near the thunder\nof the waters filling his dreams! Eternally asleep,\nhis dreams walk about the city where he persists\nincognito. Butterflies settle on his stone ear.\nImmortal he neither moves nor rouses and is seldom\nseen, though he breathes and the subtleties of his machinations\ndrawing their substance from the noise of the pouring river\nanimate a thousand automations. Who because they\nneither know their sources nor the sills of their\ndisappointments walk outside their bodies aimlessly\n    for the most part,\nlocked and forgot in their desires-unroused.\n\n  —Say it, no ideas but in things—\n  nothing but the blank faces of the houses\n  and cylindrical trees\n  bent, forked by preconception and accident—\n  split, furrowed, creased, mottled, stained—\n  secret—into the body of the light!\n\nFrom above, higher than the spires, higher\neven than the office towers, from oozy fields\nabandoned to gray beds of dead grass,\nblack sumac, withered weed-stalks,\nmud and thickets cluttered with dead leaves-\nthe river comes pouring in above the city\nand crashes from the edge of the gorge\nin a recoil of spray and rainbow mists-\n\n  (What common language to unravel?\n  . . .combed into straight lines\n  from that rafter of a rock's\n  lip.)\n\nA man like a city and a woman like a flower\n—who are in love. Two women. Three women.\nInnumerable women, each like a flower.\n\nBut\nonly one man—like a city.\n"  # noqa: E501
 
@@ -30,11 +34,11 @@ class Pipeline:
         self.bedrock_client = bedrock_client
 
     async def on_startup(self):
-        print(f"on_startup:{__name__}")
+        logger.info("on_startup")
         pass
 
     async def on_shutdown(self):
-        print(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
         pass
 
     def pipe(
@@ -43,7 +47,7 @@ class Pipeline:
 
         model_id = self.valves.BEDROCK_CLAUDE_HAIKU_ARN
 
-        print(f"model_id: {model_id}")
+        logger.info("pipe", model=model_id)
         if "messages" in body:
             # remove messages with system role and insert content into body
             new_msgs = []
@@ -94,7 +98,7 @@ class Pipeline:
             )
         filtered_body = {k: v for k, v in body.items() if k in allowed_params}
         if len(body) != len(filtered_body):
-            print(
+            logger.info(
                 f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
             )
 
@@ -174,41 +178,41 @@ class Pipeline:
             #             )
 
         except self.bedrock_client.exceptions.AccessDeniedException as e:
-            print("Access Denied Exception:", e)
+            logger.exception("Access Denied Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ResourceNotFoundException as e:
-            print("Resource Not Found Exception:", e)
+            logger.exception("Resource Not Found Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ThrottlingException as e:
-            print("Throttling Exception:", e)
+            logger.exception("Throttling Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ModelTimeoutException as e:
-            print("Model Timeout Exception:", e)
+            logger.exception("Model Timeout Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.InternalServerException as e:
-            print("Internal Server Exception:", e)
+            logger.exception("Internal Server Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ServiceUnavailableException as e:
-            print("Service Unavailable Exception:", e)
+            logger.exception("Service Unavailable Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ModelStreamErrorException as e:
-            print("Model Stream Error Exception:", e)
+            logger.exception("Model Stream Error Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ValidationException as e:
-            print("Validation Exception:", e)
+            logger.exception("Validation Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ModelNotReadyException as e:
-            print("Model Not Ready Exception:", e)
+            logger.exception("Model Not Ready Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ServiceQuotaExceededException as e:
-            print("Service Quota Exceeded Exception:", e)
+            logger.exception("Service Quota Exceeded Exception:", exc_info=e)
             raise e
         except self.bedrock_client.exceptions.ModelErrorException as e:
-            print("Model Error Exception:", e)
+            logger.exception("Model Error Exception:", exc_info=e)
             raise e
         except BotoCoreError as e:
-            print(f"AWS BotoCoreError: {e}")
+            logger.exception("AWS BotoCoreError", exc_info=e)
             raise e
         except Exception as e:
-            print(f"General Error: {e}")
+            logger.exception("General Error", exc_info=e)
             raise e

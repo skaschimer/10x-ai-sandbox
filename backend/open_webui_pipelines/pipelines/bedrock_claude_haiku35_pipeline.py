@@ -19,6 +19,7 @@ class Pipeline:
         BEDROCK_CLAUDE_HAIKU_ARN: Optional[str]
 
     def __init__(self):
+        logger.info("Initializing pipeline")
         self.name = "Claude Haiku 3.5"
         self.valves = self.Valves(
             **{

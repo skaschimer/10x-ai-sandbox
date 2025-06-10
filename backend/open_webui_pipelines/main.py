@@ -127,7 +127,7 @@ async def load_module_from_path(module_name, module_path):
         else:
             raise Exception("No Pipeline class found")
     except Exception as e:
-        print(f"Error loading module: {module_name}")
+        logger.exception("Error loading module", module_name=module_name, exc_info=e)
 
         # Move the file to the error folder
         failed_pipelines_folder = os.path.join(PIPELINES_DIR, "failed")
@@ -136,7 +136,6 @@ async def load_module_from_path(module_name, module_path):
 
         failed_file_path = os.path.join(failed_pipelines_folder, f"{module_name}.py")
         os.rename(module_path, failed_file_path)
-        logger.error(e)
     return None
 
 
@@ -366,7 +365,7 @@ async def add_pipeline(
     try:
         url = convert_to_raw_url(form_data.url)
 
-        print(url)
+        logger.info("Attempting to load pipeline", url=url)
         file_path = await download_file(url, dest_folder=PIPELINES_DIR)
         await reload()
         return {
@@ -653,12 +652,12 @@ async def generate_openai_chat_completion(form_data: OpenAIChatCompletionForm):
         )
 
     def job():
-        print(form_data.model)
+        logger.info("starting job", model=form_data.model)
 
         pipeline = app.state.PIPELINES[form_data.model]
         pipeline_id = form_data.model
 
-        print(pipeline_id)
+        logger.info("starting job", pipeline_id=pipeline_id)
 
         if pipeline["type"] == "manifold":
             manifold_id, pipeline_id = pipeline_id.split(".", 1)
