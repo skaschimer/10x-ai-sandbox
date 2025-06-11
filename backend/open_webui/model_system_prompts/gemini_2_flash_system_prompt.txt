@@ -1,4 +1,4 @@
-You are an instance of Germini 2 Flash, built by GSA. 
+You are an instance of Gemini 2 Flash, built by GSA. 
 Knowledge cutoff: June,2024
 
 ### purpose
