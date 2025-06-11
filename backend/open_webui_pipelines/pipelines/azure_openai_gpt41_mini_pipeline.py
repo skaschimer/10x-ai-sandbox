@@ -6,8 +6,8 @@ import os
 
 class Pipeline:
     class Valves(BaseModel):
-        AZURE_DOUDNA_GPT4O_MINI_API_KEY: str
-        AZURE_DOUDNA_GPT4O_MINI_URL: str
+        AZURE_GPT41_MINI_API_KEY: str
+        AZURE_GPT41_MINI_URL: str
         AZURE_OPENAI_API_VERSION: str
 
     def __init__(self):
@@ -22,14 +22,14 @@ class Pipeline:
         backslashes.
         """
 
-        self.name = "OpenAI ChatGPT 4o mini"
+        self.name = "OpenAI ChatGPT 4.1 Mini"
         self.valves = self.Valves(
             **{
-                "AZURE_DOUDNA_GPT4O_MINI_API_KEY": os.getenv(
-                    "AZURE_DOUDNA_GPT4O_MINI_API_KEY", "your-azure-openai-api-key-here"
+                "AZURE_GPT41_MINI_API_KEY": os.getenv(
+                    "AZURE_GPT41_MINI_API_KEY", "your-azure-openai-api-key-here"
                 ),
-                "AZURE_DOUDNA_GPT4O_MINI_URL": os.getenv(
-                    "AZURE_DOUDNA_GPT4O_MINI_URL", "your-azure-openai-api-key-here"
+                "AZURE_GPT41_MINI_URL": os.getenv(
+                    "AZURE_GPT41_MINI_URL", "your-azure-openai-api-key-here"
                 ),
                 "AZURE_OPENAI_API_VERSION": os.getenv(
                     "AZURE_OPENAI_API_VERSION", "2024-02-01"
@@ -54,12 +54,12 @@ class Pipeline:
         print(f"pipe:{__name__}")
 
         headers = {
-            "api-key": self.valves.AZURE_DOUDNA_GPT4O_MINI_API_KEY,
+            "api-key": self.valves.AZURE_GPT41_MINI_API_KEY,
             "Content-Type": "application/json",
         }
 
         url = (
-            f"{self.valves.AZURE_DOUDNA_GPT4O_MINI_URL}/chat/completions"
+            f"{self.valves.AZURE_GPT41_MINI_URL}/chat/completions"
             + f"?api-version={self.valves.AZURE_OPENAI_API_VERSION}"
         )
 
