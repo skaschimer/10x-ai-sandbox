@@ -7,23 +7,25 @@ from pydantic import BaseModel
 from utils.pipelines.aws import bedrock_client
 from botocore.exceptions import BotoCoreError
 import structlog
-import sys
+
 
 logger = structlog.get_logger(__name__)
 
 
 def format_llama_prompt(body):
     messages = body.get("messages", [])
-    formatted_prompt = "<|begin_of_text|>"
+    formatted_prompt = ""
 
-    for message in messages:
+    for i, message in enumerate(messages):
         role = message.get("role", "")
         content = message.get("content", "")
-        formatted_prompt += (
-            f"<|start_header_id|>{role}<|end_header_id|>\n\n{content}<|eot_id|>"
-        )
-
-    formatted_prompt += "<|start_header_id|>assistant<|end_header_id|>"
+        if role == "system" and i == 0:
+            formatted_prompt += f"<|system|>\n{content}\n"
+        elif role == "user":
+            formatted_prompt += f"<|user|>\n{content}\n"
+        elif role == "assistant":
+            formatted_prompt += f"<|assistant|>\n{content}\n"
+    formatted_prompt += "<|assistant|>\n"
 
     return formatted_prompt
 
@@ -98,6 +100,7 @@ class Pipeline:
                 chunk = json.loads(event["chunk"]["bytes"])
                 if "generation" in chunk:
                     tokens = chunk["generation"]
+
                     yield tokens
                     if ttft is None and tokens:
                         ttft = time.time() - request_init_time
