@@ -8,18 +8,12 @@ import asyncio
 
 from pydantic import BaseModel
 import redis
-import logging
+import structlog
 
-from utils.pipelines.custom_exceptions import RateLimitException
+from open_webui_pipelines.utils.pipelines.custom_exceptions import RateLimitException
 
 
-logger = logging.getLogger("RateLimitFilter")
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+logger = structlog.get_logger(__name__)
 
 
 DEFAULT_REQUEST_LIMITS = {
@@ -47,12 +41,12 @@ class Pipeline:
         request_limits_json: str = ""
 
     def __init__(self):
-        logger.info("Initializing Rate Limit Filter Pipeline")
+        logger.info("Initializing pipeline")
         redis_url = os.getenv(
             "RATE_LIMIT_REDIS_URL",
             os.getenv("REDIS_URL", "you forget to set the REDIS_URL"),
         )
-        logger.debug(f"Using Redis URL: {redis_url}")
+        logger.debug("Using Redis URL", redis_url=redis_url)
 
         request_limits = None
         request_limits_json_str = os.getenv("REQUEST_LIMITS", None)
@@ -61,10 +55,15 @@ class Pipeline:
                 # Parse JSON string from environment variable
                 _ = json.loads(request_limits_json_str)
                 request_limits = request_limits_json_str
-                logger.info(f"Using request limits from environment: {request_limits}")
+                logger.info(
+                    "Using request limits from environment",
+                    request_limits=request_limits,
+                )
             except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse REQUEST_LIMITS as JSON: {e}")
-                logger.info("Falling back to default request limits")
+                logger.warning(
+                    "Failed to parse REQUEST_LIMITS as JSON, falling back to default",
+                    exc_info=e,
+                )
                 request_limits = json.dumps(DEFAULT_REQUEST_LIMITS)
 
         if not request_limits:
@@ -72,10 +71,13 @@ class Pipeline:
             request_limits = json.dumps(DEFAULT_REQUEST_LIMITS)
 
         self.request_limits_dict = json.loads(request_limits)
-        logger.info(f"Configured request limits dict: {self.request_limits_dict}")
+        logger.info(
+            "Configured request limits dict",
+            request_limits_dict=self.request_limits_dict,
+        )
 
         self.models = list(self.request_limits_dict.keys())
-        logger.info(f"Models in request limits: {self.models}")
+        logger.info("Models in request limits dict", models=self.models)
 
         if redis_url is None:
             self.type = None
@@ -85,7 +87,7 @@ class Pipeline:
 
         self.type = "filter"
         self.name = "Rate Limit Filter"
-        logger.info(f"Pipeline type: {self.type}, name: {self.name}")
+        logger.info("Pipeline values", type=self.type, name=self.name)
 
         self.valves = self.Valves(
             pipelines=[
@@ -93,19 +95,21 @@ class Pipeline:
             ],
             request_limits_json=request_limits,
         )
-        logger.debug(f"Valves configured with pipelines: {self.valves.pipelines}")
+        logger.debug("Valves configured", pipelines=self.valves.pipelines)
 
         parsed_url = urlparse(redis_url)
 
         logger.info(
-            f"Connecting to Redis at {parsed_url.hostname}:{parsed_url.port if parsed_url.port else 6379}"
+            "Connecting to Redis",
+            redis_host=parsed_url.hostname,
+            redis_port=(parsed_url.port if parsed_url.port else 6379),
         )
         if not parsed_url.hostname:
             logger.error("Invalid RATE_LIMIT_REDIS_URL: missing hostname")
             raise ValueError("Invalid RATE_LIMIT_REDIS_URL: missing hostname")
         try:
             verify_ssl = os.getenv("DEV", "false").lower() == "false"
-            logger.info("Redis SSL verification: " + str(verify_ssl))
+            logger.info("Redis SSL verification", result=verify_ssl)
             self.redis_client = redis.Redis(
                 host=parsed_url.hostname,
                 port=parsed_url.port if parsed_url.port else 6379,
@@ -133,7 +137,7 @@ class Pipeline:
             get_result = self.redis_client.get(test_key)
             if get_result != test_value:
                 logger.warning(
-                    f"Redis GET test failed. Expected '{test_value}', got '{get_result}'"
+                    "Redis GET test failed", expected=test_value, actual=get_result
                 )
             else:
                 logger.info(
@@ -145,40 +149,40 @@ class Pipeline:
 
             logger.info("Successfully connected to Redis")
         except redis.exceptions.TimeoutError as e:
-            logger.error(
-                f"Redis timed out when checking simple get set operation: {str(e)}"
+            logger.exception(
+                "Redis timed out when checking simple get set operation", exc_info=e
             )
             raise ConnectionError(f"Initial Redis connection timed out: {str(e)}")
         except Exception as e:
-            logger.error(f"Failed to connect to Redis: {str(e)}")
+            logger.exception("Failed to connect to Redis", exc_info=e)
             raise ConnectionError(f"Failed to connect to Redis: {str(e)}")
 
     async def on_startup(self):
-        print(f"on_startup:{__name__}")
+        logger.info("on_startup")
         pass
 
     async def on_shutdown(self):
-        print(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
         pass
 
     def get_global_redis_key(self, model_id: str):
         """Generate Redis keys for global rate limits."""
         now = int(time.time())
         key = f"global:{model_id}:rate:minute:{now // 60}"
-        logger.debug(f"get_global_redis_key: {key}")
+        logger.debug("get_global_redis_key", key=key)
         return key
 
     def get_user_redis_key(self, user_id: str, model_id: str):
         """Generate Redis keys for user rate limits."""
         now = int(time.time())
         key = f"user:{user_id}:{model_id}:rate:minute:{now // 60}"
-        logger.debug(f"get_user_redis_key: {key}")
+        logger.debug("get_user_redis_key", key=key)
         return key
 
     def get_user_last_blocked_redis_key(self, user_id: str, model_id: str):
         """Generate Redis keys for user rate limits."""
         key = f"user:{user_id}:{model_id}:last_blocked"
-        logger.debug(f"get_user_last_blocked_redis_key: {key}")
+        logger.debug("get_user_last_blocked_redis_key", key=key)
         return key
 
     def get_rate_limit_info(self, user_id: str, model_id: str):
@@ -211,7 +215,7 @@ class Pipeline:
         user_last_blocked_key = self.get_user_last_blocked_redis_key(user_id, model_id)
 
         rate_limit_info = self.get_rate_limit_info(user_id, model_id)
-        logger.debug(f"Rate limit info: {rate_limit_info}")
+        logger.debug("Rate limit", info=rate_limit_info)
 
         global_current_count = rate_limit_info["global_count"]
         user_current_count = rate_limit_info["user_count"]
@@ -219,26 +223,32 @@ class Pipeline:
 
         global_limit = self.request_limits_dict[model_id].get("global_limit", 2000)
         logger.debug(
-            f"Global model: {model_id}, current count: {global_current_count}/{global_limit}"
+            "global_limit",
+            model=model_id,
+            current_count=global_current_count / global_limit,
         )
         safe_free_quota = (global_limit - global_current_count) * 0.25
-        logger.debug(f"safe_free_quota: {safe_free_quota}")
+        logger.debug("safe_free_quota", safe_free_quota=safe_free_quota)
 
         user_limit = self.request_limits_dict[model_id].get("user_limit", 50)
         logger.debug(
-            f"User: {user_id}, model: {model_id}, current count:"
-            + f"{user_current_count}/{user_limit}"
+            "user_limit",
+            user=user_id,
+            model=model_id,
+            current_count=user_current_count / user_limit,
         )
 
         original_user_limit = user_limit
         if user_limit < safe_free_quota:
             user_limit = safe_free_quota
-        logger.debug(f"Adjusted user limit: {user_limit}")
+        logger.debug("Adjusted user limit", limit=user_limit)
 
         if user_current_count >= user_limit:
             logger.warning(
-                f"User {user_id} rate limit exceeded for model {model_id}: "
-                + f"{user_current_count}/{user_limit}"
+                "User rate limit exceeded",
+                user=user_id,
+                model=model_id,
+                current_count=user_current_count / user_limit,
             )
             current_time = int(time.time())
             self.redis_client.set(user_last_blocked_key, current_time)
@@ -253,27 +263,31 @@ class Pipeline:
         return False, None, None
 
     def is_rate_limited(self, user_id: str, model_id: str) -> bool:
-        logger.debug(f"Checking rate limits for user: {user_id}, model: {model_id}")
+        logger.debug("Checking rate limits", user=user_id, model=model_id)
         if model_id not in self.models:
-            logger.warning(f"Model {model_id} not found in request limits")
+            logger.warning("Model not found in request limits", model=model_id)
             return False, None
 
         logger.debug(
-            f"Model {model_id} found, checking rate limits for user: {user_id}"
+            "Model found, checking rate limits for user", model=model_id, user=user_id
         )
         user_last_blocked_key = self.get_user_last_blocked_redis_key(user_id, model_id)
 
         try:
             user_last_blocked_time = self.redis_client.get(user_last_blocked_key)
-            logger.debug(f"User {user_id} last blocked time: {user_last_blocked_time}")
+            logger.debug(
+                "User last blocked time",
+                user=user_id,
+                last_blocked_time=user_last_blocked_time,
+            )
         except redis.exceptions.TimeoutError as e:
-            logger.error(
-                f"Redis operation timed out when checking last blocked time: {str(e)}"
+            logger.exception(
+                "Redis operation timed out when checking last blocked time", exc_info=e
             )
             # Return a default/safe value instead of failing
             return False, None, None
         except Exception as e:
-            logger.error(f"Redis error when checking last blocked time: {str(e)}")
+            logger.exception("Redis error when checking last blocked time", exc_info=e)
             return False, None, None
 
         if (
@@ -281,44 +295,54 @@ class Pipeline:
             and int(user_last_blocked_time) > int(time.time()) - 60
         ):
             logger.warning(
-                f"User {user_id} was blocked less than 60 seconds ago for model {model_id}"
+                "User was blocked less than 60 seconds ago",
+                user=user_id,
+                model=model_id,
             )
             return self.set_last_blocked_time(user_id, model_id)
 
-        logger.debug(f"Proceeding without blocking user {user_id} for model {model_id}")
+        logger.debug("Proceeding without blocking user", user=user_id, model=model_id)
         return False, None, None
 
     async def log_request(self, user_id: str, model_id: str):
-        logger.debug(f"Logging request for user: {user_id}, model: {model_id}")
+        logger.debug("Logging request", user=user_id, model=model_id)
         minute_key = self.get_user_redis_key(user_id, model_id)
         new_user_count = self.redis_client.incr(minute_key)
         logger.debug(
-            f"Incremented user request count to {new_user_count} at key {minute_key}"
+            "Incremented user request count",
+            new_user_count=new_user_count,
+            key=minute_key,
         )
 
         expiry_result = self.redis_client.expire(minute_key, 60, nx=True)
-        logger.debug(f"Set expiry on user key {minute_key}: {expiry_result}")
+        logger.debug(
+            "Set expiry on user key", minute_key=minute_key, expiry_result=expiry_result
+        )
 
         # Log global request
         global_key = self.get_global_redis_key(model_id)
         new_global_count = self.redis_client.incr(global_key)
         logger.debug(
-            f"Incremented global request count to {new_global_count} at key {global_key}"
+            "Incremented global request count",
+            new_global_count=new_global_count,
+            key=global_key,
         )
 
         expiry_result = self.redis_client.expire(global_key, 60, nx=True)
-        logger.debug(f"Set expiry on global key {global_key}: {expiry_result}")
+        logger.debug(
+            "Set expiry on global key",
+            global_key=global_key,
+            expiry_result=expiry_result,
+        )
         _, _, _ = self.set_last_blocked_time(user_id, model_id)
 
     async def inlet(self, body: dict, user: Optional[dict] = None) -> dict:
 
-        logger.debug(f"Processing inlet request with body: {body} and user: {user}")
+        logger.debug("Processing inlet request", body=body, user=user)
         user_id = user.get("id", "default_user") if user else "default_user"
         model_id = body["model"]
 
-        logger.debug(
-            f"Processing inlet request with User ID: {user_id}, Model ID: {model_id}"
-        )
+        logger.debug("Processing inlet request", user_id=user_id, model=model_id)
         limited, msg, last_period_start_time = self.is_rate_limited(user_id, model_id)
         if limited:
             logger.error(f"Rate limit check failed with msg: {msg}")

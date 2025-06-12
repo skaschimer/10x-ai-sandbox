@@ -6,11 +6,15 @@ from typing import Optional
 from open_webui.internal.db import Base, get_db
 from open_webui.models.tags import TagModel, Tag, Tags
 
-
+import structlog
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import BigInteger, Boolean, Column, String, Text, JSON
 from sqlalchemy import or_, func, select, and_, text
 from sqlalchemy.sql import exists
+
+
+log = structlog.get_logger(__name__)
+
 
 ####################
 # Chat DB Schema
@@ -573,8 +577,8 @@ class ChatTable:
                         | text(
                             """
                             EXISTS (
-                                SELECT 1 
-                                FROM json_each(Chat.chat, '$.messages') AS message 
+                                SELECT 1
+                                FROM json_each(Chat.chat, '$.messages') AS message
                                 WHERE LOWER(message.value->>'content') LIKE '%' || :search_text || '%'
                             )
                             """
@@ -668,7 +672,7 @@ class ChatTable:
             # Perform pagination at the SQL level
             all_chats = query.offset(skip).limit(limit).all()
 
-            print(len(all_chats))
+            log.debug("Chats by user", user=user_id, count=(len(all_chats)))
 
             # Validate and return chats
             return [ChatModel.model_validate(chat) for chat in all_chats]
@@ -729,7 +733,7 @@ class ChatTable:
             query = db.query(Chat).filter_by(user_id=user_id)
             tag_id = tag_name.replace(" ", "_").lower()
 
-            print(db.bind.dialect.name)
+            log.debug("DB dialect", dialect=db.bind.dialect.name)
             if db.bind.dialect.name == "sqlite":
                 # SQLite JSON1 querying for tags within the meta JSON field
                 query = query.filter(
@@ -750,7 +754,7 @@ class ChatTable:
                 )
 
             all_chats = query.all()
-            print("all_chats", all_chats)
+            log.debug("all_chats", all_chats=all_chats)
             return [ChatModel.model_validate(chat) for chat in all_chats]
 
     def add_chat_tag_by_id_and_user_id_and_tag_name(
@@ -808,7 +812,7 @@ class ChatTable:
             count = query.count()
 
             # Debugging output for inspection
-            print(f"Count of chats for tag '{tag_name}':", count)
+            log.debug("Chat count", tag=tag_name, count=count)
 
             return count
 

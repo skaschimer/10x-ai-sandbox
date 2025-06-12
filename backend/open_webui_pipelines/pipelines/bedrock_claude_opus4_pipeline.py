@@ -6,16 +6,10 @@ import time
 from pydantic import BaseModel
 from utils.pipelines.aws import bedrock_client
 from botocore.exceptions import BotoCoreError
-import logging
+import structlog
 import sys
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+logger = structlog.get_logger(__name__)
 
 
 class Pipeline:
@@ -36,11 +30,11 @@ class Pipeline:
         self.bedrock_client = bedrock_client
 
     async def on_startup(self):
-        logger.info(f"on_startup:{__name__}")
+        logger.info("on_startup")
         pass
 
     async def on_shutdown(self):
-        logger.info(f"on_shutdown:{__name__}")
+        logger.info("on_shutdown")
         pass
 
     def pipe(

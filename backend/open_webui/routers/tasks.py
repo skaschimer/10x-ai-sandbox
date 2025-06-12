@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from pydantic import BaseModel
 from typing import Optional
-import logging
+import structlog
 
 from open_webui.utils.chat import generate_chat_completion
 from open_webui.utils.task import (
@@ -24,8 +24,7 @@ from open_webui.config import config
 from open_webui.env import SRC_LOG_LEVELS
 
 
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MODELS"])
+log = structlog.get_logger(__name__)
 
 router = APIRouter()
 
@@ -141,9 +140,7 @@ async def generate_title(
         models,
     )
 
-    log.debug(
-        f"generating chat title using model {task_model_id} for user {user.email} "
-    )
+    log.debug("generating chat title", model=task_model_id, user=user.email)
 
     if request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE
@@ -216,9 +213,7 @@ async def generate_chat_tags(
         models,
     )
 
-    log.debug(
-        f"generating chat tags using model {task_model_id} for user {user.email} "
-    )
+    log.debug("generating chat tags", model=task_model_id, user=user.email)
 
     if request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE
@@ -287,9 +282,7 @@ async def generate_queries(
         models,
     )
 
-    log.debug(
-        f"generating {type} queries using model {task_model_id} for user {user.email}"
-    )
+    log.debug("generating queries", model=task_model_id, type=type, user=user.email)
 
     if (request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE
@@ -362,9 +355,7 @@ async def generate_autocompletion(
         models,
     )
 
-    log.debug(
-        f"generating autocompletion using model {task_model_id} for user {user.email}"
-    )
+    log.debug("generating autocompletion", model=task_model_id, user=user.email)
 
     if (request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
@@ -419,7 +410,7 @@ async def generate_emoji(
         models,
     )
 
-    log.debug(f"generating emoji using model {task_model_id} for user {user.email} ")
+    log.debug("generating emoji", model=task_model_id, user=user.email)
 
     template = config.DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE
 
@@ -479,7 +470,7 @@ async def generate_moa_response(
         models,
     )
 
-    log.debug(f"generating MOA model {task_model_id} for user {user.email} ")
+    log.debug("generating MOA", model=task_model_id, user=user.email)
 
     template = config.DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE
 

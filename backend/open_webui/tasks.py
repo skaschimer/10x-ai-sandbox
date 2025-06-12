@@ -1,8 +1,7 @@
 # tasks.py
 import asyncio
-import logging
+import structlog
 import os
-import sys
 import redis
 from typing import Dict
 from uuid import uuid4
@@ -14,9 +13,7 @@ from open_webui.env import GLOBAL_LOG_LEVEL, REDIS_URL, SRC_LOG_LEVELS
 tasks: Dict[str, asyncio.Task] = {}
 
 # Configure logging
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
+log = structlog.get_logger(__name__)
 
 # Unique identifier for this app instance
 INSTANCE_NAME = os.environ.get("HOSTNAME", f"instance-{uuid4()}")
@@ -42,18 +39,29 @@ def task_channel_listener():
     """
     pubsub = redis_client.pubsub()
     pubsub.subscribe(CHANNEL_NAME)
-    log.info(f"{INSTANCE_NAME} subscribed to Redis pub/sub channel: {CHANNEL_NAME}")
+    log.info(
+        "App subscribed to Redis pub/sub channel",
+        instance=INSTANCE_NAME,
+        channel=CHANNEL_NAME,
+    )
 
     for message in pubsub.listen():
-        log.debug(f"Received message: {message}")
+        log.debug(f"Received task message", message=message)
         if message["type"] != "message":
-            log.debug(f"Message type is not 'message', ignoring: {message['type']}")
+            log.debug(
+                "Message type is not 'message', ignoring", message_type=message["type"]
+            )
             continue
 
         message_data = message["data"].decode("utf-8")
         command, task_id = message_data.split(":", 1)
-        log.debug(f"{INSTANCE_NAME} evaluating command: {command}, task ID: {task_id}")
-        log.debug(f"{INSTANCE_NAME} local tasks: {tasks.keys()}")
+        log.debug(
+            "evaluating command",
+            instance=INSTANCE_NAME,
+            command=command,
+            task_id=task_id,
+            local_tasks=tasks.keys(),
+        )
 
         # If this is our task, handle the command.
         if command == "stop" and task_id in tasks:
@@ -61,18 +69,18 @@ def task_channel_listener():
 
 
 def cancel_task(task_id: str):
-    log.debug(f"Stopping task {task_id} on instance {INSTANCE_NAME}")
+    log.debug("Stopping task", instance=INSTANCE_NAME, task_id=task_id)
     try:
         tasks[task_id].cancel()
     except Exception as e:
-        log.error(f"Error stopping task {task_id}: {e}")
+        log.exception("Error stopping task", instance=INSTANCE_NAME, task_id=task_id)
 
 
 def cleanup_task(task_id: str):
     """
     Remove a completed or canceled task from the global `tasks` dictionary.
     """
-    log.info(f"Cleaning up task {task_id} on instance {INSTANCE_NAME}")
+    log.info("Cleaning up task", instance=INSTANCE_NAME, task_id=task_id)
     tasks.pop(task_id, None)  # Remove the task if it exists
 
 
@@ -82,16 +90,25 @@ def create_task(coroutine):
     """
     task_id = str(uuid4())  # Generate a unique ID for the task
     task = asyncio.create_task(coroutine)  # Create the task
-    log.info(f"Task {task_id} created on instance {INSTANCE_NAME}")
+    log.info("Task created", instance=INSTANCE_NAME, task_id=task_id)
 
     def on_task_done(task):
         try:
             if task.cancelled():
-                log.info(f"Task {task_id} was cancelled.")
+                log.info("Task cancelled", instance=INSTANCE_NAME, task_id=task_id)
             elif task.exception():
-                log.error(f"Task {task_id} raised an exception: {task.exception()}")
+                log.exception(
+                    "Task raised an exception",
+                    instance=INSTANCE_NAME,
+                    task_id=task_id,
+                    exc_info=task.exception(),
+                )
             else:
-                log.info(f"Task {task_id} completed successfully.")
+                log.info(
+                    "Task completed successfully",
+                    instance=INSTANCE_NAME,
+                    task_id=task_id,
+                )
         finally:
             cleanup_task(task_id)
 
@@ -106,17 +123,20 @@ async def stop_task(task_id: str):
     """
     Handle a request to cancel a running task.
     """
-    log.debug(f"Instance {INSTANCE_NAME} received stop request for task {task_id}")
+    log.debug("Received stop request for task", instance=INSTANCE_NAME, task_id=task_id)
     if task_id in tasks:
         # It's a local task, stop it locally
         cancel_task(task_id)
-        log.debug(f"Task {task_id} stopped locally.")
+        log.debug(f"Task stopped locally", instance=INSTANCE_NAME, task_id=task_id)
         return {"status": True, "message": f"Task stopped locally: {task_id}."}
     else:
         # Otherwise, inform other instances of the stop request
         subscriber_count = redis_client.publish(CHANNEL_NAME, f"stop:{task_id}")
         log.debug(
-            f"Task {task_id} stop request published to other instances. {subscriber_count} subscriber(s) notified."
+            "Task stop request published to other instances",
+            instance=INSTANCE_NAME,
+            task_id=task_id,
+            subscribers_notified=subscriber_count,
         )
         return {
             "status": True,
