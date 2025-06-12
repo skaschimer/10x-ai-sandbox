@@ -107,11 +107,14 @@ class Pipeline:
                 credentials=credentials,
             )
             model = GenerativeModel("gemini-2.0-flash")
-            response = model.generate_content(
-                "Please respond with 'hi' and nothing else.", stream=False
-            )
-            if "hi" in response.text.lower():
-                logger.debug("Vertex AI client initialized successfully.")
+            try:
+                response = model.generate_content(
+                    "Please respond with 'hi' and nothing else.", stream=False
+                )
+                if "hi" in response.text.lower():
+                    logger.debug("Vertex AI client initialized successfully.")
+            except Exception as e:
+                logger.exception("Vertex AI client failed to initialize.", exc_info=e)
 
     async def on_shutdown(self) -> None:
         """This function is called when the server is stopped."""
