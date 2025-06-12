@@ -385,6 +385,7 @@ async def chat_web_search_handler(
         queries = [user_message]
 
     if len(queries) == 0:
+        log.info("No search queries generated")
         await event_emitter(
             {
                 "type": "status",
@@ -530,11 +531,13 @@ async def chat_completion_files_handler(
             hybrid_search=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
         )
 
-        log.debug(f"rag_contexts:sources: {sources}")
+        log.debug("rag_contexts:sources", sources=sources)
     return body, {"sources": sources}
 
 
 def apply_params_to_form_data(form_data, model):
+    log.debug("apply_params_to_form_data", form_data=form_data, model=model)
+
     params = form_data.pop("params", {})
     if model.get("ollama"):
         form_data["options"] = params
@@ -563,8 +566,8 @@ def apply_params_to_form_data(form_data, model):
 
 
 async def process_chat_payload(request, form_data, metadata, user, model):
+    log.debug("process_chat_payload", form_data=form_data, user=user, model=model)
     form_data = apply_params_to_form_data(form_data, model)
-    log.debug(f"form_data: {form_data}")
 
     event_emitter = get_event_emitter(metadata)
     event_call = get_event_call(metadata)
