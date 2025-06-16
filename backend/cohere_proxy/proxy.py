@@ -1,17 +1,20 @@
 import os
 import json
-import logging
+import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 import botocore.exceptions
 
 from utils.aws import bedrock_client
+from utils.logs import setup_logging, structlog_context_middleware_factory
 
 
 app = FastAPI()
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+setup_logging()
+logger = structlog.get_logger("cohere_proxy")
+app.add_middleware(structlog_context_middleware_factory("cohere_proxy.http"))
 
 model_id = os.getenv("COHERE_EMBED_MODEL_ID", "You forgot to set COHERE_EMBED_MODEL_ID")
 

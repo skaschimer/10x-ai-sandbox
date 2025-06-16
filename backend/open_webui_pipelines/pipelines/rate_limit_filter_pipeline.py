@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import redis
 import structlog
 
-from open_webui_pipelines.utils.pipelines.custom_exceptions import RateLimitException
+from utils.pipelines.custom_exceptions import RateLimitException
 
 
 logger = structlog.get_logger(__name__)

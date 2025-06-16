@@ -22,25 +22,20 @@ import shutil
 import aiohttp
 import os
 import importlib.util
-import logging
 import time
 import json
 import uuid
-import sys
 
+import structlog
+from utils.logs import setup_logging, structlog_context_middleware_factory
 
 from config import API_KEY, PIPELINES_DIR
 
 if not os.path.exists(PIPELINES_DIR):
     os.makedirs(PIPELINES_DIR)
 
-
-import structlog
-from utils.logs import setup_logging
-
 setup_logging()
-
-logger = structlog.get_logger("pipelines")
+logger = structlog.get_logger("open_webui_pipelines")
 
 
 PIPELINES = {}
@@ -236,6 +231,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(structlog_context_middleware_factory("open_webui_pipelines.http"))
 
 
 @app.middleware("http")

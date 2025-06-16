@@ -1,7 +1,17 @@
 import logging
 import sys
+import uuid
+
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
 import structlog
 from structlog.types import EventDict, Processor
+
+
+def drop_extra_keys(_, __, event_dict: EventDict) -> EventDict:
+    # Uvicorn adds a color version of its messages, but we don't want it.
+    event_dict.pop("color_message", None)
+    return event_dict
 
 
 def setup_logging(log_level="INFO"):
@@ -14,6 +24,7 @@ def setup_logging(log_level="INFO"):
         structlog.stdlib.add_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.stdlib.ExtraAdder(),
+        drop_extra_keys,
         structlog.processors.StackInfoRenderer(),
     ]
 
@@ -78,3 +89,40 @@ def setup_logging(log_level="INFO"):
     # Uvicorn logs are re-emitted with more context. We effectively silence them here
     logging.getLogger("uvicorn.access").handlers.clear()
     logging.getLogger("uvicorn.access").propagate = False
+
+
+def structlog_context_middleware_factory(logger_name):
+    """
+    This factory creates a FastAPI middleware that provides context logging
+    and can be used across different Uvicorn instances. The logger_name parameter
+    provides a way to identify which Uvicorn instance a log entry came from.
+    """
+
+    class StructlogContextMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            # Clear previous context variables
+            structlog.contextvars.clear_contextvars()
+
+            # Generate a request ID and bind it to the general context
+            request_id = str(uuid.uuid4())
+            structlog.contextvars.bind_contextvars(request_id=request_id)
+
+            # Create a separate logger for access logs
+            access_log = structlog.get_logger(logger_name)
+
+            # Make the request and receive a response
+            response = await call_next(request)
+
+            # Log the response details using the access logger
+            access_log.info(
+                "Request completed",
+                status_code=response.status_code,
+                method=request.method,
+                path=request.url.path,
+                client_host=request.client.host,
+                client_port=request.client.port,
+            )
+
+            return response
+
+    return StructlogContextMiddleware

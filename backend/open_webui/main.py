@@ -47,9 +47,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response, StreamingResponse
 
-from open_webui.middleware.logs import StructlogContextMiddleware
-
-
 from open_webui.socket.main import (
     app as socket_app,
     periodic_usage_pool_cleanup,
@@ -150,7 +147,7 @@ from open_webui.utils.security_headers import SecurityHeadersMiddleware
 
 from open_webui.tasks import stop_task, task_channel_listener
 
-from open_webui.utils.logs import setup_logging
+from open_webui.utils.logs import setup_logging, structlog_context_middleware_factory
 
 
 setup_logging(log_level=GLOBAL_LOG_LEVEL)
@@ -553,7 +550,7 @@ class RedirectMiddleware(BaseHTTPMiddleware):
 # Add the middleware to the app
 app.add_middleware(RedirectMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(StructlogContextMiddleware)
+app.add_middleware(structlog_context_middleware_factory("open_webui.http"))
 
 
 @app.middleware("http")
