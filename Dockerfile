@@ -17,15 +17,16 @@ RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.pem npm c
 COPY . .
 ENV APP_BUILD_HASH=dev-build
 ENV NODE_OPTIONS=--max-old-space-size=4096
-ARG PUBLIC_DATADOG_APP_ID
-ARG PUBLIC_DATADOG_CLIENT_TOKEN
-ARG PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN
-ARG PUBLIC_DATADOG_SERVICE
 
-ENV PUBLIC_DATADOG_APP_ID=${PUBLIC_DATADOG_APP_ID}
-ENV PUBLIC_DATADOG_CLIENT_TOKEN=${PUBLIC_DATADOG_CLIENT_TOKEN}
-ENV PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN=${PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN}
-ENV PUBLIC_DATADOG_SERVICE=${PUBLIC_DATADOG_SERVICE}
+ARG PUBLIC_DATADOG_APP_ID=1570fdb1-4af6-40bd-8afc-33962f7e4f75
+ARG PUBLIC_DATADOG_CLIENT_TOKEN=pub4943adb8fbab823c0b0d2c75a8100771
+ARG PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN=pub010cb3969c15a90f52d688046cb62a8e
+ARG PUBLIC_DATADOG_SERVICE=gsai_rum
+
+ENV PUBLIC_DATADOG_APP_ID=$PUBLIC_DATADOG_APP_ID
+ENV PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN
+ENV PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN=$PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN
+ENV PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE
 
 RUN echo "PUBLIC_DATADOG_APP_ID=${PUBLIC_DATADOG_APP_ID}"
 RUN echo "PUBLIC_DATADOG_CLIENT_TOKEN=${PUBLIC_DATADOG_CLIENT_TOKEN}"
@@ -65,7 +66,7 @@ RUN uv pip uninstall --system ecdsa
 #     SentenceTransformer(os.environ['RAG_EMBEDDING_MODEL'], device='cpu')" && \
 # RUN python -c "import os; \
 #     from faster_whisper import WhisperModel; \
-#     WhisperModel(os.environ['WHISPER_MODEL'], device='cpu', compute_type='int8', download_root=os.environ['WHISPER_MODEL_DIR'])" 
+#     WhisperModel(os.environ['WHISPER_MODEL'], device='cpu', compute_type='int8', download_root=os.environ['WHISPER_MODEL_DIR'])"
 # python -c "import os; import tiktoken; tiktoken.get_encoding(os.environ['TIKTOKEN_ENCODING_NAME'])"
 
 # ##############################################################################
@@ -111,7 +112,7 @@ RUN chown -R $UID:$GID /app
 
 # EXPOSE 8081
 
-## Healthcheck
+# Healthcheck
 HEALTHCHECK CMD curl --silent --fail http://localhost:${PORT:-8080}/health \
     | jq -ne 'input.status == true' || exit 1
 
