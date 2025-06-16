@@ -22,15 +22,12 @@ import shutil
 import aiohttp
 import os
 import importlib.util
-import logging
 import time
 import json
 import uuid
-import sys
 
 import structlog
-from open_webui.middleware.logs import structlog_context_middleware_factory
-from open_webui.utils.logs import setup_logging
+from utils.logs import setup_logging, structlog_context_middleware_factory
 
 from config import API_KEY, PIPELINES_DIR
 
@@ -38,7 +35,7 @@ if not os.path.exists(PIPELINES_DIR):
     os.makedirs(PIPELINES_DIR)
 
 setup_logging()
-logger = structlog.get_logger("cohere_proxy")
+logger = structlog.get_logger("open_webui_pipelines")
 
 
 PIPELINES = {}

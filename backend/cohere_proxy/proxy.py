@@ -6,8 +6,7 @@ from fastapi.responses import JSONResponse
 import botocore.exceptions
 
 from utils.aws import bedrock_client
-from open_webui.middleware.logs import structlog_context_middleware_factory
-from open_webui.utils.logs import setup_logging
+from utils.logs import setup_logging, structlog_context_middleware_factory
 
 
 app = FastAPI()
