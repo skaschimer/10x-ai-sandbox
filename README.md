@@ -46,7 +46,7 @@ If you are interested in contributing, please contact us using the details below
 
 ## Contact
 
-Government/NGO/Academic developers and program officials can reach out to **Jim Moffet** at **[jim.moffet@gsa.gov](mailto:jim.moffet@gsa.gov)** for more information.
+Government/NGO/Academic developers and program officials can reach out to **[chat@gsa.gov](mailto:chat@gsa.gov)** for more information.
 
 ---
 

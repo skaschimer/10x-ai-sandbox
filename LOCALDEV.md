@@ -23,7 +23,7 @@
    source ./venv/bin/activate
    ```
 
-3. **Install and use node 20.15.1**:
+3. **Install and use node 20.18.1**:
 
    - If you don't have nvm, you can install with `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash` and `source ~/.zshrc` (or `source ~/.bashrc` if you use bash):
 
