@@ -115,7 +115,7 @@ def structlog_context_middleware_factory(logger_name):
 
             # Log the response details using the access logger
             access_log.info(
-                "Request completed",
+                "http:request_complete",
                 status_code=response.status_code,
                 method=request.method,
                 path=request.url.path,

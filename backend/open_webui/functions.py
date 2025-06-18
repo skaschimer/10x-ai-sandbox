@@ -1,4 +1,4 @@
-import logging
+import structlog
 import sys
 import inspect
 import json
@@ -31,8 +31,6 @@ from open_webui.utils.plugin import load_function_module_by_id
 from open_webui.utils.tools import get_tools
 from open_webui.utils.access_control import has_access
 
-from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL
-
 from open_webui.utils.misc import (
     add_or_update_system_message,
     get_last_user_message,
@@ -46,12 +44,11 @@ from open_webui.utils.payload import (
 )
 
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
+log = structlog.get_logger(__name__)
 
 
 def get_function_module_by_id(request: Request, pipe_id: str):
+    log.debug("get_function_module_by_id", pipe_id=pipe_id)
     # Check if function is already loaded
     if pipe_id not in request.app.state.FUNCTIONS:
         function_module, _, _ = load_function_module_by_id(pipe_id)
@@ -66,6 +63,7 @@ def get_function_module_by_id(request: Request, pipe_id: str):
 
 
 async def get_function_models(request):
+    log.debug("get_function_models")
     pipes = Functions.get_functions_by_type("pipe", active_only=True)
     pipe_models = []
 
@@ -84,11 +82,13 @@ async def get_function_models(request):
                 else:
                     sub_pipes = function_module.pipes
             except Exception as e:
-                log.exception(e)
+                log.exception("Error in get_function_models", exc_info=e)
                 sub_pipes = []
 
             log.debug(
-                f"get_function_models: function '{pipe.id}' is a manifold of {sub_pipes}"
+                "get_function_models: is a manifold",
+                pipe_id=pipe.id,
+                sub_pipes=sub_pipes,
             )
 
             for p in sub_pipes:
@@ -114,7 +114,9 @@ async def get_function_models(request):
             pipe_flag = {"type": "pipe"}
 
             log.debug(
-                f"get_function_models: function '{pipe.id}' is a single pipe {{ 'id': {pipe.id}, 'name': {pipe.name} }}"
+                "get_function_models: is a single pipe",
+                pipe_id=pipe.id,
+                pipe_name=pipe.name,
             )
 
             pipe_models.append(
@@ -189,7 +191,7 @@ async def generate_function_chat_completion(
             try:
                 params["__user__"]["valves"] = function_module.UserValves(**user_valves)
             except Exception as e:
-                log.exception(e)
+                log.exception("Error in get_function_params", exc_info=e)
                 params["__user__"]["valves"] = function_module.UserValves()
 
         return params
@@ -197,6 +199,7 @@ async def generate_function_chat_completion(
     model_id = form_data.get("model")
     model_info = Models.get_model_by_id(model_id)
 
+    log.debug("generate_function_chat_completion", form_data=form_data)
     metadata = form_data.pop("metadata", {})
 
     files = metadata.get("files", [])
@@ -274,7 +277,7 @@ async def generate_function_chat_completion(
                     return
 
             except Exception as e:
-                log.error(f"Error: {e}")
+                log.exception("Error in stream_context", exc_info=e)
                 yield f"data: {json.dumps({'error': {'detail':str(e)}})}\n\n"
                 return
 
@@ -304,7 +307,7 @@ async def generate_function_chat_completion(
             res = await execute_pipe(pipe, params)
 
         except Exception as e:
-            log.error(f"Error: {e}")
+            log.exception("Error in generate_function_chat_completion", exc_info=e)
             return {"error": {"detail": str(e)}}
 
         if isinstance(res, StreamingResponse) or isinstance(res, dict):

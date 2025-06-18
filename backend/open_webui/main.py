@@ -707,6 +707,7 @@ async def chat_completion(
     form_data: dict,
     user=Depends(get_verified_user),
 ):
+    log.debug("chat_completion", form_data=form_data, user=user.email)
     if not request.app.state.MODELS:
         await get_all_models(request)
 
@@ -714,6 +715,7 @@ async def chat_completion(
     try:
         model_id = form_data.get("model", None)
         if model_id not in request.app.state.MODELS:
+            log.exception("chat_completion model not found", model_id=model_id)
             raise Exception("Model not found")
         model = request.app.state.MODELS[model_id]
 
@@ -722,6 +724,10 @@ async def chat_completion(
             try:
                 check_model_access(user, model)
             except Exception as e:
+                log.exception(
+                    "chat_completion user does not have access to model",
+                    model_id=model_id,
+                )
                 raise e
 
         metadata = {
@@ -739,6 +745,7 @@ async def chat_completion(
             request, form_data, metadata, user, model
         )
     except Exception as e:
+        log.exception("chat_completion error processing payload", exc_info=e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
@@ -750,6 +757,7 @@ async def chat_completion(
             request, response, form_data, user, events, metadata, tasks
         )
     except Exception as e:
+        log.exception("chat_completion error processing response", exc_info=e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),

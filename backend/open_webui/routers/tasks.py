@@ -122,6 +122,8 @@ async def update_task_config(
 async def generate_title(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generate_title", form_data=form_data, user=user.email)
+
     models = request.app.state.MODELS
 
     model_id = form_data["model"]
@@ -139,8 +141,6 @@ async def generate_title(
         request.app.state.config.TASK_MODEL_EXTERNAL,
         models,
     )
-
-    log.debug("generating chat title", model=task_model_id, user=user.email)
 
     if request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TITLE_GENERATION_PROMPT_TEMPLATE
@@ -177,7 +177,7 @@ async def generate_title(
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
-        log.error("Exception occurred", exc_info=True)
+        log.exception("generate_title:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": "An internal error has occurred."},
@@ -188,8 +188,10 @@ async def generate_title(
 async def generate_chat_tags(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generate_chat_tags", form_data=form_data, user=user.email)
 
     if not request.app.state.config.ENABLE_TAGS_GENERATION:
+        log.info("generate_chat_tags:generation_disabled")
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"detail": "Tags generation is disabled"},
@@ -212,8 +214,6 @@ async def generate_chat_tags(
         request.app.state.config.TASK_MODEL_EXTERNAL,
         models,
     )
-
-    log.debug("generating chat tags", model=task_model_id, user=user.email)
 
     if request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE != "":
         template = request.app.state.config.TAGS_GENERATION_PROMPT_TEMPLATE
@@ -238,7 +238,7 @@ async def generate_chat_tags(
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
-        log.error(f"Error generating chat completion: {e}")
+        log.exception(f"generate_chat_tags:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "An internal error has occurred."},
@@ -249,16 +249,20 @@ async def generate_chat_tags(
 async def generate_queries(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generate_queries", form_data=form_data)
 
     type = form_data.get("type")
+    log.debug("generate_queries:check_type", type=type)
     if type == "web_search":
         if not request.app.state.config.ENABLE_SEARCH_QUERY_GENERATION:
+            log.info("generate_queries:search_generation_disabled")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Search query generation is disabled",
             )
     elif type == "retrieval":
         if not request.app.state.config.ENABLE_RETRIEVAL_QUERY_GENERATION:
+            log.info("generate_queries:retrieval_generation_disabled")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Query generation is disabled",
@@ -282,12 +286,14 @@ async def generate_queries(
         models,
     )
 
-    log.debug("generating queries", model=task_model_id, type=type, user=user.email)
+    log.debug("generate_queries:check_task_model", task_model_id=task_model_id)
 
     if (request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.QUERY_GENERATION_PROMPT_TEMPLATE
     else:
         template = config.DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE
+
+    log.debug("generate_queries:check_template", template=template)
 
     content = query_generation_template(
         template, form_data["messages"], {"name": user.name}
@@ -304,9 +310,12 @@ async def generate_queries(
         },
     }
 
+    log.debug("generate_queries:check_payload", payload=payload)
+
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
+        log.exception("generate_queries:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": str(e)},
@@ -317,7 +326,10 @@ async def generate_queries(
 async def generate_autocompletion(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generate_autocompletion", form_data=form_data, user=user.email)
+
     if not request.app.state.config.ENABLE_AUTOCOMPLETE_GENERATION:
+        log.info("generate_autocompletion:autocompletion_disabled")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Autocompletion generation is disabled",
@@ -355,8 +367,6 @@ async def generate_autocompletion(
         models,
     )
 
-    log.debug("generating autocompletion", model=task_model_id, user=user.email)
-
     if (request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE).strip() != "":
         template = request.app.state.config.AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE
     else:
@@ -380,7 +390,7 @@ async def generate_autocompletion(
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
-        log.error(f"Error generating chat completion: {e}")
+        log.exception(f"generate_autocompletion:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "An internal error has occurred."},
@@ -391,6 +401,7 @@ async def generate_autocompletion(
 async def generate_emoji(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generating emoji", form_data=form_data, user=user.email)
 
     models = request.app.state.MODELS
 
@@ -409,8 +420,6 @@ async def generate_emoji(
         request.app.state.config.TASK_MODEL_EXTERNAL,
         models,
     )
-
-    log.debug("generating emoji", model=task_model_id, user=user.email)
 
     template = config.DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE
 
@@ -441,6 +450,7 @@ async def generate_emoji(
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
+        log.exception("generate_emoji:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": str(e)},
@@ -451,6 +461,7 @@ async def generate_emoji(
 async def generate_moa_response(
     request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
+    log.debug("generate_moa_response", form_data=form_data, user=user.email)
 
     models = request.app.state.MODELS
     model_id = form_data["model"]
@@ -469,8 +480,6 @@ async def generate_moa_response(
         request.app.state.config.TASK_MODEL_EXTERNAL,
         models,
     )
-
-    log.debug("generating MOA", model=task_model_id, user=user.email)
 
     template = config.DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE
 
@@ -494,6 +503,7 @@ async def generate_moa_response(
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
+        log.exception("generate_moa_response:error", exc_info=e)
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": str(e)},

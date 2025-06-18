@@ -11,12 +11,10 @@ from langchain_core.documents import Document
 
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.config import config
-from open_webui.env import SRC_LOG_LEVELS
 
-import logging
+import structlog
 
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["RAG"])
+log = structlog.get_logger(__name__)
 
 
 def validate_url(url: Union[str, Sequence[str]]):
@@ -78,7 +76,7 @@ class SafeWebBaseLoader(WebBaseLoader):
                 yield Document(page_content=text, metadata=metadata)
             except Exception as e:
                 # Log the error and continue with the next URL
-                log.error(f"Error loading {path}: {e}")
+                log.exception(f"Error loading website", path=path, exc_info=e)
 
 
 def get_web_loader(

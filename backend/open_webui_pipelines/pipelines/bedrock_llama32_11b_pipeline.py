@@ -68,7 +68,8 @@ class Pipeline:
 
         if len(body) != len(filtered_body):
             logger.info(
-                f"Dropped params: {', '.join(set(body.keys()) - set(filtered_body.keys()))}"
+                "pipe:dropped_params",
+                params=(set(body.keys()) - set(filtered_body.keys())),
             )
 
         if "max_gen_len" not in filtered_body:
@@ -105,8 +106,7 @@ class Pipeline:
                             "pipeline_ttft_model_id": model_id,
                             "pipeline_ttft_first_tokens": tokens,
                         }
-                        json_ttft_log = json.dumps(ttft_log)
-                        logger.info(json_ttft_log)
+                        logger.info("pipe:ttft", ttft_log=ttft_log)
 
         except self.bedrock_client.exceptions.AccessDeniedException as e:
             logger.error("Access Denied Exception:", e)

@@ -1,9 +1,7 @@
-import logging
+import structlog
 import os
-import uuid
 from typing import Optional, Union
 
-import asyncio
 import requests
 
 from huggingface_hub import snapshot_download
@@ -14,10 +12,9 @@ from langchain_core.documents import Document
 from open_webui.retrieval.vector.connector import VECTOR_DB_CLIENT
 from open_webui.utils.misc import get_last_user_message
 
-from open_webui.env import SRC_LOG_LEVELS, OFFLINE_MODE
+from open_webui.env import OFFLINE_MODE
 
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["RAG"])
+log = structlog.get_logger(__name__)
 
 
 from typing import Any
@@ -65,8 +62,10 @@ def query_doc(
 ):
     try:
         log.info(
-            "query_doc for collection: "
-            + f"{collection_name} and query {query_embedding} with k {k}"
+            "query_doc",
+            collection_name=collection_name,
+            query_embedding=query_embedding,
+            k=k,
         )
         result = VECTOR_DB_CLIENT.search(
             collection_name=collection_name,
@@ -75,13 +74,18 @@ def query_doc(
         )
 
         if result:
-            log.info(f"query_doc result {result.ids} {result.metadatas}")
+            log.info(
+                "query_doc result",
+                collection_name=collection_name,
+                ids=result.ids,
+                metadatas=result.metadatas,
+            )
         else:
-            log.error(f"query_doc result None for collection {collection_name}")
+            log.error("query_doc result none", collection_name=collection_name)
 
         return result
     except Exception as e:
-        log.error(f"Error in query_doc: {e}")
+        log.exception("Error in query_doc", exc_info=e)
         raise e
 
 
@@ -95,13 +99,16 @@ def query_doc_with_hybrid_search(
 ) -> dict:
     try:
         log.info(
-            "query_doc_with_hybrid_search for collection: "
-            + f"{collection_name} and query {query} with k {k}"
+            "query_doc_with_hybrid_search",
+            collection_name=collection_name,
+            query=query,
+            k=k,
         )
         result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
         if result is None:
             log.error(
-                f"Error in query_doc_with_hybrid_search collection {collection_name} does not exist in the vector database."  # noqa: E501
+                "query_doc_with_hybrid_search collection does not exist",
+                collection_name=collection_name,
             )
             raise Exception(
                 f"Collection {collection_name} does not exist in the vector database."
@@ -141,12 +148,14 @@ def query_doc_with_hybrid_search(
         }
 
         log.info(
-            "query_doc_with_hybrid_search result "
-            + f'{result["metadatas"]} {result["distances"]}'
+            "query_doc_with_hybrid_search result",
+            collection_name=collection_name,
+            distances=result["distances"],
+            metadatas=result["metadatas"],
         )
         return result
     except Exception as e:
-        log.error(f"Error in query_doc_with_hybrid_search: {e}")
+        log.exception("Error in query_doc_with_hybrid_search", exc_info=e)
         raise e
 
 
@@ -213,7 +222,7 @@ def query_collection(
                     if result is not None:
                         results.append(result.model_dump())
                 except Exception as e:
-                    log.exception(f"Error when querying the collection: {e}")
+                    log.exception("query_collection error", exc_info=e)
             else:
                 pass
 
@@ -296,8 +305,14 @@ def get_sources_from_files(
     r,
     hybrid_search,
 ):
-    log.debug(f"files: {files} {queries} {embedding_function} {reranking_function}")
 
+    log.debug(
+        "get_sources_from_files",
+        files=files,
+        queries=queries,
+        embedding_function=embedding_function,
+        reranking_function=reranking_function,
+    )
     extracted_collections = []
     relevant_contexts = []
 
@@ -326,7 +341,7 @@ def get_sources_from_files(
 
             collection_names = set(collection_names).difference(extracted_collections)
             if not collection_names:
-                log.debug(f"skipping {file} as it has already been extracted")
+                log.debug("skipping file as it has already been extracted", file=file)
                 continue
 
             try:
@@ -346,8 +361,7 @@ def get_sources_from_files(
                             )
                         except Exception as e:
                             log.debug(
-                                "Error when using hybrid search, using"
-                                " non hybrid search as fallback."
+                                "Error when using hybrid search, using non hybrid search as fallback."
                             )
 
                     if (not hybrid_search) or (context is None):
@@ -358,7 +372,9 @@ def get_sources_from_files(
                             k=k,
                         )
             except Exception as e:
-                log.exception(e)
+                log.exception(
+                    "get_sources_from_files error getting context", exc_info=e
+                )
 
             extracted_collections.extend(collection_names)
 
@@ -382,7 +398,7 @@ def get_sources_from_files(
 
                     sources.append(source)
         except Exception as e:
-            log.exception(e)
+            log.exception("get_sources_from_files", exc_info=e)
 
     return sources
 
@@ -401,8 +417,7 @@ def get_model_path(model: str, update_model: bool = False):
         "local_files_only": local_files_only,
     }
 
-    log.debug(f"model: {model}")
-    log.debug(f"snapshot_kwargs: {snapshot_kwargs}")
+    log.debug("get_model_path", model=model, snapshot_kwargs=snapshot_kwargs)
 
     # Inspiration from upstream sentence_transformers
     if (
@@ -421,10 +436,10 @@ def get_model_path(model: str, update_model: bool = False):
     # Attempt to query the huggingface_hub library to determine the local path and/or to update
     try:
         model_repo_path = snapshot_download(**snapshot_kwargs)
-        log.debug(f"model_repo_path: {model_repo_path}")
+        log.debug("got model_repo_path", model_repo_path=model_repo_path)
         return model_repo_path
     except Exception as e:
-        log.exception(f"Cannot determine model snapshot path: {e}")
+        log.exception("Cannot determine model snapshot path", exc_info=e)
         return model
 
 
