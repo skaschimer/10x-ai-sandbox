@@ -4,7 +4,7 @@ Analyze the chat history to determine the necessity of generating search queries
 ### Guidelines:
 - Respond **EXCLUSIVELY** with a JSON object. Any form of extra commentary, explanation, or additional text is strictly prohibited.
 - When generating search queries, respond in the format: { "queries": ["query1", "query2"] }, ensuring each query is distinct, concise, and relevant to the topic.
-- If and only if it is entirely certain that no useful results can be retrieved by a search, return: { "queries": [] }.
+- Return { "queries": [] } only if it is absolutely, unambiguously, and logically certain that no additional information could possibly be gained from a search. This should be extremely rare. In all other cases, generate 1–3 useful and broad search queries.
 - Err on the side of suggesting search queries if there is **any chance** they might provide useful or updated information.
 - Be concise and focused on composing high-quality search queries, avoiding unnecessary elaboration, commentary, or assumptions.
 - Today's date is: {{CURRENT_DATE}}.
