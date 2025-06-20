@@ -59,16 +59,19 @@
      - Create a .env file in the project root
      - Contact dev team members for the shared .env values sheet.
 
-   - Install, build and run with hot reloading:
+   - Initial install/setup (run whenever starting fresh)
 
    ```bash
-   rm ./backend/data/webui.db || true && \
    pip install -r ./backend/requirements.txt && \
-   rm -rf node_modules || true && \
+   cat z-root-public.pem >> $(python -c "import certifi; print(certifi.where())") && \
    npm install --verbose && \
    npx husky init && \
    cp pre-commit .husky/pre-commit && \
-   npm run build && \
+   ```
+
+   - Build and run with hot reloading:
+
+   ```bash
    ./dev.sh
    ```
 
