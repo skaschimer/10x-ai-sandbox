@@ -1,5 +1,5 @@
 import time
-import logging
+import structlog
 import sys
 
 from aiocache import cached
@@ -45,12 +45,10 @@ from open_webui.utils.response import (
     convert_streaming_response_ollama_to_openai,
 )
 
-from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL, BYPASS_MODEL_ACCESS_CONTROL
+from open_webui.env import BYPASS_MODEL_ACCESS_CONTROL
 
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-log = logging.getLogger(__name__)
-log.setLevel(SRC_LOG_LEVELS["MAIN"])
+log = structlog.get_logger(__name__)
 
 
 async def generate_chat_completion(
@@ -59,6 +57,8 @@ async def generate_chat_completion(
     user: Any,
     bypass_filter: bool = False,
 ):
+    log.debug("generate_chat_completion", form_data=form_data, user=user.email)
+
     if BYPASS_MODEL_ACCESS_CONTROL:
         bypass_filter = True
 
@@ -66,12 +66,21 @@ async def generate_chat_completion(
 
     model_id = form_data["model"]
     if model_id not in models:
+        log.error(
+            "generate_chat_completion:requested_model_not_found", model_id=model_id
+        )
         raise Exception("Model not found")
+
+    log.debug("generate_chat_completion:check_model_id", model_id=model_id)
 
     # Process the form_data through the pipeline
     try:
         form_data = process_pipeline_inlet_filter(request, form_data, user, models)
+        log.debug(
+            "generate_chat_completion:check_processed_form_data", form_data=form_data
+        )
     except Exception as e:
+        log.exception("generate_chat_completion:inlet_filter_error", exc_info=e)
         raise e
 
     model = models[model_id]
@@ -81,9 +90,13 @@ async def generate_chat_completion(
         try:
             check_model_access(user, model)
         except Exception as e:
+            log.info(
+                "generate_chat_completion:no_model_access", user=user.email, model=model
+            )
             raise e
 
     if model["owned_by"] == "arena":
+        log.debug("generate_chat_completion:using_arena_model", model=model)
         model_ids = model.get("info", {}).get("meta", {}).get("model_ids")
         filter_mode = model.get("info", {}).get("meta", {}).get("filter_mode")
         if model_ids and filter_mode == "exclude":
@@ -137,6 +150,7 @@ async def generate_chat_completion(
             request, form_data, user=user, models=models
         )
     if model["owned_by"] == "ollama":
+        log.debug("generate_chat_completion:using_ollama_model", model=model)
         # Using /ollama/api/chat endpoint
         form_data = convert_payload_openai_to_ollama(form_data)
         response = await generate_ollama_chat_completion(
@@ -152,6 +166,7 @@ async def generate_chat_completion(
         else:
             return convert_response_ollama_to_openai(response)
     else:
+        log.debug("generate_chat_completion:using_model", model=model)
         return await generate_openai_chat_completion(
             request=request, form_data=form_data, user=user, bypass_filter=bypass_filter
         )

@@ -206,7 +206,7 @@ async def chat_completion_tools_handler(
     metadata = body.get("metadata", {})
 
     tool_ids = metadata.get("tool_ids", None)
-    log.debug(f"{tool_ids=}")
+    log.debug("chat_completion_tools_handler:tool_ids", tool_ids=tool_ids)
     if not tool_ids:
         return body, {}
 
@@ -230,7 +230,7 @@ async def chat_completion_tools_handler(
             "__files__": metadata.get("files", []),
         },
     )
-    log.info(f"{tools=}")
+    log.debug("chat_completion_tools_handler:tools", tools=tools)
 
     specs = [tool["spec"] for tool in tools.values()]
     tools_specs = json.dumps(specs)
@@ -243,16 +243,23 @@ async def chat_completion_tools_handler(
     tools_function_calling_prompt = tools_function_calling_generation_template(
         template, tools_specs
     )
-    log.info(f"{tools_function_calling_prompt=}")
+    log.debug(
+        "chat_completion_tools_handler:tools_function_calling_prompt",
+        tools_function_calling_prompt=tools_function_calling_prompt,
+    )
     payload = get_tools_function_calling_payload(
         body["messages"], task_model_id, tools_function_calling_prompt
     )
 
     try:
         response = await generate_chat_completion(request, form_data=payload, user=user)
-        log.debug(f"{response=}")
+        log.debug(
+            "chat_completion_tools_handler:generated_chat_completion", response=response
+        )
         content = await get_content_from_response(response)
-        log.debug(f"{content=}")
+        log.debug(
+            "chat_completion_tools_handler:content_from_response", content=content
+        )
 
         if not content:
             return body, {}
@@ -260,6 +267,9 @@ async def chat_completion_tools_handler(
         try:
             content = content[content.find("{") : content.rfind("}") + 1]
             if not content:
+                log.error(
+                    "chat_completion_tools_handler:bad_content_no_json", content=content
+                )
                 raise Exception("No JSON object found in the response")
 
             result = json.loads(content)
@@ -286,6 +296,9 @@ async def chat_completion_tools_handler(
                 tool_output = await tool_function(**tool_function_params)
 
             except Exception as e:
+                log.exception(
+                    "chat_completion_tools_handler:tools_parsing_error", exc_info=e
+                )
                 tool_output = str(e)
 
             if isinstance(tool_output, str):
@@ -320,13 +333,15 @@ async def chat_completion_tools_handler(
                     skip_files = True
 
         except Exception as e:
-            log.exception(f"Error: {e}")
+            log.exception(
+                "chat_completion_tools_handler:tool_execution_error", exc_info=e
+            )
             content = None
     except Exception as e:
-        log.exception(f"Error: {e}")
+        log.exception("chat_completion_tools_handler:error", exc_info=e)
         content = None
 
-    log.debug(f"tool_contexts: {sources}")
+    log.debug("chat_completion_tools_handler:tool_sources", sources=sources)
 
     if skip_files and "files" in body.get("metadata", {}):
         del body["metadata"]["files"]
@@ -337,6 +352,8 @@ async def chat_completion_tools_handler(
 async def chat_web_search_handler(
     request: Request, form_data: dict, extra_params: dict, user
 ):
+    log.debug("chat_web_search_handler", form_data=form_data, user=user.email)
+
     event_emitter = extra_params["__event_emitter__"]
     await event_emitter(
         {
@@ -352,8 +369,15 @@ async def chat_web_search_handler(
     messages = form_data["messages"]
     user_message = get_last_user_message(messages)
 
+    log.debug(
+        "chat_web_search_handler:check_messages",
+        messages=messages,
+        user_message=user_message,
+    )
+
     queries = []
     try:
+        log.debug("chat_web_search_handler:check_form_data", form_data=form_data)
         res = await generate_queries(
             request,
             {
@@ -365,6 +389,11 @@ async def chat_web_search_handler(
             user,
         )
 
+        log.debug(
+            "chat_web_search_handler:check_generate_queries_response",
+            res=res,
+        )
+
         response = res["choices"][0]["message"]["content"]
 
         try:
@@ -372,20 +401,29 @@ async def chat_web_search_handler(
             bracket_end = response.rfind("}") + 1
 
             if bracket_start == -1 or bracket_end == -1:
+                log.error(
+                    "chat_web_search_handler:bad_response_no_json", response=response
+                )
                 raise Exception("No JSON object found in the response")
 
             response = response[bracket_start:bracket_end]
             queries = json.loads(response)
             queries = queries.get("queries", [])
+            log.debug(
+                "chat_web_search_handler:check_queries",
+                queries=queries,
+            )
         except Exception as e:
             queries = [response]
 
     except Exception as e:
-        log.exception(e)
+        log.exception(
+            "chat_web_search_handler:exception_generating_queries", exc_info=e
+        )
         queries = [user_message]
 
     if len(queries) == 0:
-        log.info("No search queries generated")
+        log.info("chat_web_search_handler:no_queries_generated")
         await event_emitter(
             {
                 "type": "status",
@@ -417,6 +455,7 @@ async def chat_web_search_handler(
         # Offload process_web_search to a separate thread
         loop = asyncio.get_running_loop()
         with ThreadPoolExecutor() as executor:
+            log.debug("chat_web_search_handler:running_search_query", query=searchQuery)
             results = await loop.run_in_executor(
                 executor,
                 lambda: process_web_search(
@@ -431,6 +470,7 @@ async def chat_web_search_handler(
             )
 
         if results:
+            log.debug("chat_web_search_handler:results_found", results=results)
             await event_emitter(
                 {
                     "type": "status",
@@ -455,6 +495,7 @@ async def chat_web_search_handler(
             )
             form_data["files"] = files
         else:
+            log.debug("chat_web_search_handler:no_results_found", results=results)
             await event_emitter(
                 {
                     "type": "status",
@@ -468,7 +509,7 @@ async def chat_web_search_handler(
                 }
             )
     except Exception as e:
-        log.error(f"Error during web search: {e}")
+        log.exception("chat_web_search_handler:error", exc_info=e)
         await event_emitter(
             {
                 "type": "status",
@@ -482,6 +523,8 @@ async def chat_web_search_handler(
             }
         )
 
+    log.debug("chat_web_search_handler:form_data_result", form_data=form_data)
+
     return form_data
 
 
@@ -491,8 +534,10 @@ async def chat_completion_files_handler(
     sources = []
 
     if files := body.get("metadata", {}).get("files", None):
+        log.debug("chat_completion_files_handler:files_found", files=files)
         try:
             queries_response = await generate_queries(
+                request,
                 {
                     "model": body["model"],
                     "messages": body["messages"],
@@ -512,10 +557,16 @@ async def chat_completion_files_handler(
                 queries_response = queries_response[bracket_start:bracket_end]
                 queries_response = json.loads(queries_response)
             except Exception as e:
+                log.exception(
+                    "chat_completion_files_handler:parsing_error",
+                    queries_response=queries_response,
+                    exc_info=e,
+                )
                 queries_response = {"queries": [queries_response]}
 
             queries = queries_response.get("queries", [])
         except Exception as e:
+            log.exception("chat_completion_files_handler:error", exc_info=e)
             queries = []
 
         if len(queries) == 0:
@@ -531,7 +582,7 @@ async def chat_completion_files_handler(
             hybrid_search=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH,
         )
 
-        log.debug("rag_contexts:sources", sources=sources)
+        log.debug("chat_completion_files_handler:sources", sources=sources)
     return body, {"sources": sources}
 
 
@@ -566,7 +617,7 @@ def apply_params_to_form_data(form_data, model):
 
 
 async def process_chat_payload(request, form_data, metadata, user, model):
-    log.debug("process_chat_payload", form_data=form_data, user=user, model=model)
+    log.debug("process_chat_payload", form_data=form_data, user=user.email, model=model)
     form_data = apply_params_to_form_data(form_data, model)
 
     event_emitter = get_event_emitter(metadata)
@@ -635,16 +686,24 @@ async def process_chat_payload(request, form_data, metadata, user, model):
 
     features = form_data.pop("features", None)
     if features:
+        log.debug("process_chat_payload:found_features", features=features)
         if "web_search" in features and features["web_search"]:
             form_data = await chat_web_search_handler(
                 request, form_data, extra_params, user
             )
+            log.debug("process_chat_payload:processed_web_search", form_data=form_data)
 
     try:
         form_data, flags = await chat_completion_filter_functions_handler(
             request, form_data, model, extra_params
         )
+        log.debug(
+            "process_chat_payload:from_filter_functions_handler",
+            form_data=form_data,
+            flags=flags,
+        )
     except Exception as e:
+        log.exception("process_chat_payload:filter_functions_handler_error", exc_info=e)
         return Exception(f"Error: {e}")
 
     tool_ids = form_data.pop("tool_ids", None)
@@ -665,14 +724,17 @@ async def process_chat_payload(request, form_data, metadata, user, model):
             request, form_data, user, models, extra_params
         )
         sources.extend(flags.get("sources", []))
+        log.debug(
+            "process_chat_payload:from_tools_handler", form_data=form_data, flags=flags
+        )
     except Exception as e:
-        log.exception(e)
+        log.exception("process_chat_payload:tools_handler_error", exc_info=e)
 
     try:
         form_data, flags = await chat_completion_files_handler(request, form_data, user)
         sources.extend(flags.get("sources", []))
     except Exception as e:
-        log.exception(e)
+        log.exception("process_chat_payload:files_handler_error", exc_info=e)
 
     # If context is not empty, insert it into the messages
     if len(sources) > 0:
@@ -698,13 +760,14 @@ async def process_chat_payload(request, form_data, metadata, user, model):
         prompt = get_last_user_message(form_data["messages"])
 
         if prompt is None:
+            log.error("process_chat_payload:no_user_message", form_data=form_data)
             raise Exception("No user message found")
         if (
             request.app.state.config.RAG_RELEVANCE_THRESHOLD == 0
             and context_string.strip() == ""
         ):
             log.debug(
-                f"With a 0 relevancy threshold for RAG, the context cannot be empty"
+                "With a 0 relevancy threshold for RAG, the context cannot be empty"
             )
 
         # Workaround for Ollama 2.0+ system prompt issue
@@ -749,6 +812,8 @@ async def process_chat_payload(request, form_data, metadata, user, model):
 async def process_chat_response(
     request, response, form_data, user, events, metadata, tasks
 ):
+    log.debug("process_chat_response")
+
     async def background_tasks_handler():
         message_map = Chats.get_messages_by_chat_id(metadata["chat_id"])
         message = message_map.get(metadata["message_id"]) if message_map else None
@@ -837,7 +902,10 @@ async def process_chat_response(
                                 }
                             )
                         except Exception as e:
-                            print(f"Error: {e}")
+                            log.exception(
+                                "process_chat_response:background_tasks_handler:error",
+                                exc_info=e,
+                            )
 
     event_emitter = None
     if (
@@ -1056,7 +1124,7 @@ async def process_chat_response(
                 await background_tasks_handler()
             except asyncio.CancelledError:
                 log.info(
-                    "Task was cancelled, saving messages up to this point",
+                    "process_chat_response:post_response_handler:task_cancelled",
                     task_id=task_id,
                 )
                 await event_emitter({"type": "task-cancelled"})

@@ -389,6 +389,7 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
                 "bing_search_v7_subscription_key": request.app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY,
                 "result_count": request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
                 "concurrent_requests": request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
+                "extra_query_params": request.app.state.config.RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS,
             },
         },
     }
@@ -437,6 +438,7 @@ class WebSearchConfig(BaseModel):
     bing_search_v7_subscription_key: Optional[str] = None
     result_count: Optional[int] = None
     concurrent_requests: Optional[int] = None
+    extra_query_params: Optional[str] = None
 
 
 class WebConfig(BaseModel):
@@ -547,6 +549,9 @@ async def update_rag_config(
         request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS = (
             form_data.web.search.concurrent_requests
         )
+        request.app.state.config.RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS = (
+            form_data.web.search.extra_query_params
+        )
 
     return {
         "status": True,
@@ -592,6 +597,7 @@ async def update_rag_config(
                 "bing_search_v7_subscription_key": request.app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY,
                 "result_count": request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
                 "concurrent_requests": request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
+                "extra_query_params": request.app.state.config.RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS,
             },
         },
     }
@@ -1108,6 +1114,10 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
     Args:
         query (str): The query to search for
     """
+
+    # Add extra params to query if there are any configured
+    if request.app.state.config.RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS:
+        query = f"{query} {request.app.state.config.RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS}"
 
     # TODO: add playwright to search the web
     if engine == "searxng":

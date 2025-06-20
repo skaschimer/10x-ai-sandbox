@@ -97,6 +97,26 @@
 					</div>
 				</div>
 
+				<div class="mt-1.5">
+					<div class=" self-center text-xs font-medium mb-1">
+						{$i18n.t('Extra Search Query Params')}
+					</div>
+
+					<div class="flex w-full">
+						<div class="flex-1">
+							<input
+								class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+								type="text"
+								placeholder={$i18n.t(
+									'Additional query terms to append to all searches (e.g. site:wikipedia.org)'
+								)}
+								bind:value={webConfig.search.extra_query_params}
+								autocomplete="off"
+							/>
+						</div>
+					</div>
+				</div>
+
 				{#if webConfig.search.engine !== ''}
 					<div class="mt-1.5">
 						{#if webConfig.search.engine === 'searxng'}
