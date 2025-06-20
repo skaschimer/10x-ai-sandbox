@@ -238,6 +238,8 @@
 		class="relative w-full font-primary"
 		aria-label={placeholder}
 		id="model-selector-{id}-button"
+		aria-haspopup="true"
+		aria-controls="model-selector-menu"
 	>
 		<div
 			class="flex w-full text-left px-0.5 outline-none bg-transparent truncate {triggerClassName} justify-between font-medium placeholder-gray-400 focus:outline-none"
@@ -295,104 +297,113 @@
 
 			<div class="px-3 my-2 max-h-64 overflow-y-auto scrollbar-hidden group">
 				<h3 class="font-semibold my-1 text-sm">Available models</h3>
-				{#each filteredItems as item, index}
-					<button
-						class="flex w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 outline-none transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer data-[highlighted]:bg-muted {index ===
-						selectedModelIdx
-							? 'bg-gray-100 dark:bg-gray-800 group-hover:bg-transparent'
-							: ''}"
-						data-arrow-selected={index === selectedModelIdx}
-						on:click={() => {
-							value = item.value;
-							selectedModelIdx = index;
-							// SR announcement
-							document.getElementById('svelte-announcer').textContent = 'model selection changed';
-							show = false;
-						}}
-					>
-						<div class="flex flex-col">
-							{#if $mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
-								<div class="flex gap-0.5 self-start h-full mb-1.5 -translate-x-1">
-									{#each item.model?.info?.meta.tags as tag}
-										<div
-											class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
-										>
-											{tag.name}
-										</div>
-									{/each}
-								</div>
-							{/if}
-							<div class="flex items-center gap-2">
-								<div class="flex items-center min-w-fit">
-									<div class="flex items-center min-w-fit">
-										<div class="flex flex-row gap-1 items-center">
-											<div class="flex-none">
-												<Tooltip
-													content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
-													placement="top-start"
+				<ul
+					id="model-selector-menu"
+					role="menu"
+					aria-labelledby="model-selector-{id}-button"
+					aria-activedescendant="model-menu-item-0"
+				>
+					{#each filteredItems as item, index}
+						<li id={'model-menu-item-' + index} role="menuitem" class="model-selector-item">
+							<button
+								class="flex w-full text-left font-medium line-clamp-1 select-none items-center rounded-button py-2 pl-3 pr-1.5 text-sm text-gray-700 dark:text-gray-100 transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer data-[highlighted]:bg-muted"
+								tabindex="0"
+								data-arrow-selected={index === selectedModelIdx}
+								on:click={() => {
+									value = item.value;
+									selectedModelIdx = index;
+									// SR announcement
+									document.getElementById('svelte-announcer').textContent =
+										'model selection changed';
+									show = false;
+								}}
+							>
+								<div class="flex flex-col">
+									{#if $mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
+										<div class="flex gap-0.5 self-start h-full mb-1.5 -translate-x-1">
+											{#each item.model?.info?.meta.tags as tag}
+												<div
+													class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
 												>
-													<img
-														src={item.model?.info?.meta?.profile_image_url ?? '/static/favicon.png'}
-														alt=""
-														class="rounded-full size-5 flex items-center mr-2"
-													/>
-												</Tooltip>
-											</div>
-											<div class="flex flex-col">
-												<div class="flex flex-row items-center">
-													<Tooltip
-														content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
-														placement="top-start"
-													>
-														{item.label}
-													</Tooltip>
-													{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
-														<div class="ml-1 flex gap-0.5 self-center items-center h-full">
-															{#each item.model?.info?.meta.tags as tag}
-																<Tooltip content={tag.name}>
-																	<div
-																		class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
-																	>
-																		{tag.name}
-																	</div>
-																</Tooltip>
-															{/each}
-														</div>
-													{/if}
+													{tag.name}
 												</div>
-												<div class="text-xs">
-													{#if item.model?.info?.meta?.description}
+											{/each}
+										</div>
+									{/if}
+									<div class="flex items-center gap-2">
+										<div class="flex items-center min-w-fit">
+											<div class="flex items-center min-w-fit">
+												<div class="flex flex-row gap-1 items-center">
+													<div class="flex-none">
 														<Tooltip
-															content={`${marked.parse(
-																sanitizeResponseContent(
-																	item.model?.info?.meta?.description
-																).replaceAll('\n', '<br>')
-															)}`}
+															content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
+															placement="top-start"
 														>
-															{item.model?.info?.meta?.description}
+															<img
+																src={item.model?.info?.meta?.profile_image_url ??
+																	'/static/favicon.png'}
+																alt=""
+																class="rounded-full size-5 flex items-center mr-2"
+															/>
 														</Tooltip>
-													{/if}
+													</div>
+													<div class="flex flex-col">
+														<div class="flex flex-row items-center">
+															<Tooltip
+																content={$user?.role === 'admin' ? (item?.value ?? '') : ''}
+																placement="top-start"
+															>
+																{item.label}
+															</Tooltip>
+															{#if !$mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
+																<div class="ml-1 flex gap-0.5 self-center items-center h-full">
+																	{#each item.model?.info?.meta.tags as tag}
+																		<Tooltip content={tag.name}>
+																			<div
+																				class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
+																			>
+																				{tag.name}
+																			</div>
+																		</Tooltip>
+																	{/each}
+																</div>
+															{/if}
+														</div>
+														<div class="text-xs">
+															{#if item.model?.info?.meta?.description}
+																<Tooltip
+																	content={`${marked.parse(
+																		sanitizeResponseContent(
+																			item.model?.info?.meta?.description
+																		).replaceAll('\n', '<br>')
+																	)}`}
+																>
+																	{item.model?.info?.meta?.description}
+																</Tooltip>
+															{/if}
+														</div>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						</div>
 
-						{#if value === item.value}
-							<div class="ml-auto pl-2 pr-2 md:pr-0">
-								<Check />
+								{#if value === item.value}
+									<div class="ml-auto pl-2 pr-2 md:pr-0">
+										<Check />
+									</div>
+								{/if}
+							</button>
+						</li>
+					{:else}
+						<div>
+							<div class="block px-3 py-2 text-sm text-gray-700 dark:text-gray-100">
+								{$i18n.t('No results found')}
 							</div>
-						{/if}
-					</button>
-				{:else}
-					<div>
-						<div class="block px-3 py-2 text-sm text-gray-700 dark:text-gray-100">
-							{$i18n.t('No results found')}
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</ul>
 
 				{#if !(searchValue.trim() in $MODEL_DOWNLOAD_POOL) && searchValue && ollamaVersion && $user.role === 'admin'}
 					<Tooltip
