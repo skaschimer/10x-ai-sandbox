@@ -779,6 +779,7 @@ class RAGConfig(Config):
     BING_SEARCH_V7_SUBSCRIPTION_KEY: str = Config.persistent("")
     RAG_WEB_SEARCH_RESULT_COUNT: int = Config.persistent(3)
     RAG_WEB_SEARCH_CONCURRENT_REQUESTS: int = Config.persistent(10)
+    RAG_WEB_SEARCH_EXTRA_QUERY_PARAMS: str = Config.persistent("")
 
 
 ####################################
