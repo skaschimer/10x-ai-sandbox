@@ -1036,18 +1036,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-cors"
-version = "5.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "flask" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4f/d0/d9e52b154e603b0faccc0b7c2ad36a764d8755ef4036acbf1582a67fb86b/flask_cors-5.0.0.tar.gz", hash = "sha256:5aadb4b950c4e93745034594d9f3ea6591f734bb3662e16e255ffbf5e89c88ef", size = 30954, upload-time = "2024-08-31T00:44:26.395Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/07/1afa0514c876282bebc1c9aee83c6bb98fe6415cf57b88d9b06e7e29bf9c/Flask_Cors-5.0.0-py2.py3-none-any.whl", hash = "sha256:b9e307d082a9261c100d8fb0ba909eec6a228ed1b60a8315fd85f783d61910bc", size = 14463, upload-time = "2024-08-31T00:44:24.394Z" },
-]
-
-[[package]]
 name = "flatbuffers"
 version = "24.3.25"
 source = { registry = "https://pypi.org/simple" }
@@ -2407,8 +2395,6 @@ dependencies = [
     { name = "fake-useragent" },
     { name = "fastapi" },
     { name = "faster-whisper" },
-    { name = "flask" },
-    { name = "flask-cors" },
     { name = "fpdf2" },
     { name = "ftfy" },
     { name = "google-generativeai" },
@@ -2491,8 +2477,6 @@ requires-dist = [
     { name = "fake-useragent", specifier = "==1.5.1" },
     { name = "fastapi", specifier = "==0.111.0" },
     { name = "faster-whisper", specifier = "==1.0.3" },
-    { name = "flask", specifier = "==3.0.3" },
-    { name = "flask-cors", specifier = "==5.0.0" },
     { name = "fpdf2", specifier = "==2.7.9" },
     { name = "ftfy", specifier = "==6.2.3" },
     { name = "google-generativeai", specifier = "==0.7.2" },
