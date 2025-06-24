@@ -85,10 +85,10 @@
 		<hr class="my-2 border-gray-50 dark:border-gray-700/10" />
 
 		<Collapsible title={$i18n.t('System Prompt')} open={true} buttonClassName="w-full">
-			<div class="" slot="content">
+			<div class="mt-0.5" slot="content">
 				<textarea
 					bind:value={params.system}
-					class="w-full text-xs py-1.5 bg-transparent outline-none resize-none"
+					class="w-full rounded-lg py-2 px-4 text-sm dark:text-gray-300 dark:bg-gray-850 border border-gray-400 resize-none"
 					rows="4"
 					placeholder={$i18n.t('Enter system prompt')}
 				/>
