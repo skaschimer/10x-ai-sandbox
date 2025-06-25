@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, tick } from 'svelte';
 	import { config } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
 
@@ -40,6 +40,16 @@
 
 	let showShareChatModal = false;
 	let showDownloadChatModal = false;
+
+	async function focusFirstChatItem() {
+		// Wait for the DOM to update before focusing the first chat item
+		await tick();
+
+		const firstChatItem = document.getElementById('sidebar-open-toggle-button');
+		if (firstChatItem) {
+			firstChatItem.focus();
+		}
+	};
 </script>
 
 <ShareChatModal bind:show={showShareChatModal} chatId={$chatId} />
@@ -62,6 +72,9 @@
 						class="cursor-pointer px-2 py-2 flex rounded-xl hover:bg-gray-50 dark:hover:bg-gray-850 transition"
 						on:click={() => {
 							showSidebar.set(!$showSidebar);
+
+							// Focus the first chat item when the sidebar is opened.
+							focusFirstChatItem();
 						}}
 						aria-expanded={$showSidebar}
 						aria-label="Toggle Sidebar"
