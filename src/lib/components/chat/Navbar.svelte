@@ -49,7 +49,7 @@
 		if (firstChatItem) {
 			firstChatItem.focus();
 		}
-	};
+	}
 </script>
 
 <ShareChatModal bind:show={showShareChatModal} chatId={$chatId} />
