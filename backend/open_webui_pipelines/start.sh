@@ -82,4 +82,4 @@ else
   echo "PIPELINES_URLS not specified. Skipping pipelines download and installation."
 fi
 
-uvicorn main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
+ddtrace-run uvicorn main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
