@@ -75,6 +75,12 @@
 		dragged = false;
 	};
 
+	const onKeydown = (event) => {
+		if (event.key === 'Escape') {
+			closeHandler();
+		}
+	};
+
 	onMount(() => {
 		// listen to resize 1024px
 		mediaQuery = window.matchMedia('(min-width: 1024px)');
@@ -110,6 +116,7 @@
 
 		document.addEventListener('mousedown', onMouseDown);
 		document.addEventListener('mouseup', onMouseUp);
+		document.addEventListener('keydown', onKeydown);
 	});
 
 	onDestroy(() => {
