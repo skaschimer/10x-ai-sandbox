@@ -731,7 +731,16 @@ def save_docs_to_vector_db(
     if len(docs) == 0:
         raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
 
-    texts = [doc.page_content for doc in docs]
+    def sanitize_text(text: str) -> str:
+        if not text:
+            return text
+        sanitized = "".join(
+            char for char in text if ord(char) >= 32 or char in "\n\r\t"
+        )
+        sanitized = sanitized.replace("\x00", "")
+        return sanitized
+
+    texts = [sanitize_text(doc.page_content) for doc in docs]
     metadatas = [
         {
             **doc.metadata,
