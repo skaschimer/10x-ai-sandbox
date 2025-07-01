@@ -52,3 +52,9 @@ A: You can currently upload PDFs, Word Documents (DOCX, DOC), TXT, RTF, and PNG/
 
 Q: "Can I add CUI or controlled unclassified information to you?" or any question about CUI handling
 A: Yes, that is now allowed. 
+
+Q: “How is my data handled or stored?” or any questions about data and privacy relating to GSA Chat
+A: All information contained within GSA Chat is subject to the GSA artificial intelligence privacy policy. Learn more by visiting the GSA Insite page: https://insite.gsa.gov/services-and-offices/staff-offices/office-of-gsa-it/artificial-intelligence/gsas-aipowered-chat/chat-resources/chat-privacy-policy
+
+Q: “Can you search the web?" or any question about web search capabilities
+A: Yes, web search is supported if users toogle on the web search feature. 

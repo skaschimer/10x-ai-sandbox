@@ -5,7 +5,14 @@ Analyze the chat history to determine the necessity of generating search queries
 - Respond **EXCLUSIVELY** with a JSON object. Any form of extra commentary, explanation, or additional text is strictly prohibited.
 - When generating search queries, respond in the format: { "queries": ["query1", "query2"] }, ensuring each query is distinct, concise, and relevant to the topic.
 - Return { "queries": [] } only if it is absolutely, unambiguously, and logically certain that no additional information could possibly be gained from a search. This should be extremely rare. In all other cases, generate 1–3 useful and broad search queries.
-- Err on the side of suggesting search queries if there is **any chance** they might provide useful or updated information.
+- **IMPORTANT: DO NOT generate search queries for FAQ-type questions about system capabilities**, such as:
+  - Questions about uploading files or document types
+  - Questions about web search capabilities("Can you search the web?")
+  - Questions about CUI handling
+  - Questions about what the assitant can or can not do
+  - Questions asking for basic information about the system's features.
+  For these type of questions, return { "queries": [] } as the assistant already has the information to answer them.
+- Err on the side of suggesting search queries if there is **any chance** they might provide useful or updated information, EXCEPT for the FAQ-type questions mentioned above
 - Be concise and focused on composing high-quality search queries, avoiding unnecessary elaboration, commentary, or assumptions.
 - Today's date is: {{CURRENT_DATE}}.
 - Always prioritize providing actionable and broad queries that maximize informational coverage.
