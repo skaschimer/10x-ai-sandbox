@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Switch from '$lib/components/common/Switch.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
-	import { getContext, createEventDispatcher } from 'svelte';
+	import { getContext, createEventDispatcher, onMount } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -41,6 +41,26 @@
 	$: if (params) {
 		dispatch('change', params);
 	}
+
+	const tabAfterLastItem = (event) => {
+		if (event.key === 'Tab') {
+			const buttons = document.querySelectorAll('.p-1.px-3.text-xs.flex.rounded.transition.flex-shrink-0');
+			const lastButton = buttons[buttons.length - 1];
+			const closeButton = document.getElementById('close-button');
+
+			// If the last button is focused, move focus to the close button
+			if (document.activeElement === lastButton) {
+				event.preventDefault();
+				closeButton?.focus();
+				console.log(closeButton);
+				console.log(lastButton);
+			}
+		}
+	};
+
+	onMount(() => {
+		document.addEventListener('keydown', tabAfterLastItem);
+	});
 </script>
 
 <div class=" space-y-1 text-xs pb-safe-bottom">
