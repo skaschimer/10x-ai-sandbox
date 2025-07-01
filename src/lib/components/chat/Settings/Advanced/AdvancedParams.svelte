@@ -44,8 +44,7 @@
 
 	const tabAfterLastItem = (event) => {
 		if (event.key === 'Tab') {
-			const buttons = document.querySelectorAll('.p-1.px-3.text-xs.flex.rounded.transition.flex-shrink-0');
-			const lastButton = buttons[buttons.length - 1];
+			const lastButton = document.getElementById('num-gpu-toggle');
 			const closeButton = document.getElementById('close-button');
 
 			// If the last button is focused, move focus to the close button
@@ -1117,6 +1116,7 @@
 					</div>
 
 					<button
+						id="num-gpu-toggle"
 						class="p-1 px-3 text-xs flex rounded transition flex-shrink-0"
 						type="button"
 						on:click={() => {
