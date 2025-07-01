@@ -62,13 +62,15 @@ class SafeWebBaseLoader(WebBaseLoader):
                 soup = self._scrape(path, bs_kwargs=self.bs_kwargs)
                 text = soup.get_text(**self.bs_get_text_kwargs)
 
+                text = self._sanitize_text(text)
+
                 # Build metadata
                 metadata = {"source": path}
                 if title := soup.find("title"):
-                    metadata["title"] = title.get_text()
+                    metadata["title"] = self._sanitize_text(title.get_text())
                 if description := soup.find("meta", attrs={"name": "description"}):
-                    metadata["description"] = description.get(
-                        "content", "No description found."
+                    metadata["description"] = self._sanitize_text(
+                        description.get("content", "No description found.")
                     )
                 if html := soup.find("html"):
                     metadata["language"] = html.get("lang", "No language found.")
@@ -77,6 +79,16 @@ class SafeWebBaseLoader(WebBaseLoader):
             except Exception as e:
                 # Log the error and continue with the next URL
                 log.exception(f"Error loading website", path=path, exc_info=e)
+
+    def _sanitize_text(self, text: str) -> str:
+        if not text:
+            return text
+        sanitized = "".join(
+            char for char in text if ord(char) >= 32 or char in "\n\r\t"
+        )
+        sanitized = sanitized.replace("\x00", "")
+        sanitized = " ".join(sanitized.split())
+        return sanitized
 
 
 def get_web_loader(

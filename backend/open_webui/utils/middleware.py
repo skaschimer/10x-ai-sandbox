@@ -450,7 +450,7 @@ async def chat_web_search_handler(
                 },
             }
         )
-        return
+        return form_data
 
     searchQuery = queries[0]
 
@@ -704,9 +704,11 @@ async def process_chat_payload(request, form_data, metadata, user, model):
     if features:
         log.debug("process_chat_payload:found_features", features=features)
         if "web_search" in features and features["web_search"]:
-            form_data = await chat_web_search_handler(
+            web_search_result = await chat_web_search_handler(
                 request, form_data, extra_params, user
             )
+            if web_search_result is not None:
+                form_data = web_search_result
             log.debug("process_chat_payload:processed_web_search", form_data=form_data)
 
     try:
