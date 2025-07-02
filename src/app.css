@@ -1,4 +1,5 @@
 @import '@gsa-tts/graymatter-style-tokens/dist/css/variables.css';
+@import './styles/components.css';
 
 :root {
 	--gsa-blue: #005087;
