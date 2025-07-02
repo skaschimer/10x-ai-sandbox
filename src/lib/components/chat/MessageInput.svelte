@@ -1205,7 +1205,7 @@
 															id="send-message-button"
 															class="{prompt !== ''
 																? 'chat-send-msg-btn dark:bg-white dark:text-black outline-none '
-																: 'chat-send-msg-btn dark:text-gray-900 dark:bg-gray-700 disabled'} transition rounded-full p-1.5 self-center"
+																: 'bg-steel-100 text-black dark:text-gray-900 dark:bg-gray-700 disabled'} transition rounded-full p-1.5 self-center"
 															type="submit"
 															disabled={prompt === ''}
 														>
