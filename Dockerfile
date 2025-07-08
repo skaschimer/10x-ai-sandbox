@@ -1,22 +1,5 @@
-## syntax=docker/dockerfile:1
-# ##############################################################################
-# ###               1) FRONTEND BUILD (Node)                                 ###
-# ##############################################################################
-FROM node:22.14.0-alpine3.21 AS build-frontend
-
-# COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
-COPY z-root-public.pem /usr/local/share/ca-certificates/z-root-public.pem
-# RUN apt-get update && \
-#     apt-get install -y ca-certificates && \
-#     update-ca-certificates
-
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/z-root-public.pem npm ci
-
-COPY . .
-ENV APP_BUILD_HASH=dev-build
-ENV NODE_OPTIONS=--max-old-space-size=4096
+# Stage 1: Frontend build
+FROM node:20.18.1 AS build-frontend
 
 ARG PUBLIC_DATADOG_APP_ID=1570fdb1-4af6-40bd-8afc-33962f7e4f75
 ARG PUBLIC_DATADOG_CLIENT_TOKEN=pub4943adb8fbab823c0b0d2c75a8100771
@@ -28,98 +11,82 @@ ENV PUBLIC_DATADOG_CLIENT_TOKEN=$PUBLIC_DATADOG_CLIENT_TOKEN
 ENV PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN=$PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN
 ENV PUBLIC_DATADOG_SERVICE=$PUBLIC_DATADOG_SERVICE
 
-RUN echo "PUBLIC_DATADOG_APP_ID=${PUBLIC_DATADOG_APP_ID}"
-RUN echo "PUBLIC_DATADOG_CLIENT_TOKEN=${PUBLIC_DATADOG_CLIENT_TOKEN}"
-RUN echo "PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN=${PUBLIC_DATADOG_BROWSERLOGS_CLIENT_TOKEN}"
-RUN echo "PUBLIC_DATADOG_SERVICE=${PUBLIC_DATADOG_SERVICE}"
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NODE_EXTRA_CA_CERTS=/app/z-root-public.pem
 
+WORKDIR /app
+
+# Add the custom root CA certificate for Zscaler
+COPY z-root-public.pem $NODE_EXTRA_CA_CERTS
+
+# Add application manifests and config files
+COPY package.json package-lock.json ./
+COPY svelte.config.js tailwind.config.js postcss.config.js vite.config.ts tsconfig.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Add in the rest of the source code
+COPY src ./src
+
+# Build the frontend
 RUN npm run build
 
-# ##############################################################################
-# ###               2) PYTHON DEPENDENCIES BUILDER STAGE                     ###
-# ##############################################################################
-FROM jimmoffetgsa/gsai:jammy-builder-32325 AS builder
 
-ENV ENV=prod \
-    HOME=/root
+# Stage 2: Final image build
+FROM ubuntu:24.04
 
-COPY ./backend/requirements.txt ./requirements.txt
-RUN uv pip uninstall --system setuptools && \
-    uv pip install --upgrade --system setuptools==70.0.0
-RUN uv pip install --system -r requirements.txt --no-cache-dir
+# Avoid prompts during package upgrades/installation
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TZ=Etc/UTC
 
-RUN uv pip install --upgrade --system pillow==10.3.0
-RUN uv pip install --upgrade --system posthog==3.11.0
-RUN uv pip install --upgrade --system starlette==0.40.0
-RUN uv pip uninstall --system flask
-RUN uv pip uninstall --system Jinja2
-RUN uv pip uninstall --system python-jose
-RUN uv pip uninstall --system ecdsa
+# Workaround for Ubuntu + FIPS + openssl bug
+# https://bugs.launchpad.net/ubuntu/+source/ca-certificates/+bug/2066990
+ARG OPENSSL_FORCE_FIPS_MODE=0
 
-# ----------------------------------------------------
-# (Optional) Pre-download / cache large models
-#    so they’re already present in the builder layer.
-# ----------------------------------------------------
+# Install prerequisites
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    # For custom root CA
+    ca-certificates \
+    # For RAG
+    pandoc ffmpeg libsm6 libxext6 \
+    && rm -rf /var/lib/apt/lists/*
 
-# RUN python -c "import os; \
-#     from sentence_transformers import SentenceTransformer; \
-#     SentenceTransformer(os.environ['RAG_EMBEDDING_MODEL'], device='cpu')" && \
-# RUN python -c "import os; \
-#     from faster_whisper import WhisperModel; \
-#     WhisperModel(os.environ['WHISPER_MODEL'], device='cpu', compute_type='int8', download_root=os.environ['WHISPER_MODEL_DIR'])"
-# python -c "import os; import tiktoken; tiktoken.get_encoding(os.environ['TIKTOKEN_ENCODING_NAME'])"
+# Add the custom root CA certificate for Zscaler
+COPY z-root-public.crt /usr/local/share/ca-certificates/z-root-public.crt
+RUN update-ca-certificates
 
-# ##############################################################################
-# ###               3) FINAL RUNTIME IMAGE                                   ###
-# ##############################################################################
-FROM jimmoffetgsa/gsai:jammy-final-32325 AS final
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.7.19 /uv /uvx /usr/local/bin/
 
-# ----------------------------------------------------
-# 1. Copy only what we need from builder
-# ----------------------------------------------------
+# Create and set ownership for the app directory
+RUN mkdir -p /app && chown -R ubuntu:ubuntu /app
 
-ARG UID=0
-ARG GID=0
+# Switch to the non-root user
+USER ubuntu
+WORKDIR /app
 
-COPY --from=builder /usr/local/lib/python3.11/dist-packages \
-    /usr/local/lib/python3.11/dist-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-# COPY --from=builder /app/backend/data/cache/whisper/models /app/backend/data/cache/whisper/models
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python
+# Add in the backend files
+COPY --chown=ubuntu:ubuntu .python-version .
+COPY --chown=ubuntu:ubuntu backend/requirements.txt ./backend/requirements.txt
+COPY --chown=ubuntu:ubuntu backend ./backend
+COPY --chown=ubuntu:ubuntu start.sh ./start.sh
+RUN chmod +x ./start.sh
 
-# # Copy any caches or model downloads you want at runtime
-# COPY --from=builder /root/.cache /root/.cache
+# Add in the built frontend
+COPY --chown=ubuntu:ubuntu --from=build-frontend /app/build ./build
 
-# Make sure the user has ownership if you’re using non-root
-RUN chown -R $UID:$GID /app /root
+# Install Python (with retries due to Zscaler unreliability)
+RUN for i in 1 2 3 4 5; do \
+        uv --native-tls python install $(cat .python-version) && break || \
+        echo "Attempt $i failed. Retrying in 5 seconds..." && sleep 5; \
+    done
 
-# ----------------------------------------------------
-# 2. Copy in your built frontend
-# ----------------------------------------------------
-COPY --from=build-frontend /app/build /app/build
-COPY --from=build-frontend /app/.svelte-kit /app/.svelte-kit
-COPY --from=build-frontend /app/CHANGELOG.md /app/CHANGELOG.md
-COPY --from=build-frontend /app/package.json /app/package.json
+# Set up venv and install dependencies
+RUN uv venv && uv pip install --no-cache-dir -r backend/requirements.txt
 
-# ----------------------------------------------------
-# 3. Copy in your backend source code
-# ----------------------------------------------------
-COPY --chown=$UID:$GID ./backend /app/backend
-COPY --chown=$UID:$GID ./start.sh /app/start.sh
+# Set the PATH to include the Python venv
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Ensure the user owns the /app directory
-RUN chown -R $UID:$GID /app
-
-# EXPOSE 8081
-
-# Healthcheck
-HEALTHCHECK CMD curl --silent --fail http://localhost:${PORT:-8080}/health \
-    | jq -ne 'input.status == true' || exit 1
-
-USER $UID:$GID
-
-# Ensure start.sh is executable
-RUN chmod +x /app/start.sh
-
-# local
-CMD ["bash", "-c", "./start.sh && tail -f /dev/null"]
+# Set the entrypoint for the container
+CMD ["/app/start.sh"]
