@@ -71,6 +71,7 @@ COPY --chown=ubuntu:ubuntu .python-version .
 COPY --chown=ubuntu:ubuntu backend/requirements.txt ./backend/requirements.txt
 COPY --chown=ubuntu:ubuntu backend ./backend
 COPY --chown=ubuntu:ubuntu start.sh ./start.sh
+COPY --chown=ubuntu:ubuntu CHANGELOG.md ./CHANGELOG.md
 RUN chmod +x ./start.sh
 
 # Add in the built frontend
